@@ -1,0 +1,191 @@
+/**
+\page plugin How to create a plugin
+\section plugin_cmake Including the CMake file
+\subsection plugin_cmake_win Windows
+In your yoyo installation directory, there is a lib directory. Add this directory to the to the
+CMAKE_PREFIX_PATH provided to CMake when configuring.
+
+\subsection plugin_cmake_linux Linuxoid Systems
+Installing the Yoyo sdk package will install the CMake module to your /usr/lib/cmake/ directory,
+where CMake will automatically search for package descriptions.
+
+\subsection plugin_cmake_definition Use Yoyo Sdk
+Using
+\code{.cmake}
+find_package(yoyo)
+\endcode
+should get you the target definition.
+\code{.cmake}
+target_link_libraries(my_target Yoyo::Sdk)
+\endcode
+This will add the Yoyo include directories and link-libraries to your library.
+
+\subsection plugin_cmake_utilities Some CMake utilities
+If you are working on a Windows System, you might find this package interesting:
+\code{.cmake}
+include(GenerateExportHeader)
+generate_export_header(my-plugin EXPORT_MACRO_NAME MY_PLUGIN_EXPORT)
+\endcode
+See https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html for more information.
+
+\section plugin_node Node creation
+To find a description how to define new node types please consult the \ref nodes page.
+
+\section plugin_documentation Node documentation
+When installing a node to a yoyo::node_factory, you will notice, that a yoyo::documentation object
+is necessary here as well.
+
+This yoyo::documentation object will be used by the Property Widget to display a title for the
+property if the camelCased Qt property name is not descriptive enough and it will use the toolTip
+attribute of the property to provide some help to the user.
+
+It will also be used by the persistance engine to omit storing default values.
+
+Taking this, it makes sense to provide all possible bits of information into the yoyo::documentation
+object.
+
+You do not need to define the property documentation for the Yoyo base classes you used. There are
+convenience functions adding documentation on the properties of these classes.
+
+\section plugin_json Plugin descriptions
+\subsection plugin_json_qt Qt plugin description
+When creating a plugin with Qt you need a json file. This file is named at declaration and adds some
+meta information to the plugin binary. This file is mandatory, but it can be empty.
+\subsection plugin_json_yoyo Yoyo plugin description
+The Yoyo plugin management provides the possibility to load plugins from any location, not just the
+plugin directory inside the installation folder. For this and for the user to be able to distinguish
+different plugins, each plugin needs a json file containing the plugin description. This json file
+has to look like this:
+\code{.json}
+{
+  "id": "2730bf79-0630-4a0b-8011-27d6dea0c363",
+  "name": "test plugin",
+  "description": "This is a plugin for testing purposes.",
+  "path": "test-plugin.dll",
+  "dependencies": []
+}
+\endcode
+The items "name" and "description" will be shown in the Plugin Manager to help the user manage the
+individual plugins. The "id" is used as internal identifier. Please make sure it is unique for your
+plugin (https://www.uuidgenerator.net/).
+
+In "path" you specify the path to your plugin binary. This can be an absolute path or a path
+relative to the location of the description file.
+
+With "dependencies" you can list a number of plugins (their ids) which need to be loaded before this
+plugin can be loaded.
+
+\section plugin_plugin Create the Plugin class
+To creat a Yoyo plugin, you have to create a class derived from yoyo::yoyo_plugin, implementing all
+purely virtual methods.
+\code{.cpp}
+#pragma once
+#include "test-plugin_export.h"
+
+#include "yoyo/yoyo_plugin.h"
+
+class YOYO_TEST_PLUGIN_EXPORT test_plugin: public yoyo_plugin
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.yoyo.plugin.Interface.test" FILE "test_plugin.json")
+    Q_INTERFACES(yoyo::yoyo_plugin)
+public:
+    auto name() const->QString override;
+    auto install_gui_nodes(yoyo::node_factory& gui_factory)->void override;
+    auto install_data_nodes(yoyo::node_factory& data_factory)->void override;
+    auto install_communication_nodes(yoyo::node_factory& communication_factory)->void override;
+    auto install_protocol_nodes(yoyo::node_factory& protocol_factory)->void override;
+    auto uninstall_gui_nodes(yoyo::node_factory& gui_factory)->void override;
+    auto uninstall_data_nodes(yoyo::node_factory& data_factory)->void override;
+    auto uninstall_communication_nodes(yoyo::node_factory& communication_factory)->void override;
+    auto uninstall_protocol_nodes(yoyo::node_factory& protocol_factory)->void override;
+};
+\endcode
+\note On Windows, you need an export macro; this is not necessary for Linuxoid systems
+
+Using the Q_PLUGIN_METADATA macro you tell Qt which id it should use internally and you specify the
+name of the previously created json (\ref plugin_json_qt).
+
+With the Q_INTERFACES you declare which interfaces you are implementing.
+
+\warning Per shared/dynamic library only one of these classes is allowed.
+
+This could be a possible implementation for a plugin defining a leaf node for each category.
+\code{.cpp}
+#include "test_plugin.hpp"
+
+#include "my_data_node.h"
+#include "my_gui_node.h"
+#include "my_protocol_node.h"
+#include "my_communication_node.h"
+
+#include "yoyo/node_factory.h"
+
+auto test_plugin::name() const->QString { return "test-plugin"; }
+
+auto test_plugin::install_gui_nodes(yoyo::node_factory& gui_factory)->void
+{
+    gui_factory.install_node(
+        my_gui_node::typeId(),
+        "my_gui_node",
+        &my_gui_node::staticMetaObject,
+        create_my_gui_documentation(),
+        [](auto id) {
+            return std::make_shared<my_gui_node>(id);
+        },
+        [](auto) {
+            return yoyo::node_factory::node_id_list{};
+        });
+}
+
+auto test_plugin::install_data_nodes(yoyo::node_factory& data_factory)->void
+{
+    data_factory.install_node(
+        my_data_node::typeId(),
+        "my_data_node",
+        &my_data_node::staticMetaObject,
+        create_my_data_documentation(),
+        [](auto id) {
+            return std::make_shared<my_data_node>(id);
+        },
+        [](auto) {
+            return yoyo::node_factory::node_id_list{};
+        });
+}
+
+auto test_plugin::install_communication_nodes(yoyo::node_factory& communication_factory)->void
+{
+    communication_factory.install_node(
+        my_communication_node::typeId(),
+        "my_communication_node",
+        &my_communication_node::staticMetaObject,
+        create_my_communication_documentation(),
+        [](auto id) {
+            return std::make_shared<my_communication_node>(id);
+        },
+        [](auto) {
+            return yoyo::node_factory::node_id_list{};
+        });
+}
+
+auto test_plugin::install_protocol_nodes(yoyo::node_factory& protocol_factory)->void
+{
+    protocol_factory.install_node(
+        my_protocol_node::typeId(),
+        "my_protocol_node",
+        &my_protocol_node::staticMetaObject,
+        create_my_protocol_documentation(),
+        [](auto id) {
+            return std::make_shared<my_protocol_node>(id);
+        },
+        [](auto) {
+            return yoyo::node_factory::node_id_list{};
+        });
+}
+
+auto test_plugin::uninstall_gui_nodes(yoyo::node_factory& gui_factory)->void { gui_factory.uninstall_node(id_gui); }
+auto test_plugin::uninstall_data_nodes(yoyo::node_factory& data_factory)->void { data_factory.uninstall_node(id_data); }
+auto test_plugin::uninstall_communication_nodes(yoyo::node_factory& communication_factory)->void { communication_factory.uninstall_node(id_communication); }
+auto test_plugin::uninstall_protocol_nodes(yoyo::node_factory& protocol_factory)->void { protocol_factory.uninstall_node(id_protocol); }
+\endcode
+*/

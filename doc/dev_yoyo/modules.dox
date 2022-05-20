@@ -1,0 +1,17 @@
+/**
+\page modules Yoyo modules
+
+\section modules_sdk Yoyo-Sdk
+\section modules_id File Input and Output
+\section modules_plugin Plugin manager
+\section modules_model Data model
+\subsection modules_model_connection Connectivity
+\subsection modules_model_nodes Predefined nodes
+\section modules_gui Graphical User Interface
+\subsection modules_gui_tree Tree widget
+\subsection modules_gui_tool Tool widget
+\subsection modules_gui_property Property widget
+\subsection modules_gui_plugin Plugin management
+\subsection modules_gui_help Help widget
+\subsection modules_gui_log Log widget
+*/

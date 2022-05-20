@@ -1,0 +1,19 @@
+/**
+\mainpage Yoyo development
+
+Yoyo is a highly versatile graphical user interface to create dynamic user interfaces to calculate,
+display and communicate values.
+
+The yoyo data model is a tree structure with subtrees dedicated to different tasks. There is a
+subtree dedicated to data objects, one which represents the widgets to display. There are optional
+subtrees for the purpose of communication and serialization/deserialization.
+
+The data model can be enriched at run-time using the yoyo-sdk - a plugin interface.
+
+\ref modules
+\ref properties
+
+\todo How to build
+\todo How to test
+\todo How to build installer
+*/

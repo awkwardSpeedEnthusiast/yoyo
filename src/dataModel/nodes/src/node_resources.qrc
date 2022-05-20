@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/yoyo/nodes">
+        <file alias="ed464bef-321c-424a-8acd-5dfba4d345b4.png">resources/button.png</file>
+        <file alias="6538cef0-6592-470f-91f3-80d4423b46ce.png">resources/checkbox.png</file>
+        <file alias="286a8cfb-46b2-487d-ae8a-6f614648a494.png">resources/combobox.png</file>
+        <file alias="b5c09162-9eb8-4ed2-95b8-3096c8dcb356.png">resources/group.png</file>
+        <file alias="81c2df83-2452-422c-8846-d8bfa2d756df.png">resources/lineedit.png</file>
+    </qresource>
+</RCC>

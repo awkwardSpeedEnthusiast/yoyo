@@ -1,0 +1,3 @@
+add_subdirectory(toolWidget)
+add_subdirectory(treeDisplay)
+add_subdirectory(propertyEditor)
