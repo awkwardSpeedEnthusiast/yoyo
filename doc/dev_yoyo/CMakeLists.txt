@@ -11,9 +11,7 @@ doxygen_add_docs(yoyoDeveloperDocumentation
     ${CMAKE_SOURCE_DIR}/src/gui/treeDisplay/include/
     ${CMAKE_SOURCE_DIR}/src/io/include/
     ${CMAKE_SOURCE_DIR}/src/plugin_manager/include/
-    mainpage.dox
-    modules.dox
-    properties.dox
+    ${CMAKE_CURRENT_SOURCE_DIR}
     #ALL
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/
     COMMENT "Yoyo developer documentation"

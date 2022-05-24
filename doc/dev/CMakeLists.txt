@@ -4,10 +4,6 @@ set(DOXYGEN_HTML_EXTRA_STYLESHEET ${CMAKE_CURRENT_SOURCE_DIR}/doxygen-awesome.cs
 doxygen_add_docs(developerDocumentation
     ${CMAKE_SOURCE_DIR}/src/sdk/include/
     ${CMAKE_CURRENT_SOURCE_DIR}
-    mainpage.dox
-    nodes.dox
-    plugin_creation.dox
-    properties.dox
     #ALL
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/sdk/
     COMMENT "Plugin developer documentation"

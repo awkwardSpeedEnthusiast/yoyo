@@ -1,17 +1,227 @@
 /**
 \page modules Yoyo modules
 
+Yoyo is devided into individual modules with as small coupling between the modules as possible.
+
+The modules contain an interface each and possibly some package-private classes and functions.
+
 \section modules_sdk Yoyo-Sdk
-\section modules_id File Input and Output
+
+This is the most basic of the Yoyo modules. It contains the minimal interface necessary to create
+plugins for Yoyo. All other modules (except for \ref modules_command) depend on it.
+
+This module is heavily documented. This documentation, the header files and an CMake export module
+are packaged on the install target to be shipped alongside the Yoyo binaries to any customer.
+
+The content of this module is:
+- The most basic node for the tree like data model
+- derived classes from this basic node for
+    - Gui nodes
+    - Data nodes
+    - Protocol nodes
+    - Communication nodes
+- a class for handling the documentation of nodes
+- the node factory
+- and the base class for Yoyo plugins
+
+\section modules_command Command framework
+
+The command framework provides two classes:
+- the command
+- the command handler
+- some helper objects
+
+The command represents an undoable and re-doable command atomic action.
+
+The command handler manages the commands in an undo stack.
+
+In contrast to the usual design pattern, Yoyo doesn't use inheritance to specialize commands, but
+dependency injection with std::function.
+
+Even though technically a singleton, the main command handler is stored as a package private object
+and can be accessed using free functions. This allows different instances, if necessary.
+
+\section modules_io File Input and Output
+
+Yoyo comes with an io framework. This framework is independent of the file format, and even
+independent of files (using std-streams to write/read).
+
+The interface defines:
+- a serializer
+- a deserializer
+- a manager class
+
+The manager class holds a list of serializers and deserializers for different formats.
+
+Even though technically a singleton, the main io-manager is stored as a package private object and
+can be accessed using free functions. This allows different instances, if necessary.
+
+Currently IO objects are available for json file format.
+
+\todo discuss whether to allow IO objects into plugins.
+
 \section modules_plugin Plugin manager
+
+Since Yoyo provides a plugin framework, it also needs to load these plugins. It was decided to have
+an aproach which is a bit more comfortable: The plugins are not only loaded from a single predefined
+directory (mostly the plugin directory inside the installation folder), but they are defined by a
+description file.
+
+With the plugin description, the plugins can be located anywhere on the disk. The known plugins can
+be displayed in the Gui and plugins can be loaded and unloaded at runtime. From session to session
+the plugin manager remembers the known plugin and their load state and sets loads plugins at startup
+accordingly.
+
+This module contains the "backend" management, not the Gui (\ref modules_gui_plugin).
+
+The plugin manager itself is the interface of this module. Package private components include the
+settings management and deserialization for the plugin description.
+
 \section modules_model Data model
+
+The data model contains anything "under-the-hood". Stuff which Yoyo provides, but which is not
+related directly to Gui.
+
 \subsection modules_model_connection Connectivity
+
+This module is the most important module for Yoyo functionality. It provides the connectivity
+between data nodes and non-data nodes. It watches connection properties and connects the node of
+that name, if it exists. In addition it also connects other "connected" properties.
+
+\note This module is still a bit messy.
+
 \subsection modules_model_nodes Predefined nodes
+
+In this module, there are some nodes, which are needed for a basic functioning of Yoyo. There is a
+set of data nodes (hopefully complete) and some basic Gui nodes, like line-edit, combo-box, check-
+box, etc.
+
+In addition, organizational nodes are defined here:
+- configuration, the root node
+- data root, the root for all data nodes
+- gui root, the root node for all gui nodes
+
+Currently it is not planned to add some default protocols or communication nodes, but this is not
+fixed.
+
+\todo there are still nodes missing: something like configuration_data, protocol-root,
+communication-root, etc.
+
+The interface of this module consists of factory populating free functions and the declaration of
+the configuration class. The rest is package private.
+
+\section modules_engine Engines
+
+\subsection modules_engine_js JavaScript Engine
+\todo to be implemented.
+\subsection modules_engine_other Other engines?
+\todo other engines to be defined
+
 \section modules_gui Graphical User Interface
-\subsection modules_gui_tree Tree widget
-\subsection modules_gui_tool Tool widget
-\subsection modules_gui_property Property widget
+
+In the gui directory Yoyo collects individual widgets, which can be used by the main gui. This does
+not include gui nodes, though. The widgets defined here are organizational, meant for editing or
+displaying information about the data model.
+
+Each one of the Gui modules defines an interface widget using the pimpl idiom. All internals are
+hidden from the rest of Yoyo to enforce low coupling, one of the basic principles of object-
+oriented software engineering.
+
+\subsection modules_gui_tree Tree Widget
+
+This widget displays the complete data model as a tree. Drag and Drop is supported within the widget
+and for data nodes, from this widget to the main display. Nodes from the data model can be selected,
+which will display their properties in the \ref modules_gui_property.
+
+This module and the IO module are the only modules, which are allowed to create nodes. In case of
+the Tree Widget, the creation and destruction of nodes is undoable.
+
+\todo The current implementation of the undo for add and remove might introduce a memory leak,
+    because the lambdas capture the shared-pointers of the nodes, so they are only really destroyed,
+    when the undo-stack is cleared. Solution could be to keep a property-value-list for each
+    destroyed node.
+
+Being a pretty featuresome module, the actual functionality was split up into several classes (the S
+in SOLID principles). One to handle the context menu, type dependent adapters to handle what data
+to display and the model for Drag&Drop handling as well as interface to the tree-view.
+
+The interface contains solely of the widget itself. The model and other functional parts are package
+private.
+
+\subsection modules_gui_tool Tool Widget
+
+The Tool Widget displays a list of available gui nodes, which can be dragged and dropped on the main
+display to add new items.
+
+This widget is pretty simple compared to other widgets, it only contains the item model as
+controller for the data received from the respective node factory (MVC, Model-View-Controller
+pattern: Model is the installed nodes data from the factory, View is the list-view).
+
+The interface contains solely of the widget itself. The model and other functional parts are package
+private.
+
+\subsection modules_gui_property Property Widget
+
+The Property Widget displays and allows to modify the properties of the selected node.
+
+The widget itself has a rather small implementation, the handling of the individual property types
+is delegated to sub widgets. All internally used widgets are package private.
+
+This module is by far the biggest of the gui modules. This is not due to complexity, but due to the
+fact, that there are so many possible property types to handle (\ref properties_extend).
+
+The Property Widget itself requests the creation of individual property input widgets, depending on
+the respective property type; one for each property. These input widgets are package private, so not
+accessible from outside other than by iterating through the Qt parent/child tree.
+
+There is not a one-to-one relationship of input-widgets to property types, since some widgets can
+handle several similar types. The idea had been to have many small, simple classes.
+
+A generic approach using templates was not possible, since the Meta Object Compiler does
+not support templates. And the property management by Yoyo (the actual type of the node being
+unknown or even inaccessible to the Property Widget) heavily relies on the Qt property system.
+
+The interface contains solely of the widget itself.
+
 \subsection modules_gui_plugin Plugin management
+
+This is the Gui for the \ref modules_plugin described earlier. It displays known plugins, requests
+the load of plugins on user request.
+
+\todo Implement gui::plugin_dialog.
+
+The interface contains solely of the widget itself.
+
 \subsection modules_gui_help Help widget
+
+The user help is written with doxygen and can be found in this repository in doc/user/. The
+generated html files along with a css are deployed with the installation. The purpose of the Help
+Widget is to enable the user to view the help from within Yoyo.
+
+\todo Implement gui::help_widget.
+
+The interface contains solely of the widget itself.
+
 \subsection modules_gui_log Log widget
+
+Yoyo internals does some logging to dedicated logging contexts. The user can use the Log Widget to
+select one or more logging contexts and display what has been logged during the current session.
+
+\todo Implement gui::log_widget.
+
+The interface contains solely of the widget itself.
+
+\section modules_yoyo The Yoyo application
+
+This module is less a module, but the final executable. Here all other modules come together to form
+the Yoyo application.
+
+The Yoyo application contains of a main window, owning the individual widgets defined in the gui
+modules and handling their visibility through menu actions.
+
+It also contains an application class, which is the owner of the data-model. It owns not only the
+node factories and the \ref modules_plugin, but also the defined \ref modules_engine and the
+\ref modules_io. It is responsible for handling user request for loading and storing.
+
+\todo Implement yoyo::application.
 */
