@@ -113,9 +113,9 @@ the configuration class. The rest is package private.
 \section modules_engine Engines
 
 \subsection modules_engine_js JavaScript Engine
-\todo to be implemented.
+\todo JavaScript Engine: to be implemented.
 \subsection modules_engine_other Other engines?
-\todo other engines to be defined
+\todo other engines: to be defined
 
 \section modules_gui Graphical User Interface
 
@@ -139,7 +139,8 @@ the Tree Widget, the creation and destruction of nodes is undoable.
 \todo The current implementation of the undo for add and remove might introduce a memory leak,
     because the lambdas capture the shared-pointers of the nodes, so they are only really destroyed,
     when the undo-stack is cleared. Solution could be to keep a property-value-list for each
-    destroyed node.
+    destroyed node, but memory wise, this should not make that much of a difference, because the
+    property-value-lists then are captured.
 
 Being a pretty featuresome module, the actual functionality was split up into several classes (the S
 in SOLID principles). One to handle the context menu, type dependent adapters to handle what data
