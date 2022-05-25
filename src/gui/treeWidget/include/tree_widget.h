@@ -17,14 +17,14 @@ namespace gui
 class tree_model;
 class contextmenu_handler;
 
-class YOYO_GUI_TREE_SHARED_EXPORT TreeWidget : public QDockWidget
+class YOYO_GUI_TREE_SHARED_EXPORT tree_widget : public QDockWidget
 {
   Q_OBJECT
 
 public:
-  explicit TreeWidget(std::vector<std::shared_ptr<node_factory>> factories,
+  explicit tree_widget(std::vector<std::shared_ptr<node_factory>> factories,
                       QWidget* parent = nullptr);
-  ~TreeWidget() override;
+  ~tree_widget() override;
 
   auto setConfiguration(std::shared_ptr<node_base> root_node) -> void;
   auto updateFactories() -> void;

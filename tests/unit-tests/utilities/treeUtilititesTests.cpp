@@ -1,6 +1,6 @@
 #include "guiFixture.hpp"
 
-#include "treeUtils.hpp"
+#include "tree_utils.hpp"
 
 #include "configuration.hpp"
 #include "factory_provider.hpp"

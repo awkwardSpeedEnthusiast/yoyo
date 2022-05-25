@@ -4,7 +4,7 @@
 #include "yoyo/gui_node.h"
 #include "yoyo/protocol_node.h"
 
-#include "treeUtils.hpp"
+#include "tree_utils.hpp"
 
 #include <QDataStream>
 #include <QMetaObject>

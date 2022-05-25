@@ -21,7 +21,7 @@ auto TreeWidgetTest::SetUp() -> void
 
 auto TreeWidgetTest::createWidget() -> void
 {
-  _widget = std::make_shared<yoyo::gui::TreeWidget>(std::vector {
+  _widget = std::make_shared<yoyo::gui::tree_widget>(std::vector {
     _fundamental_factory, _data_factory, _gui_factory, _protocol_factory, _communication_factory });
   _widget->resize(50, 200);
   _widget->show();

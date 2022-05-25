@@ -1,10 +1,10 @@
 ifx_add_library(toolWidget SHARED
     HEADERS
-        src/toolModel.hpp
-        include/toolwidget.h
+        src/tool_model.hpp
+        include/tool_widget.h
     SOURCES
-        src/toolModel.cpp
-        src/toolwidget.cpp
+        src/tool_model.cpp
+        src/tool_widget.cpp
         src/toolwidget.ui
     DEPENDS
         PUBLIC yoyo::Sdk

@@ -1,5 +1,5 @@
 #include "TreeWidgetFixture.hpp"
-#include "treeUtils.hpp"
+#include "tree_utils.hpp"
 
 #include "command_handler.h"
 

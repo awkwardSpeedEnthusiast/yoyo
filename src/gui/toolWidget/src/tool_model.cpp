@@ -1,4 +1,4 @@
-#include "toolModel.hpp"
+#include "tool_model.hpp"
 
 #include <QDataStream>
 #include <QFile>
@@ -15,36 +15,36 @@ namespace yoyo
 {
 namespace gui
 {
-toolModel::toolModel(std::shared_ptr<node_factory> gui_factory)
+tool_model::tool_model(std::shared_ptr<node_factory> gui_factory)
   : QAbstractListModel {}
   , _gui_factory { gui_factory }
 {
   _cached_list = _gui_factory->installed_nodes();
 }
 
-auto toolModel::update() -> void
+auto tool_model::update() -> void
 {
   beginResetModel();
   _cached_list = _gui_factory->installed_nodes();
   endResetModel();
 }
 
-auto toolModel::parent(const QModelIndex&) const -> QModelIndex
+auto tool_model::parent(const QModelIndex&) const -> QModelIndex
 {
   return {};
 }
 
-auto toolModel::columnCount(const QModelIndex&) const -> int
+auto tool_model::columnCount(const QModelIndex&) const -> int
 {
   return 1;
 }
 
-auto toolModel::rowCount(const QModelIndex&) const -> int
+auto tool_model::rowCount(const QModelIndex&) const -> int
 {
   return static_cast<int>(_cached_list.size());
 }
 
-auto toolModel::data(const QModelIndex& index, int role) const -> QVariant
+auto tool_model::data(const QModelIndex& index, int role) const -> QVariant
 {
   if (!index.isValid() || (static_cast<size_t>(index.row()) > _cached_list.size())) {
     return {};
@@ -68,7 +68,7 @@ auto toolModel::data(const QModelIndex& index, int role) const -> QVariant
   return {};
 }
 
-auto toolModel::mimeData(const QModelIndexList& indexes) const -> QMimeData*
+auto tool_model::mimeData(const QModelIndexList& indexes) const -> QMimeData*
 {
   if (indexes.count() != 1) {
     return nullptr;
@@ -85,7 +85,7 @@ auto toolModel::mimeData(const QModelIndexList& indexes) const -> QMimeData*
   return mimedata;
 }
 
-auto toolModel::mimeTypes() const -> QStringList
+auto tool_model::mimeTypes() const -> QStringList
 {
   return QStringList {} << mimetype_gui_new;
 }

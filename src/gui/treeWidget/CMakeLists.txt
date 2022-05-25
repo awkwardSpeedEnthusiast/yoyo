@@ -1,12 +1,12 @@
 ifx_add_library(treeWidget SHARED
     HEADERS
         src/tree_model.hpp
-        include/treewidget.h
+        include/tree_widget.h
         src/data_adapter.hpp
         src/contextmenu_handler.hpp
     SOURCES
         src/tree_model.cpp
-        src/treewidget.cpp
+        src/tree_widget.cpp
         src/treewidget.ui
         src/data_adapter.cpp
         src/contextmenu_handler.cpp

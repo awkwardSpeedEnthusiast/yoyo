@@ -1,7 +1,7 @@
 #include "tree_model.hpp"
 
 #include "data_adapter.hpp"
-#include "treeUtils.hpp"
+#include "tree_utils.hpp"
 
 #include "command_handler.h"
 #include "yoyo/communication_node.h"

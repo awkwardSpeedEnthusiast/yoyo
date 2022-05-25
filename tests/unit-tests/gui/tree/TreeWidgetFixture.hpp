@@ -1,5 +1,5 @@
 #pragma once
-#include "treewidget.h"
+#include "tree_widget.h"
 
 #include "guiFixture.hpp"
 #include "yoyo/communication_node.h"
@@ -36,7 +36,7 @@ public:
     &yoyo::protocol_node::staticMetaObject) };
   std::shared_ptr<yoyo::node_factory> _communication_factory { std::make_shared<yoyo::node_factory>(
     &yoyo::communication_node::staticMetaObject) };
-  std::shared_ptr<yoyo::gui::TreeWidget> _widget;
+  std::shared_ptr<yoyo::gui::tree_widget> _widget;
 
   QTreeView* view;
   QMenu* menu;

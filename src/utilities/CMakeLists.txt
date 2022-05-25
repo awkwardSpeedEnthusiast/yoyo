@@ -1,8 +1,8 @@
 ifx_add_library(utilities
     HEADERS
-        include/treeUtils.hpp
+        include/tree_utils.hpp
     SOURCES
-        src/treeUtils.cpp
+        src/tree_utils.cpp
     DEPENDS
         PUBLIC yoyo::Sdk
         PRIVATE Qt5::Widgets

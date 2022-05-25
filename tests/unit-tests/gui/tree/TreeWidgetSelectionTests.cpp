@@ -63,7 +63,7 @@ TEST_F(TreeWidgetSelectionTest, treeSelectData)
   setupDataTree();
   testing::StrictMock<SelectionReceiver> receiver;
 
-  QObject::connect(_widget.get(), &yoyo::gui::TreeWidget::itemSelected,
+  QObject::connect(_widget.get(), &yoyo::gui::tree_widget::itemSelected,
                    [&receiver](auto i) { receiver.itemSelected(i); });
 
   EXPECT_EQ(selection_model->selectedIndexes().count(), 0);
@@ -92,7 +92,7 @@ TEST_F(TreeWidgetSelectionTest, treeSelectGui)
   setupGuiTree();
   testing::StrictMock<SelectionReceiver> receiver;
 
-  QObject::connect(_widget.get(), &yoyo::gui::TreeWidget::itemSelected,
+  QObject::connect(_widget.get(), &yoyo::gui::tree_widget::itemSelected,
                    [&receiver](auto i) { receiver.itemSelected(i); });
 
   EXPECT_EQ(selection_model->selectedIndexes().count(), 0);
@@ -122,7 +122,7 @@ TEST_F(TreeWidgetSelectionTest, itemSelectGui)
   testing::StrictMock<SelectionReceiver> receiver;
   QObject lifetimer;
 
-  QObject::connect(_widget.get(), &yoyo::gui::TreeWidget::itemSelected, &lifetimer,
+  QObject::connect(_widget.get(), &yoyo::gui::tree_widget::itemSelected, &lifetimer,
                    [&receiver](auto i) { receiver.itemSelected(i); });
 
   EXPECT_EQ(selection_model->selectedIndexes().count(), 0);

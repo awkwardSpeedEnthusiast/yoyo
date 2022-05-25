@@ -1,16 +1,17 @@
 set(DOXYGEN_GENERATE_TREEVIEW YES)
 set(DOXYGEN_HTML_EXTRA_STYLESHEET ${CMAKE_CURRENT_SOURCE_DIR}/doxygen-awesome.css)
+set(DOXYGEN_WARN_IF_UNDOCUMENTED NO)
+set(DOXYGEN_QUIET YES)
 
 doxygen_add_docs(yoyoDeveloperDocumentation
-    ${CMAKE_SOURCE_DIR}/src/sdk/include/
-    ${CMAKE_SOURCE_DIR}/src/command/include/
-    ${CMAKE_SOURCE_DIR}/src/dataModel/nodes/include/
-    ${CMAKE_SOURCE_DIR}/src/dataModel/connection/include/
-    ${CMAKE_SOURCE_DIR}/src/gui/propertyEditor/include/
-    ${CMAKE_SOURCE_DIR}/src/gui/toolWidget/include/
-    ${CMAKE_SOURCE_DIR}/src/gui/treeDisplay/include/
-    ${CMAKE_SOURCE_DIR}/src/io/include/
-    ${CMAKE_SOURCE_DIR}/src/plugin_manager/include/
+    ${CMAKE_SOURCE_DIR}/src/sdk/
+    ${CMAKE_SOURCE_DIR}/src/command/
+    ${CMAKE_SOURCE_DIR}/src/dataModel/
+    ${CMAKE_SOURCE_DIR}/src/gui/propertyWidget/
+    ${CMAKE_SOURCE_DIR}/src/gui/toolWidget/
+    ${CMAKE_SOURCE_DIR}/src/gui/treeWidget/
+    ${CMAKE_SOURCE_DIR}/src/io/
+    ${CMAKE_SOURCE_DIR}/src/plugin_manager/
     ${CMAKE_CURRENT_SOURCE_DIR}
     #ALL
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src/

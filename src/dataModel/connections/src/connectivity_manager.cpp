@@ -1,5 +1,5 @@
 #include "connectivity_manager.hpp"
-#include "treeUtils.hpp"
+#include "tree_utils.hpp"
 
 #include "yoyo/data_node.h"
 

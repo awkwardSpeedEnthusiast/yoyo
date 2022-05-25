@@ -1,3 +1,3 @@
 add_subdirectory(toolWidget)
-add_subdirectory(treeDisplay)
-add_subdirectory(propertyEditor)
+add_subdirectory(treeWidget)
+add_subdirectory(propertyWidget)

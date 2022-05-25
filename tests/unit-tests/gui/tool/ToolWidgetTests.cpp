@@ -1,4 +1,4 @@
-#include "toolWidget.h"
+#include "tool_widget.h"
 
 #include "factory_provider.hpp"
 #include "guiFixture.hpp"
@@ -17,7 +17,7 @@ class ToolWidgetTest : public yoyo::test::guiFixture
 public:
   auto createWidget() -> void
   {
-    _widget = std::make_shared<yoyo::gui::ToolWidget>(_gui_factory);
+    _widget = std::make_shared<yoyo::gui::tool_widget>(_gui_factory);
     _widget->resize(50, 200);
     _widget->show();
   }
@@ -42,7 +42,7 @@ public:
 
   std::shared_ptr<yoyo::node_factory> _gui_factory { std::make_shared<yoyo::node_factory>(
     &yoyo::gui_node::staticMetaObject) };
-  std::shared_ptr<yoyo::gui::ToolWidget> _widget;
+  std::shared_ptr<yoyo::gui::tool_widget> _widget;
 };
 
 TEST_F(ToolWidgetTest, nodesListed)

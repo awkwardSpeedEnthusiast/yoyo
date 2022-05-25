@@ -1,4 +1,4 @@
-#include "treewidget.h"
+#include "tree_widget.h"
 #include "ui_treewidget.h"
 
 #include "contextmenu_handler.hpp"
@@ -10,7 +10,7 @@
 
 namespace yoyo::gui
 {
-TreeWidget::TreeWidget(std::vector<std::shared_ptr<node_factory>> factories, QWidget* parent)
+tree_widget::tree_widget(std::vector<std::shared_ptr<node_factory>> factories, QWidget* parent)
   : QDockWidget { parent }
   , ui { std::make_unique<Ui::TreeWidget>() }
   , _model { std::make_unique<tree_model>() }
@@ -38,7 +38,7 @@ TreeWidget::TreeWidget(std::vector<std::shared_ptr<node_factory>> factories, QWi
           });
 }
 
-auto TreeWidget::setConfiguration(std::shared_ptr<node_base> root_node) -> void
+auto tree_widget::setConfiguration(std::shared_ptr<node_base> root_node) -> void
 {
   if (auto root = _root.lock()) {
     disconnect(root.get(), &node_base::addRequested, this, nullptr);
@@ -74,10 +74,10 @@ auto TreeWidget::setConfiguration(std::shared_ptr<node_base> root_node) -> void
   }
 }
 
-auto TreeWidget::updateFactories() -> void
+auto tree_widget::updateFactories() -> void
 {
   _menu->update();
 }
 
-TreeWidget::~TreeWidget() = default;
+tree_widget::~tree_widget() = default;
 } // namespace yoyo::gui

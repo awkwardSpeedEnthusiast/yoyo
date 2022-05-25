@@ -239,7 +239,7 @@ to handle the all defined property types:
   test_data { QString { "my::own::type_t" }, QVariant::fromValue(my::own::type_t{someInitializer}) },
     \endcode
 
-\subsubsection properties_extend_io Adjust Production Code
+\subsubsection properties_extend_io_prod Adjust Production Code
 
 When you've read the test modifications closely, you already know, where to add the changes for
 production code.

@@ -1,6 +1,6 @@
 #include "contextmenu_handler.hpp"
 
-#include "treeUtils.hpp"
+#include "tree_utils.hpp"
 
 #include "command_handler.h"
 #include "yoyo/data_node.h"

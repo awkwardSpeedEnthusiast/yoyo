@@ -7,17 +7,17 @@ namespace yoyo
 {
 namespace gui
 {
-class toolModel : public QAbstractListModel
+class tool_model : public QAbstractListModel
 {
   Q_OBJECT
 
 public:
-  toolModel(std::shared_ptr<node_factory> gui_factory);
-  ~toolModel() override = default;
-  toolModel(toolModel const&) = delete;
-  toolModel(toolModel&&) = delete;
-  toolModel& operator=(toolModel const&) = delete;
-  toolModel& operator=(toolModel&&) = delete;
+  tool_model(std::shared_ptr<node_factory> gui_factory);
+  ~tool_model() override = default;
+  tool_model(tool_model const&) = delete;
+  tool_model(tool_model&&) = delete;
+  tool_model& operator=(tool_model const&) = delete;
+  tool_model& operator=(tool_model&&) = delete;
 
   auto update() -> void;
 
