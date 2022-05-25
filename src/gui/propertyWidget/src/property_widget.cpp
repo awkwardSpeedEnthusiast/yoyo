@@ -2,6 +2,8 @@
 #include "property_input/property_input_factory.hpp"
 #include "ui_property_widget.h"
 
+#include "command_handler.h"
+#include "tree_utils.hpp"
 #include "yoyo/documentation.h"
 #include "yoyo/node_base.h"
 
@@ -59,9 +61,27 @@ auto property_widget::itemSelected(std::shared_ptr<node_base> item,
           label->setAlignment(Qt::AlignBottom | Qt::AlignRight);
           label->setToolTip(tooltip);
           input->setToolTip(tooltip);
+
           connect(input.get(), &property_input::propertyChanged, this, [item](auto p, auto value) {
-            ///\todo add undo!
-            item->setProperty(p.c_str(), value);
+            auto exec = [item, value, p]() { item->setProperty(p.c_str(), value); };
+
+            if (auto handler = command::commandhandler()) {
+              auto id = utilities::calculatePath<utilities::path_strategy_t::INDEX>(item);
+              auto root = utilities::get_root(item);
+              auto undo = [id, value = item->property(p.c_str()), p, root]() {
+                auto item =
+                  utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
+                item->setProperty(p.c_str(), value);
+              };
+              auto redo = [id, value, p, root]() {
+                auto item =
+                  utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
+                item->setProperty(p.c_str(), value);
+              };
+              handler->execute({ tr("Set property %1").arg(p.c_str()), exec, undo, redo });
+            } else {
+              exec();
+            }
           });
           connect(input.get(), &property_input::visibilityChanged, label.get(), [label](auto v) {
             label->setVisible(v);

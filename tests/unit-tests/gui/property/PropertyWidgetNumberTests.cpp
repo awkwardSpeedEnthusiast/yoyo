@@ -168,6 +168,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop1Changed(1);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(1));
     input->setText("-11");
     EXPECT_CALL(*object, set_prop1(-11));
     QTest::keyClick(input, Qt::Key_Return);
@@ -191,6 +192,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop2Changed(1);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop2()).WillOnce(Return(1));
     input->setText("125");
     EXPECT_CALL(*object, set_prop2(125));
     QTest::keyClick(input, Qt::Key_Return);
@@ -217,6 +219,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop3Changed(1);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop3()).WillOnce(Return(1));
     input->setText("12567");
     EXPECT_CALL(*object, set_prop3(12567));
     QTest::keyClick(input, Qt::Key_Return);
@@ -243,6 +246,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop4Changed(1);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop4()).WillOnce(Return(1));
     input->setText("-12567");
     EXPECT_CALL(*object, set_prop4(-12567));
     QTest::keyClick(input, Qt::Key_Return);
@@ -269,6 +273,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop5Changed(1);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop5()).WillOnce(Return(1));
     input->setText("12567");
     EXPECT_CALL(*object, set_prop5(12567));
     QTest::keyClick(input, Qt::Key_Return);
@@ -295,6 +300,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop6Changed(11);
     EXPECT_EQ(input->text().toStdString(), "0xb");
 
+    EXPECT_CALL(*object, prop6()).WillOnce(Return(0xb));
     input->setText("0xfe");
     EXPECT_CALL(*object, set_prop6(0xfe));
     QTest::keyClick(input, Qt::Key_Return);
@@ -321,6 +327,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop7Changed(11);
     EXPECT_EQ(input->text().toStdString(), "0xb");
 
+    EXPECT_CALL(*object, prop7()).WillOnce(Return(0xb));
     input->setText("0xfedc");
     EXPECT_CALL(*object, set_prop7(0xfedc));
     QTest::keyClick(input, Qt::Key_Return);
@@ -347,6 +354,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop8Changed(11);
     EXPECT_EQ(input->text().toStdString(), "0xb");
 
+    EXPECT_CALL(*object, prop8()).WillOnce(Return(0xb));
     input->setText("0xfedcba");
     EXPECT_CALL(*object, set_prop8(0xfedcba));
     QTest::keyClick(input, Qt::Key_Return);
@@ -373,6 +381,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop9Changed(11);
     EXPECT_EQ(input->text().toStdString(), "0xb");
 
+    EXPECT_CALL(*object, prop9()).WillOnce(Return(0xb));
     input->setText("0xfedcba0123");
     EXPECT_CALL(*object, set_prop9(0xfedcba0123));
     QTest::keyClick(input, Qt::Key_Return);
@@ -399,6 +408,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop10Changed(11);
     EXPECT_EQ(input->text().toStdString(), "11");
 
+    EXPECT_CALL(*object, prop10()).WillOnce(Return(11));
     input->setText("123");
     EXPECT_CALL(*object, set_prop10(123));
     QTest::keyClick(input, Qt::Key_Return);
@@ -425,6 +435,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop11Changed(1111);
     EXPECT_EQ(input->text().toStdString(), "1.111");
 
+    EXPECT_CALL(*object, prop11()).WillOnce(Return(1111));
     input->setText("-1235");
     EXPECT_CALL(*object, set_prop11(-1235));
     QTest::keyClick(input, Qt::Key_Return);
@@ -451,6 +462,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop12Changed(300000);
     EXPECT_EQ(input->text().toStdString(), "300.000");
 
+    EXPECT_CALL(*object, prop12()).WillOnce(Return(300000));
     input->setText("-123456");
     EXPECT_CALL(*object, set_prop12(-123456));
     QTest::keyClick(input, Qt::Key_Return);
@@ -477,6 +489,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop13Changed(11);
     EXPECT_EQ(input->text().toStdString(), "11");
 
+    EXPECT_CALL(*object, prop13()).WillOnce(Return(11));
     input->setText("123");
     EXPECT_CALL(*object, set_prop13(123));
     QTest::keyClick(input, Qt::Key_Return);
@@ -504,6 +517,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop14Changed(0x02);
     EXPECT_EQ(input->text().toStdString(), "0x2");
 
+    EXPECT_CALL(*object, prop14()).WillOnce(Return(0x2));
     input->setText("0xfa");
     EXPECT_CALL(*object, set_prop14(0xfa));
     QTest::keyClick(input, Qt::Key_Return);
@@ -530,6 +544,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop15Changed(0x1111);
     EXPECT_EQ(input->text().toStdString(), "0x1111");
 
+    EXPECT_CALL(*object, prop15()).WillOnce(Return(0x1111));
     input->setText("0x0235");
     EXPECT_CALL(*object, set_prop15(0x0235));
     QTest::keyClick(input, Qt::Key_Return);
@@ -556,6 +571,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop16Changed(0x1111abc);
     EXPECT_EQ(input->text().toStdString(), "0x1111abc");
 
+    EXPECT_CALL(*object, prop16()).WillOnce(Return(0x1111abc));
     input->setText("0x0235");
     EXPECT_CALL(*object, set_prop16(0x0235));
     QTest::keyClick(input, Qt::Key_Return);
@@ -582,6 +598,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop17Changed(0x1111abc);
     EXPECT_EQ(input->text().toStdString(), "0x1111abc");
 
+    EXPECT_CALL(*object, prop17()).WillOnce(Return(0x1111abc));
     input->setText("0x0235");
     EXPECT_CALL(*object, set_prop17(0x0235));
     QTest::keyClick(input, Qt::Key_Return);
@@ -608,6 +625,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop18Changed(0x1111abc);
     EXPECT_EQ(input->text().toStdString(), "0x1111abc");
 
+    EXPECT_CALL(*object, prop18()).WillOnce(Return(0x1111abc2));
     input->setText("0x0235");
     EXPECT_CALL(*object, set_prop18(0x0235));
     QTest::keyClick(input, Qt::Key_Return);
@@ -634,6 +652,7 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop19Changed(-1.1);
     EXPECT_EQ(input->text().toStdString(), QLocale::system().toString(-1.1).toStdString());
 
+    EXPECT_CALL(*object, prop19()).WillOnce(Return(-1.1));
     input->setText(QLocale::system().toString(176.75));
     EXPECT_CALL(*object, set_prop19(176.75));
     QTest::keyClick(input, Qt::Key_Return);
@@ -657,11 +676,13 @@ TEST_F(PropertyWidgetTest, numberProperty)
     object->prop20Changed(-1.5);
     EXPECT_EQ(input->text().toStdString(), QLocale::system().toString(-1.5).toStdString());
 
+    EXPECT_CALL(*object, prop20()).WillOnce(Return(-1.5));
     input->setText(QLocale::system().toString(1.75));
     EXPECT_CALL(*object, set_prop20(1.75));
     QTest::keyClick(input, Qt::Key_Return);
     EXPECT_EQ(input->text().toStdString(), QLocale::system().toString(1.75).toStdString());
   }
+  testing::Mock::VerifyAndClear(object.get());
 }
 
 #include "PropertyWidgetNumberTests.moc"

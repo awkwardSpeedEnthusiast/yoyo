@@ -139,6 +139,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop1Changed(prop);
     EXPECT_EQ(input->text().toInt(), -1);
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop));
     input->setText("-11");
     prop._value = -11;
     EXPECT_CALL(*object, set_prop1(prop));
@@ -164,6 +165,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop2Changed(prop);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop2()).WillOnce(Return(prop));
     input->setText("-125");
     prop._value = -125;
     EXPECT_CALL(*object, set_prop2(prop));
@@ -192,6 +194,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop3Changed(prop);
     EXPECT_EQ(input->text().toInt(), -200);
 
+    EXPECT_CALL(*object, prop3()).WillOnce(Return(prop));
     input->setText("12567");
     prop._value = 12567;
     EXPECT_CALL(*object, set_prop3(prop));
@@ -220,6 +223,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop4Changed(prop);
     EXPECT_EQ(input->text().toStdString(), "20.000.000");
 
+    EXPECT_CALL(*object, prop4()).WillOnce(Return(prop));
     input->setText("-125");
     prop._value = -125;
     EXPECT_CALL(*object, set_prop4(prop));
@@ -248,6 +252,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop5Changed(prop);
     EXPECT_EQ(input->text().toInt(), 1);
 
+    EXPECT_CALL(*object, prop5()).WillOnce(Return(prop));
     input->setText("7");
     prop._value = 7;
     EXPECT_CALL(*object, set_prop5(prop));
@@ -276,6 +281,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop6Changed(prop);
     EXPECT_EQ(input->text().toStdString(), "365");
 
+    EXPECT_CALL(*object, prop6()).WillOnce(Return(prop));
     input->setText("250");
     prop._value = 250;
     EXPECT_CALL(*object, set_prop6(prop));
@@ -304,6 +310,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop7Changed(prop);
     EXPECT_EQ(input->text().toStdString(), "35");
 
+    EXPECT_CALL(*object, prop7()).WillOnce(Return(prop));
     input->setText("11");
     prop._value = 11;
     EXPECT_CALL(*object, set_prop7(prop));
@@ -332,6 +339,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop8Changed(prop);
     EXPECT_EQ(input->text().toStdString(), "123.456");
 
+    EXPECT_CALL(*object, prop8()).WillOnce(Return(prop));
     input->setText("987654");
     prop._value = 987654;
     EXPECT_CALL(*object, set_prop8(prop));
@@ -360,6 +368,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     object->prop9Changed(prop);
     EXPECT_EQ(input->text().toStdString(), QLocale::system().toString(-0.5).toStdString());
 
+    EXPECT_CALL(*object, prop9()).WillOnce(Return(prop));
     input->setText(QLocale::system().toString(0.001));
     prop._value = 0.001;
     EXPECT_CALL(*object, set_prop9(_)).WillOnce(Invoke([](auto v) {
@@ -371,6 +380,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     input->setText("10");
     QTest::keyClick(input, Qt::Key_Return);
   }
+  testing::Mock::VerifyAndClear(object.get());
 }
 
 #include "PropertyWidgetLimitedNumberTests.moc"

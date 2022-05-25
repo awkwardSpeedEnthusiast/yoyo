@@ -274,6 +274,7 @@ TEST_F(UtilitiesTests, treeCheckDataIndex)
 {
   using S = yoyo::utilities::path_strategy_t;
   using yoyo::utilities::calculatePath;
+  using yoyo::utilities::get_root;
   using yoyo::utilities::retrieveFromPath;
 
   auto configuration = setupConfiguration();
@@ -288,6 +289,17 @@ TEST_F(UtilitiesTests, treeCheckDataIndex)
   auto data4 = createData<data_mock>(d_group3, "data4");
   auto data5 = createData<data_mock>(d_group4, "data5");
 
+  EXPECT_EQ(get_root(d_group1), configuration);
+  EXPECT_EQ(get_root(d_group2), configuration);
+  EXPECT_EQ(get_root(d_group3), configuration);
+  EXPECT_EQ(get_root(d_group4), configuration);
+  EXPECT_EQ(get_root(data1), configuration);
+  EXPECT_EQ(get_root(data2), configuration);
+  EXPECT_EQ(get_root(data3), configuration);
+  EXPECT_EQ(get_root(data4), configuration);
+  EXPECT_EQ(get_root(data5), configuration);
+
+  EXPECT_EQ(calculatePath<S::INDEX>(configuration).toStdString(), "");
   EXPECT_EQ(calculatePath<S::INDEX>(data1).toStdString(), "item_0.item_1");
   EXPECT_EQ(calculatePath<S::INDEX>(data2).toStdString(), "item_0.item_0.item_1");
   EXPECT_EQ(calculatePath<S::INDEX>(data3).toStdString(), "item_0.item_0.item_0.item_1");
@@ -299,6 +311,8 @@ TEST_F(UtilitiesTests, treeCheckDataIndex)
   EXPECT_EQ(calculatePath<S::INDEX>(d_group3).toStdString(), "item_0.item_0.item_0.item_0");
   EXPECT_EQ(calculatePath<S::INDEX>(d_group4).toStdString(), "item_0.item_0.item_0.item_0.item_0");
 
+  EXPECT_EQ(retrieveFromPath<S::INDEX>(calculatePath<S::INDEX>(configuration), configuration),
+            configuration);
   EXPECT_EQ(retrieveFromPath<S::INDEX>(calculatePath<S::INDEX>(data1), configuration), data1);
   EXPECT_EQ(retrieveFromPath<S::INDEX>(calculatePath<S::INDEX>(data2), configuration), data2);
   EXPECT_EQ(retrieveFromPath<S::INDEX>(calculatePath<S::INDEX>(data3), configuration), data3);
@@ -314,6 +328,7 @@ TEST_F(UtilitiesTests, treeCheckGuiIndex)
 {
   using S = yoyo::utilities::path_strategy_t;
   using yoyo::utilities::calculatePath;
+  using yoyo::utilities::get_root;
   using yoyo::utilities::retrieveFromPath;
 
   auto configuration = setupConfiguration();
@@ -327,6 +342,16 @@ TEST_F(UtilitiesTests, treeCheckGuiIndex)
   auto gui3 = createGui<gui_mock>(g_group2);
   auto gui4 = createGui<gui_mock>(g_group3);
   auto gui5 = createGui<gui_mock>(g_group4);
+
+  EXPECT_EQ(get_root(g_group1), configuration);
+  EXPECT_EQ(get_root(g_group2), configuration);
+  EXPECT_EQ(get_root(g_group3), configuration);
+  EXPECT_EQ(get_root(g_group4), configuration);
+  EXPECT_EQ(get_root(gui1), configuration);
+  EXPECT_EQ(get_root(gui2), configuration);
+  EXPECT_EQ(get_root(gui3), configuration);
+  EXPECT_EQ(get_root(gui4), configuration);
+  EXPECT_EQ(get_root(gui5), configuration);
 
   EXPECT_EQ(calculatePath<S::INDEX>(gui1).toStdString(), "item_1.item_1");
   EXPECT_EQ(calculatePath<S::INDEX>(gui2).toStdString(), "item_1.item_0.item_1");

@@ -10,6 +10,7 @@ ifx_add_test(gui_property_tests
         PropertyWidgetConnectionTests.cpp
         PropertyWidgetMixedTests.cpp
         PropertyWidgetEnumTests.cpp
+        PropertyWidgetUndoTests.cpp
     DEPENDS
         PUBLIC yoyo::PropertyWidget
         PUBLIC Qt5::Widgets

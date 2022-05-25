@@ -23,7 +23,7 @@ class YOYO_GUI_TREE_SHARED_EXPORT tree_widget : public QDockWidget
 
 public:
   explicit tree_widget(std::vector<std::shared_ptr<node_factory>> factories,
-                      QWidget* parent = nullptr);
+                       QWidget* parent = nullptr);
   ~tree_widget() override;
 
   auto setConfiguration(std::shared_ptr<node_base> root_node) -> void;

@@ -118,6 +118,7 @@ TEST_F(PropertyWidgetTest, enumProperty)
     EXPECT_EQ(input_enabled->parentWidget()->toolTip().toStdString(),
               std::get<2>(docu->property("prop1")).toStdString());
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     prop1._enabled = true;
     EXPECT_CALL(*object, set_prop1(prop1));
     input_enabled->click();
@@ -128,6 +129,7 @@ TEST_F(PropertyWidgetTest, enumProperty)
     EXPECT_TRUE(input_title->isEnabled());
     EXPECT_TRUE(input_event->isEnabled());
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     prop1._enabled = false;
     EXPECT_CALL(*object, set_prop1(prop1));
     input_enabled->click();
@@ -161,11 +163,13 @@ TEST_F(PropertyWidgetTest, enumProperty)
     EXPECT_EQ(input_title->text(), "V2");
     EXPECT_EQ(input_event->text(), "img2.jpg");
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     std::get<0>(prop1._values[1]) = "value2";
     EXPECT_CALL(*object, set_prop1(prop1));
     input_value->setText("value2");
     QTest::keyClick(input_value, Qt::Key_Return);
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     std::get<1>(prop1._values[1]) = "title2";
     EXPECT_CALL(*object, set_prop1(prop1));
     input_title->setText("title2");
@@ -173,6 +177,7 @@ TEST_F(PropertyWidgetTest, enumProperty)
 
     input_select->setCurrentIndex(0);
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     std::get<2>(prop1._values[0])._text = "image1.jpg";
     EXPECT_EQ(std::get<2>(prop1._values[0])._text, "image1.jpg");
     EXPECT_CALL(*object, set_prop1(prop1));
@@ -187,6 +192,7 @@ TEST_F(PropertyWidgetTest, enumProperty)
     EXPECT_EQ(input_title->text(), "title2");
     EXPECT_EQ(input_event->text(), "img2.jpg");
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     prop1._values.insert({ 2, { "", "", { "", sc::type::NATIVE } } });
     EXPECT_CALL(*object, set_prop1(prop1));
     input_data->setText("2");
@@ -202,6 +208,7 @@ TEST_F(PropertyWidgetTest, enumProperty)
     object->prop1Changed(prop1);
     QApplication::processEvents();
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     prop1._values.insert({ 2, { "", "", { "", sc::type::NATIVE } } });
     EXPECT_CALL(*object, set_prop1(prop1));
     input_data->setText("2");

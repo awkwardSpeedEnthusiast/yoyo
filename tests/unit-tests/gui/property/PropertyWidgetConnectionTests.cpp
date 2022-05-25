@@ -122,6 +122,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     object->prop1Changed(prop1);
     EXPECT_EQ(input_auto->text().toStdString(), "anOtherDataObject");
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     input_auto->setText("changed again prop1");
     prop1._auto = "changed again prop1";
     EXPECT_CALL(*object, setProp1(prop1));
@@ -132,6 +133,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     object->prop1Changed(prop1);
     EXPECT_EQ(input_in->text().toStdString(), "inputDataObject");
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     input_in->setText("otherInputDataObject");
     prop1._in = "otherInputDataObject";
     EXPECT_CALL(*object, setProp1(prop1));
@@ -142,6 +144,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     object->prop1Changed(prop1);
     EXPECT_EQ(input_out->text().toStdString(), "outputDataObject");
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
     input_out->setText("otherOutputDataObject");
     prop1._out = "otherOutputDataObject";
     EXPECT_CALL(*object, setProp1(prop1));
@@ -167,6 +170,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     object->prop2Changed(prop2);
     EXPECT_EQ(input->text().toStdString(), "changedProp2");
 
+    EXPECT_CALL(*object, prop2()).WillOnce(Return(prop2));
     input->setText("changed again prop2");
     prop2._in = "changed again prop2";
     EXPECT_CALL(*object, setProp2(prop2));
@@ -196,12 +200,14 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     object->prop3Changed(prop3);
     EXPECT_EQ(input->text().toStdString(), "changedConnectedValue");
 
+    EXPECT_CALL(*object, prop3()).WillOnce(Return(prop3));
     input->setText("changed again prop3");
     prop3._out = "changed again prop3";
     EXPECT_CALL(*object, setProp3(prop3));
     QTest::keyClick(input, Qt::Key_Return);
     EXPECT_EQ(input->text().toStdString(), "changed again prop3");
   }
+  testing::Mock::VerifyAndClear(object.get());
 }
 
 #include "PropertyWidgetConnectionTests.moc"

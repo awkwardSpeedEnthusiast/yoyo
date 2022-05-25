@@ -129,10 +129,12 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     object->prop1Changed(false);
     EXPECT_EQ(input->isChecked(), false);
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(false));
     EXPECT_CALL(*object, set_prop1(true));
     input->click();
     EXPECT_EQ(input->isChecked(), true);
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return(true));
     EXPECT_CALL(*object, set_prop1(false));
     input->click();
     EXPECT_EQ(input->isChecked(), false);
@@ -156,9 +158,11 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     object->prop2Changed(yoyo::types::access_t::READ_WRITE);
     EXPECT_EQ(input->currentIndex(), 3);
 
+    EXPECT_CALL(*object, prop2()).WillOnce(Return(yoyo::types::access_t::READ_WRITE));
     EXPECT_CALL(*object, set_prop2(yoyo::types::access_t::READ));
     input->setCurrentIndex(1);
 
+    EXPECT_CALL(*object, prop2()).WillOnce(Return(yoyo::types::access_t::WRITE));
     EXPECT_CALL(*object, set_prop2(yoyo::types::access_t::WRITE));
     input->setCurrentIndex(2);
   }
@@ -181,6 +185,7 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     object->prop3Changed(yoyo::types::layout_direction_t::FREE);
     EXPECT_EQ(input->currentIndex(), 0);
 
+    EXPECT_CALL(*object, prop3()).WillOnce(Return(yoyo::types::layout_direction_t::FREE));
     EXPECT_CALL(*object, set_prop3(yoyo::types::layout_direction_t::VERTICAL));
     input->setCurrentIndex(2);
   }
@@ -203,6 +208,7 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     EXPECT_FALSE(input->isVisible());
     EXPECT_FALSE(label->isVisible());
 
+    EXPECT_CALL(*object, prop4()).WillOnce(Return(prop4));
     prop4._s = yoyo::types::layout_direction_t::VERTICAL;
     EXPECT_CALL(*object, set_prop4(prop4));
     input->setCurrentIndex(2);
@@ -240,6 +246,7 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     object->prop5Changed(prop5);
     EXPECT_EQ(input->currentIndex(), 1);
 
+    EXPECT_CALL(*object, prop5()).WillOnce(Return(prop5));
     prop5._type = yoyo::properties::connected_boolean_t::boolean_t::DEFINED_BY_CONNECTION;
     EXPECT_CALL(*object, set_prop5(prop5));
     input->setCurrentIndex(2);
@@ -286,11 +293,13 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     EXPECT_FALSE(input_text->isVisible());
     EXPECT_FALSE(input_save->isVisible());
 
+    EXPECT_CALL(*object, prop6()).WillOnce(Return(prop6));
     prop6._text = "anOtherFile.js";
     EXPECT_CALL(*object, set_prop6(prop6));
     input_file->setText("anOtherFile.js");
     QTest::keyClick(input_file, Qt::Key_Return);
 
+    EXPECT_CALL(*object, prop6()).WillOnce(Return(prop6));
     prop6._script_type = yoyo::properties::script_t::type::NATIVE;
     EXPECT_CALL(*object, set_prop6(prop6));
     input_type->setCurrentIndex(2);
@@ -299,6 +308,7 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     EXPECT_TRUE(input_text->isVisible());
     EXPECT_TRUE(input_save->isVisible());
 
+    EXPECT_CALL(*object, prop6()).WillOnce(Return(prop6));
     prop6._text = "aGroup.myData=5\n";
     EXPECT_CALL(*object, set_prop6(prop6));
     input_text->setText("aGroup.myData=5\n");

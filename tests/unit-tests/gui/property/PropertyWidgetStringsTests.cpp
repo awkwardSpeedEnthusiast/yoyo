@@ -130,6 +130,7 @@ TEST_F(PropertyWidgetTest, stringProperty)
     object->prop1Changed("changedProp1");
     EXPECT_EQ(input->text().toStdString(), "changedProp1");
 
+    EXPECT_CALL(*object, prop1()).WillOnce(Return("changedProp1"));
     input->setText("changed again prop1");
     EXPECT_CALL(*object, setProp1(QString("changed again prop1")));
     QTest::keyClick(input, Qt::Key_Return);
@@ -161,6 +162,7 @@ TEST_F(PropertyWidgetTest, stringProperty)
     EXPECT_TRUE(label->isVisible());
     EXPECT_TRUE(input->isVisible());
 
+    EXPECT_CALL(*object, prop2()).WillOnce(Return(prop2));
     input->setText("changed again prop2");
     prop2._s = "changed again prop2";
     EXPECT_CALL(*object, setProp2(prop2));
@@ -190,6 +192,7 @@ TEST_F(PropertyWidgetTest, stringProperty)
     object->prop3Changed(prop3);
     EXPECT_EQ(input->text().toStdString(), "changedOwnValue");
 
+    EXPECT_CALL(*object, prop3()).WillOnce(Return(prop3));
     input->setText("changed again prop3");
     prop3._own_value = "changed again prop3";
     EXPECT_CALL(*object, setProp3(prop3));
@@ -219,6 +222,7 @@ TEST_F(PropertyWidgetTest, stringProperty)
     QTest::keyClick(input, Qt::Key_Return);
     EXPECT_EQ(input->text().toStdString(), "changed again prop4");
 
+    EXPECT_CALL(*object, prop4()).WillOnce(Return(prop4));
     input->setText("changedAgainProp");
     prop4._s = "changedAgainProp";
     EXPECT_CALL(*object, setProp4(prop4));
@@ -245,12 +249,17 @@ TEST_F(PropertyWidgetTest, stringProperty)
     object->prop5Changed(prop5);
     EXPECT_EQ(input->toPlainText().toStdString(), "an\neven\nlonger\ntext");
 
+    EXPECT_CALL(*object, prop5()).WillOnce(Return(prop5));
     input->setText("can\nthis\ntext\nget\nlonger");
     prop5._s = "can\nthis\ntext\nget\nlonger";
     EXPECT_CALL(*object, setProp5(prop5));
     QTest::mouseClick(save, Qt::LeftButton);
     EXPECT_EQ(input->toPlainText().toStdString(), "can\nthis\ntext\nget\nlonger");
   }
+  _widget->itemSelected(nullptr, nullptr);
+  testing::Mock::VerifyAndClearExpectations(object.get());
+  testing::Mock::VerifyAndClear(object.get());
+  testing::Mock::AllowLeak(object.get());
 }
 
 #include "PropertyWidgetStringsTests.moc"

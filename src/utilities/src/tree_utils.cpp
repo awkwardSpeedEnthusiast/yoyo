@@ -62,6 +62,9 @@ auto retrieveFromPath(QString const& path, std::shared_ptr<node_base> root)
   if (!root) {
     return {};
   }
+  if (path.isEmpty()) {
+    return root;
+  }
 
   if (!path.contains(".")) {
     return findChildOfName<T>(path, root);
@@ -81,5 +84,16 @@ template auto retrieveFromPath<path_strategy_t::NAME>(QString const& path,
 template auto retrieveFromPath<path_strategy_t::INDEX>(QString const& path,
                                                        std::shared_ptr<node_base> root)
   -> std::shared_ptr<node_base>;
+
+auto get_root(std::shared_ptr<node_base> item) -> std::shared_ptr<node_base>
+{
+  if (!item) {
+    return {};
+  }
+  while (auto parent = item->parent().lock()) {
+    item = parent;
+  }
+  return item;
+}
 
 } // namespace yoyo::utilities
