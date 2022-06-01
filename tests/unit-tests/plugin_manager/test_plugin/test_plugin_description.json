@@ -1,7 +1,0 @@
-{
-  "id": "2730bf79-0630-4a0b-8011-27d6dea0c363",
-  "name": "test plugin",
-  "description": "This is a plugin for testing purposes.",
-  "path": "test-plugin.dll",
-  "dependencies": []
-}

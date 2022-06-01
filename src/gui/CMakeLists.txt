@@ -1,3 +1,4 @@
 add_subdirectory(toolWidget)
 add_subdirectory(treeWidget)
 add_subdirectory(propertyWidget)
+add_subdirectory(pluginWidget)

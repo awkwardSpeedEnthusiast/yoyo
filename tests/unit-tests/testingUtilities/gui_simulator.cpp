@@ -125,6 +125,26 @@ auto keyClicks(QWidget* widget, std::vector<Qt::Key> key, Qt::KeyboardModifiers 
   }
 }
 
+auto keyClicks(QWidget* widget, std::string keys, Qt::KeyboardModifiers modifier,
+               std::chrono::milliseconds delay) -> void
+{
+  auto event = [widget, keys, modifier] {
+    auto c = QString::fromStdString(keys);
+    for (auto k : c) {
+      QApplication::postEvent(widget, new QKeyEvent(QEvent::KeyPress, k.toLatin1(), modifier));
+      QApplication::processEvents();
+      QApplication::postEvent(widget, new QKeyEvent(QEvent::KeyRelease, k.toLatin1(), modifier));
+      QApplication::processEvents();
+    }
+  };
+
+  if (delay.count() > 0) {
+    QTimer::singleShot(delay, event);
+  } else {
+    event();
+  }
+}
+
 auto keyPress(QWidget* widget, Qt::Key key, Qt::KeyboardModifiers modifier,
               std::chrono::milliseconds delay) -> void
 {

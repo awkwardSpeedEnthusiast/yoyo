@@ -18,7 +18,7 @@ auto const id_protocol = boost::uuids::random_generator {}();
 
 namespace yoyo::test
 {
-class test_gui_node : public gui_node
+class test_gui_node_a : public gui_node
 {
   Q_OBJECT
   auto supportsValueType(types::value_t) const -> bool override
@@ -63,7 +63,7 @@ public:
   using gui_node::gui_node;
 };
 
-class test_data_node : public data_node
+class test_data_node_a : public data_node
 {
   Q_OBJECT
   auto setValue(QVariant const&) -> void override {}
@@ -109,7 +109,7 @@ public:
   using data_node::data_node;
 };
 
-class test_protocol_node : public protocol_node
+class test_protocol_node_a : public protocol_node
 {
   Q_OBJECT
   auto serialize(QVariant const&) -> void override {}
@@ -160,7 +160,7 @@ public:
   using protocol_node::protocol_node;
 };
 
-class test_communication_node : public communication_node
+class test_communication_node_a : public communication_node
 {
   Q_OBJECT
   auto staticTypeId() const -> boost::uuids::uuid override
@@ -203,25 +203,26 @@ public:
 
 auto test_plugin::name() const -> QString
 {
-  return "test-plugin";
+  return "test-plugin-a";
 }
 
 auto test_plugin::install_gui_nodes(node_factory& gui_factory) -> void
 {
   gui_factory.install_node(
-    id_gui, "test_gui_node", &test_gui_node::staticMetaObject,
-    documentation::builder("test_gui_node").build(),
-    [](auto id) { return std::make_shared<test_gui_node>("test_gui_node", nullptr, id); },
+    id_gui, "test_gui_node", &test_gui_node_a::staticMetaObject,
+    documentation::builder("test_gui_node_a").build(),
+    [](auto id) { return std::make_shared<test_gui_node_a>("test_gui_node_a", nullptr, id); },
     [](auto) { return node_factory::node_id_list {}; });
 }
 
 auto test_plugin::install_data_nodes(node_factory& data_factory) -> void
 {
   data_factory.install_node(
-    id_data, "test_data_node", &test_data_node::staticMetaObject,
-    documentation::builder("test_data_node").build(),
+    id_data, "test_data_node_a", &test_data_node_a::staticMetaObject,
+    documentation::builder("test_data_node_a").build(),
     [](auto id) {
-      return std::make_shared<test_data_node>("test_data_node", id, types::value_t::CUSTOM, false);
+      return std::make_shared<test_data_node_a>("test_data_node_a", id, types::value_t::CUSTOM,
+                                                false);
     },
     [](auto) { return node_factory::node_id_list {}; });
 }
@@ -229,10 +230,10 @@ auto test_plugin::install_data_nodes(node_factory& data_factory) -> void
 auto test_plugin::install_communication_nodes(node_factory& communication_factory) -> void
 {
   communication_factory.install_node(
-    id_communication, "test_communication_node", &test_communication_node::staticMetaObject,
-    documentation::builder("test_communication_node").build(),
+    id_communication, "test_communication_node_a", &test_communication_node_a::staticMetaObject,
+    documentation::builder("test_communication_node_a").build(),
     [](auto id) {
-      return std::make_shared<test_communication_node>("test_communication_node", id);
+      return std::make_shared<test_communication_node_a>("test_communication_node_a", id);
     },
     [](auto) { return node_factory::node_id_list {}; });
 }
@@ -240,9 +241,9 @@ auto test_plugin::install_communication_nodes(node_factory& communication_factor
 auto test_plugin::install_protocol_nodes(node_factory& protocol_factory) -> void
 {
   protocol_factory.install_node(
-    id_protocol, "test_protocol_node", &test_protocol_node::staticMetaObject,
-    documentation::builder("test_protocol_node").build(),
-    [](auto id) { return std::make_shared<test_protocol_node>("test_protocol_node", id); },
+    id_protocol, "test_protocol_node_a", &test_protocol_node_a::staticMetaObject,
+    documentation::builder("test_protocol_node_a").build(),
+    [](auto id) { return std::make_shared<test_protocol_node_a>("test_protocol_node", id); },
     [](auto) { return node_factory::node_id_list {}; });
 }
 

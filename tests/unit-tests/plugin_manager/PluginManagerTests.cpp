@@ -109,16 +109,17 @@ TEST_F(PluginManagerTests, testPlugin)
   auto protocol = std::make_shared<yoyo::node_factory>(&yoyo::node_base::staticMetaObject);
   auto communication = std::make_shared<yoyo::node_factory>(&yoyo::node_base::staticMetaObject);
 
-  auto test_plugin_path = boost::filesystem::current_path() / "test_plugin";
+  auto test_plugin_path =
+    boost::filesystem::current_path().parent_path() / "test_plugins" / "test_plugin_a";
   {
     yoyo::plugin::plugin_manager manager { data_f, gui, protocol, communication };
 
     auto data = manager.read_plugin_description(test_plugin_path / "test_plugin_description.json");
     EXPECT_EQ(data->id(), test_plugin_id);
-    EXPECT_EQ(data->name(), "test plugin");
-    EXPECT_EQ(data->description(), "This is a plugin for testing purposes.");
+    EXPECT_EQ(data->name(), "test plugin A");
+    EXPECT_EQ(data->description(), "This is a A plugin for testing purposes.");
     EXPECT_EQ(data->description_location(), test_plugin_path / "test_plugin_description.json");
-    EXPECT_EQ(data->location(), test_plugin_path / "test-plugin.dll");
+    EXPECT_EQ(data->location(), test_plugin_path / "test-plugin-a.dll");
     EXPECT_THAT(data->depends_on(), testing::IsEmpty());
 
     EXPECT_THAT(manager.known_plugins(), testing::IsEmpty());

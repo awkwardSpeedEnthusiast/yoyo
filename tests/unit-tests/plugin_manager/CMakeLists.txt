@@ -1,5 +1,3 @@
-add_subdirectory(test_plugin)
-
 ifx_add_test(plugin_manager_tests
     MOCK QT
     SOURCES

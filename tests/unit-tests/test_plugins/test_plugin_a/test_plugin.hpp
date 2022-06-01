@@ -1,5 +1,5 @@
 #pragma once
-#include "test-plugin_export.h"
+#include "test-plugin-a_export.h"
 
 #include "yoyo/yoyo_plugin.h"
 

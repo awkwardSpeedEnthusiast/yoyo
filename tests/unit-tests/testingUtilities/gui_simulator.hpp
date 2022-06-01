@@ -4,6 +4,7 @@
 #include <qnamespace.h>
 
 #include <chrono>
+#include <string>
 #include <vector>
 
 class QWidget;
@@ -104,6 +105,20 @@ auto keyClick(QWidget* widget, Qt::Key key, Qt::KeyboardModifiers modifier = {},
 ///              processed; the event is scheduled in \a delay milliseconds.
 ///
 auto keyClicks(QWidget* widget, std::vector<Qt::Key> key, Qt::KeyboardModifiers modifier = {},
+               std::chrono::milliseconds delay = {}) -> void;
+
+///
+/// \brief keyClicks
+///
+/// This function provides a series of keyboard events, where a single key is pressed and released
+/// again. Events are requested to be processed.
+/// \param widget the widget to post the event for,
+/// \param key the list of keys, which are clicked (in this version as string),
+/// \param modifier the list of keyboard modifiers pressed, while the click events are created,
+/// \param delay if the delay is bigger than 0, the function will return before the events have been
+///              processed; the event is scheduled in \a delay milliseconds.
+///
+auto keyClicks(QWidget* widget, std::string keys, Qt::KeyboardModifiers modifier = {},
                std::chrono::milliseconds delay = {}) -> void;
 
 ///

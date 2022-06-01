@@ -1,11 +1,11 @@
-ifx_add_library(test-plugin PLUGIN NOCOVERAGE
+ifx_add_library(test-plugin-b PLUGIN NOCOVERAGE
     HEADERS
         test_plugin.hpp
     SOURCES
         test_plugin.cpp
     DEPENDS
         PUBLIC yoyo::Sdk
-    ALIAS yoyo::Test::TestPlugin
+    ALIAS yoyo::Test::TestPluginB
     PUBLIC_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_BINARY_DIR}
