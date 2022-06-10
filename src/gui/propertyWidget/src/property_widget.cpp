@@ -26,6 +26,7 @@ property_widget::property_widget(QWidget* parent)
   , _p { std::make_unique<impl>() }
 {
   ui->setupUi(this);
+  itemSelected({}, {});
 }
 
 property_widget::~property_widget() = default;
@@ -36,75 +37,77 @@ auto property_widget::itemSelected(std::shared_ptr<node_base> item,
   ui->type_label->setText("");
   _p->_inputs.clear();
 
-  if (item) {
-    ui->type_label->setText(item->type());
-    auto meta = item->metaObject();
+  ui->type_label->setVisible(item != nullptr);
+  ui->label->setVisible(item != nullptr);
 
-    int count = 1;
+  if (!item) {
+    return;
+  }
+  ui->type_label->setText(item->type());
+  auto meta = item->metaObject();
 
-    auto addProperty = [this, docu](auto item, auto property, auto row) {
-      auto it = property::factory.find(property.typeName());
+  int count = 1;
 
-      if (it != property::factory.end()) {
-        try {
-          auto input = it->second(item, property.name(), this);
+  auto addProperty = [this, docu](auto item, auto property, auto row) {
+    auto it = property::factory.find(property.typeName());
 
-          if (!input) {
-            return;
-          }
+    if (it != property::factory.end()) {
+      try {
+        auto input = it->second(item, property.name(), this);
 
-          auto [title, d, tooltip, dd] = docu->property(property.name());
-          auto label = std::make_shared<QLabel>(this);
-          ui->formLayout->setWidget(row, QFormLayout::LabelRole, label.get());
-          ui->formLayout->setWidget(row, QFormLayout::FieldRole, input.get());
-          label->setText(title);
-          label->setAlignment(Qt::AlignBottom | Qt::AlignRight);
-          label->setToolTip(tooltip);
-          input->setToolTip(tooltip);
-
-          connect(input.get(), &property_input::propertyChanged, this, [item](auto p, auto value) {
-            auto exec = [item, value, p]() { item->setProperty(p.c_str(), value); };
-
-            if (auto handler = command::commandhandler()) {
-              auto id = utilities::calculatePath<utilities::path_strategy_t::INDEX>(item);
-              auto root = utilities::get_root(item);
-              auto undo = [id, value = item->property(p.c_str()), p, root]() {
-                auto item =
-                  utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
-                item->setProperty(p.c_str(), value);
-              };
-              auto redo = [id, value, p, root]() {
-                auto item =
-                  utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
-                item->setProperty(p.c_str(), value);
-              };
-              handler->execute({ tr("Set property %1").arg(p.c_str()), exec, undo, redo });
-            } else {
-              exec();
-            }
-          });
-          connect(input.get(), &property_input::visibilityChanged, label.get(), [label](auto v) {
-            label->setVisible(v);
-
-            if (v) {
-              label->show();
-            } else {
-              label->hide();
-            }
-          });
-          _p->_inputs.push_back(label);
-          _p->_inputs.push_back(input);
-        } catch (std::runtime_error&) {
+        if (!input) {
           return;
         }
+
+        auto [title, d, tooltip, dd] = docu->property(property.name());
+        auto label = std::make_shared<QLabel>(this);
+        ui->formLayout->setWidget(row, QFormLayout::LabelRole, label.get());
+        ui->formLayout->setWidget(row, QFormLayout::FieldRole, input.get());
+        label->setText(title);
+        label->setAlignment(Qt::AlignBottom | Qt::AlignRight);
+        label->setToolTip(tooltip);
+        input->setToolTip(tooltip);
+
+        connect(input.get(), &property_input::propertyChanged, this, [item](auto p, auto value) {
+          auto exec = [item, value, p]() { item->setProperty(p.c_str(), value); };
+
+          if (auto handler = command::commandhandler()) {
+            auto id = utilities::calculatePath<utilities::path_strategy_t::INDEX>(item);
+            auto root = utilities::get_root(item);
+            auto undo = [id, value = item->property(p.c_str()), p, root]() {
+              auto item = utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
+              item->setProperty(p.c_str(), value);
+            };
+            auto redo = [id, value, p, root]() {
+              auto item = utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
+              item->setProperty(p.c_str(), value);
+            };
+            handler->execute({ tr("Set property %1").arg(p.c_str()), exec, undo, redo });
+          } else {
+            exec();
+          }
+        });
+        connect(input.get(), &property_input::visibilityChanged, label.get(), [label](auto v) {
+          label->setVisible(v);
+
+          if (v) {
+            label->show();
+          } else {
+            label->hide();
+          }
+        });
+        _p->_inputs.push_back(label);
+        _p->_inputs.push_back(input);
+      } catch (std::runtime_error&) {
+        return;
       }
-    };
-
-    addProperty(item, meta->property(meta->indexOfProperty("name")), count++);
-
-    for (int i = node_base::staticMetaObject.propertyCount(); i < meta->propertyCount(); i++) {
-      addProperty(item, meta->property(i), count++);
     }
+  };
+
+  addProperty(item, meta->property(meta->indexOfProperty("name")), count++);
+
+  for (int i = node_base::staticMetaObject.propertyCount(); i < meta->propertyCount(); i++) {
+    addProperty(item, meta->property(i), count++);
   }
 }
 } // namespace yoyo::gui
