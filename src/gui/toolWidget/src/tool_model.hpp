@@ -27,6 +27,7 @@ public:
   auto data(const QModelIndex& index, int role = Qt::DisplayRole) const -> QVariant override;
   auto mimeData(const QModelIndexList& indexes) const -> QMimeData* override;
   auto mimeTypes() const -> QStringList override;
+  auto flags(QModelIndex const& index) const -> Qt::ItemFlags override;
 
 private:
   std::shared_ptr<node_factory> _gui_factory;

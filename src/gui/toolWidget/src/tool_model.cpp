@@ -68,6 +68,14 @@ auto tool_model::data(const QModelIndex& index, int role) const -> QVariant
   return {};
 }
 
+auto tool_model::flags(QModelIndex const& index) const -> Qt::ItemFlags
+{
+  if (!index.isValid()) {
+    return QAbstractListModel::flags(index);
+  }
+  return Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
+}
+
 auto tool_model::mimeData(const QModelIndexList& indexes) const -> QMimeData*
 {
   if (indexes.count() != 1) {
@@ -81,7 +89,6 @@ auto tool_model::mimeData(const QModelIndexList& indexes) const -> QMimeData*
   auto mimedata = new QMimeData;
   mimedata->setData(mimetype_gui_new, QByteArray::fromStdString(boost::uuids::to_string(
                                         std::get<0>(_cached_list[indexes[0].row()]))));
-
   return mimedata;
 }
 
