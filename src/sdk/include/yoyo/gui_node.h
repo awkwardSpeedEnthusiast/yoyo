@@ -32,8 +32,8 @@ class YOYO_SDK_SHARED_EXPORT gui_node : public node_base
   /// this node. If this property is not to be modified by the user during edit process, set the
   /// visibility flag to false.
   ///
-  Q_PROPERTY(properties::invisible_layout_direction_t layoutDirection READ layoutDirection WRITE
-               setLayoutDirection NOTIFY layoutDirectionChanged)
+  Q_PROPERTY(yoyo::properties::invisible_layout_direction_t layoutDirection READ layoutDirection
+               WRITE setLayoutDirection NOTIFY layoutDirectionChanged)
 
   ///
   /// \brief x-position
@@ -138,7 +138,7 @@ public:
   /// \brief layout direction
   /// \return the layout direction property
   ///
-  auto layoutDirection() const -> properties::invisible_layout_direction_t;
+  auto layoutDirection() const -> yoyo::properties::invisible_layout_direction_t;
 
   ///
   /// \brief set layout direction
@@ -147,7 +147,7 @@ public:
   /// signal on actual changes.
   /// \param ld the new layout direction value.
   ///
-  auto setLayoutDirection(properties::invisible_layout_direction_t const& ld) -> void;
+  auto setLayoutDirection(yoyo::properties::invisible_layout_direction_t const& ld) -> void;
 
   ///
   /// \brief x-position
@@ -213,7 +213,7 @@ public:
   /// \brief enabled
   /// \return true if the widget is in enabled state.
   ///
-  auto enabled() const -> properties::connected_boolean_t;
+  auto enabled() const -> yoyo::properties::connected_boolean_t;
 
   ///
   /// \brief set enabled
@@ -222,7 +222,7 @@ public:
   /// signal on change.
   /// \param e the new enabled value.
   ///
-  auto setEnabled(properties::connected_boolean_t e) -> void;
+  auto setEnabled(yoyo::properties::connected_boolean_t e) -> void;
 
   ///
   /// \brief visible
@@ -290,7 +290,7 @@ Q_SIGNALS:
   /// This signal is emitted, when the layout direction property changed.
   /// \param ld the new layout direction.
   ///
-  void layoutDirectionChanged(properties::invisible_layout_direction_t ld);
+  void layoutDirectionChanged(yoyo::properties::invisible_layout_direction_t ld);
 
   ///
   /// \brief style sheet changed signal
@@ -344,7 +344,7 @@ Q_SIGNALS:
   /// This signal is emitted, when the enabled property of the node changed.
   /// \param e the new enablement value.
   ///
-  void enabledChanged(properties::connected_boolean_t e);
+  void enabledChanged(yoyo::properties::connected_boolean_t e);
 
   ///
   /// \brief visible changed signal

@@ -86,7 +86,7 @@ public:
   /// value notifier are allowed. If write is allowed, calls to setValue are allowed.
   /// \return the access type of the node.
   ///
-  auto access() const -> types::access_t;
+  auto access() const -> yoyo::types::access_t;
 
   ///
   /// \brief set access
@@ -96,7 +96,7 @@ public:
   /// value notifier are allowed. If write is allowed, calls to setValue are allowed.
   /// \param acc the new access value for the node.
   ///
-  auto setAccess(types::access_t acc) -> void;
+  auto setAccess(yoyo::types::access_t acc) -> void;
 
   ///
   /// \brief title
@@ -176,13 +176,13 @@ Q_SIGNALS:
   /// This signal is emitted, if the access type of the node changed.
   /// \param acc the new access type of the data node.
   ///
-  void accessChanged(types::access_t acc);
+  void accessChanged(yoyo::types::access_t acc);
 
   ///
   /// \brief on value change script changed signal
   /// \param s the signal to invoke, when the value of this data node changes.
   ///
-  void onChangeChanged(properties::script_t s);
+  void onChangeChanged(yoyo::properties::script_t s);
 
 protected:
   ///

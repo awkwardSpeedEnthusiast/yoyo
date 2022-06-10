@@ -231,6 +231,9 @@ auto registerAllPropertyTypes() -> void
 
 auto value_equals(QVariant const& lhs, QVariant const& rhs) -> bool
 {
+  if (!lhs.isValid() || !rhs.isValid()) {
+    return false;
+  }
   if (std::string(lhs.typeName()) != rhs.typeName()) {
     return false;
   }
