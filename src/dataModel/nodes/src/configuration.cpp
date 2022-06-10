@@ -1,6 +1,7 @@
 #include "configuration.hpp"
 
 #include "data_root.hpp"
+#include "factory_provider.hpp"
 #include "gui_root.hpp"
 
 #include <boost/uuid/string_generator.hpp>
@@ -8,8 +9,7 @@
 
 namespace yoyo
 {
-boost::uuids::uuid const configuration::_typeId =
-  boost::uuids::string_generator {}("ced35bdc-c7f6-4468-9b61-57fefe022e9d");
+boost::uuids::uuid const configuration::_typeId = fundamental::configuration_id;
 
 configuration::configuration(boost::uuids::uuid identifier)
   : node_base("Configuration", identifier)

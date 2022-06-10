@@ -1,10 +1,9 @@
 #include "gui_root.hpp"
+#include "factory_provider.hpp"
 
 namespace yoyo
 {
-boost::uuids::uuid const gui_root::_typeId =
-  boost::uuids::uuid { 0x38, 0x81, 0xcf, 0xaa, 0x6f, 0x62, 0x47, 0x30,
-                       0x8c, 0xd,  0x41, 0x6c, 0x9b, 0xb0, 0x11, 0xbc };
+boost::uuids::uuid const gui_root::_typeId = fundamental::gui_root_id;
 
 auto gui_root::typeId() -> boost::uuids::uuid
 {

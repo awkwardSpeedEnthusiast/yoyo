@@ -1,10 +1,11 @@
 #include "data_root.hpp"
+#include "factory_provider.hpp"
 
 #include "yoyo/data_node.h"
 
 namespace yoyo
 {
-boost::uuids::uuid const data_root::_typeId = data_root_id;
+boost::uuids::uuid const data_root::_typeId = fundamental::data_root_id;
 
 data_root::data_root(boost::uuids::uuid identifier)
   : node_base("Signals", identifier)

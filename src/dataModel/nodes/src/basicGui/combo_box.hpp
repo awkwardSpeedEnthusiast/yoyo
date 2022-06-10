@@ -40,8 +40,8 @@ public:
   auto connection() const -> properties::connection_t;
   auto setConnection(properties::connection_t s) -> void;
 
-  auto enumValues() const -> properties::enum_t;
-  auto setEnumValues(properties::enum_t const& values) -> void;
+  auto enumValues() const -> yoyo::properties::enum_t;
+  auto setEnumValues(yoyo::properties::enum_t const& values) -> void;
 
   static auto typeId() -> boost::uuids::uuid;
 

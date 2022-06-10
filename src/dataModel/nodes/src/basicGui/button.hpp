@@ -30,14 +30,14 @@ public:
   auto title() const -> QString;
   auto setTitle(QString const& t) -> void;
 
-  auto onClick() const -> properties::script_t;
-  auto setOnClick(properties::script_t s) -> void;
+  auto onClick() const -> yoyo::properties::script_t;
+  auto setOnClick(yoyo::properties::script_t s) -> void;
 
   static auto typeId() -> boost::uuids::uuid;
 
 Q_SIGNALS:
   void titleChanged(QString t);
-  void onClickChanged(properties::script_t s);
+  void onClickChanged(yoyo::properties::script_t s);
 
 private:
   static boost::uuids::uuid const _typeId;

@@ -31,14 +31,14 @@ public:
   auto title() const -> yoyo::properties::connected_string_t;
   auto setTitle(yoyo::properties::connected_string_t const& t) -> void;
 
-  auto connection() const -> properties::connection_t;
-  auto setConnection(properties::connection_t s) -> void;
+  auto connection() const -> yoyo::properties::connection_t;
+  auto setConnection(yoyo::properties::connection_t s) -> void;
 
   static auto typeId() -> boost::uuids::uuid;
 
 Q_SIGNALS:
   void titleChanged(yoyo::properties::connected_string_t t);
-  void connectionChanged(properties::connection_t s);
+  void connectionChanged(yoyo::properties::connection_t s);
 
 private:
   static boost::uuids::uuid const _typeId;

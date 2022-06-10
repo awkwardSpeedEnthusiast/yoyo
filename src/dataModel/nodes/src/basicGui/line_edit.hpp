@@ -36,8 +36,8 @@ public:
   auto unit() const -> yoyo::properties::connected_string_t;
   auto setUnit(yoyo::properties::connected_string_t const& t) -> void;
 
-  auto connection() const -> properties::connection_t;
-  auto setConnection(properties::connection_t s) -> void;
+  auto connection() const -> yoyo::properties::connection_t;
+  auto setConnection(yoyo::properties::connection_t s) -> void;
 
   auto captureKey() const -> bool;
   auto setCaptureKey(bool v) -> void;
@@ -46,7 +46,7 @@ public:
 Q_SIGNALS:
   void titleChanged(yoyo::properties::connected_string_t t);
   void unitChanged(yoyo::properties::connected_string_t t);
-  void connectionChanged(properties::connection_t s);
+  void connectionChanged(yoyo::properties::connection_t s);
   void captureKeyChanged(bool capture);
 
 private:
