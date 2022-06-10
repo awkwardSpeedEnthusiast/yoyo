@@ -88,4 +88,31 @@ auto yoyo_main_window::history_changed(std::vector<QString> history) -> void
     menu->addAction(file, this, [file, this]() { Q_EMIT this->recentFile_requested(file); });
   }
 }
+
+auto yoyo_main_window::store_state(QSettings& settings) -> void
+{
+  settings.setValue("main_window/geometry", saveGeometry());
+  settings.setValue("main_window/windowState", saveState());
+  settings.setValue("main_window/editMode", _ui->actionEdit_mode->isChecked());
+  settings.setValue("main_window/treeWidgetVisible", _ui->actionBrowser_Box->isChecked());
+  settings.setValue("main_window/toolWidgetVisible", _ui->actionTool_Box->isChecked());
+  settings.setValue("main_window/propertyWidgetVisible", _ui->actionProperty_Box->isChecked());
+  settings.setValue("main_window/logWidgetVisible", _ui->actionLog_Box->isChecked());
+  settings.setValue("main_window/helpWidgetVisible", _ui->actionHelp->isChecked());
+}
+
+auto yoyo_main_window::restore_state(QSettings& settings) -> void
+{
+  restoreGeometry(settings.value("main_window/geometry").toByteArray());
+  restoreState(settings.value("main_window/windowState").toByteArray());
+  _ui->actionEdit_mode->setChecked(settings.value("main_window/editMode", false).toBool());
+  _ui->actionBrowser_Box->setChecked(
+    settings.value("main_window/treeWidgetVisible", false).toBool());
+  _ui->actionTool_Box->setChecked(settings.value("main_window/toolWidgetVisible", false).toBool());
+  _ui->actionProperty_Box->setChecked(
+    settings.value("main_window/propertyWidgetVisible", false).toBool());
+  _ui->actionLog_Box->setChecked(settings.value("main_window/logWidgetVisible", false).toBool());
+  _ui->actionHelp->setChecked(settings.value("main_window/helpWidgetVisible", false).toBool());
+}
+
 } // namespace yoyo

@@ -4,6 +4,7 @@
 
 #include <memory>
 
+class QSettings;
 namespace Ui
 {
 class yoyo_main_window;
@@ -25,6 +26,10 @@ public:
   auto set_central_widget(QWidget* widget) -> void;
 
   auto history_changed(std::vector<QString> history) -> void;
+
+  auto store_state(QSettings& settings) -> void;
+  auto restore_state(QSettings& settings) -> void;
+
 Q_SIGNALS:
   void newFile_requested();
   void openFile_requested();

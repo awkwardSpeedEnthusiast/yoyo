@@ -62,6 +62,8 @@ public:
   std::unique_ptr<gui::property_widget> _properties;
   std::unique_ptr<gui::plugin_widget> _plugins;
   std::unique_ptr<file_management> _file_management;
+
+  bool _editmode { false };
 };
 
 yoyo_application::impl::impl()
@@ -102,9 +104,8 @@ auto yoyo_application::impl::read_settings() -> void
 {
   QSettings settings { QSettings::IniFormat, QSettings::UserScope, QApplication::organizationName(),
                        QApplication::applicationName() };
-  _main_window->restoreGeometry(settings.value("main_window/geometry").toByteArray());
-  _main_window->restoreState(settings.value("main_window/windowState").toByteArray());
-  set_edit_mode(settings.value("main_window/editMode").toBool());
+  _main_window->restore_state(settings);
+  set_edit_mode(_main_window->edit_mode());
 
   if (!command::commandhandler()) {
     command::initialize_commandhandler(
@@ -116,13 +117,12 @@ auto yoyo_application::impl::store_settings() -> void
 {
   QSettings settings { QSettings::IniFormat, QSettings::UserScope, QApplication::organizationName(),
                        QApplication::applicationName() };
-  settings.setValue("main_window/geometry", _main_window->saveGeometry());
-  settings.setValue("main_window/windowState", _main_window->saveState());
-  settings.setValue("main_window/editMode", _main_window->edit_mode());
+  _main_window->store_state(settings);
 }
 
 auto yoyo_application::impl::set_edit_mode(bool active) -> void
 {
+  _editmode = active;
   if (!_configuration || _configuration->childCount() < 2) {
     return;
   }
@@ -157,6 +157,9 @@ auto yoyo_application::impl::add_configuration(std::shared_ptr<node_base> root) 
     _main_window->set_central_widget(w);
     _connectivity_manager = std::make_shared<connectivity_manager>(_configuration);
     _tree->setConfiguration(_configuration);
+    if (auto guiroot = std::dynamic_pointer_cast<gui_node>(_configuration->childAt(1))) {
+      guiroot->setEditMode(_editmode);
+    }
   }
 }
 
@@ -247,7 +250,10 @@ auto yoyo_application::setup() -> void
   connect(_p->_main_window.get(), &yoyo_main_window::log_requested, this, [](bool /*active*/) {});
   connect(_p->_main_window.get(), &yoyo_main_window::help_requested, this, [](bool /*active*/) {});
 
-  connect(this, &QCoreApplication::aboutToQuit, this, [this]() { _p->close_configuration(); });
+  connect(this, &QCoreApplication::aboutToQuit, this, [this]() {
+    _p->store_settings();
+    _p->close_configuration();
+  });
 
   connect(_p->_file_management.get(), &file_management::historyChanged, _p->_main_window.get(),
           &yoyo_main_window::history_changed);
