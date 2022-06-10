@@ -383,18 +383,20 @@ auto tree_model::setRootNode(std::shared_ptr<node_base> root) -> void
   }
 
   _root_node = root;
-  connect(_root_node.get(), &node_base::treeChanged, this,
-          [this](auto changed_node, auto, auto mode) {
-            if (mode == node_base::ChangeOperation::REMOVED) {
-              beginResetModel();
-              endResetModel();
-              return;
-            }
+  if (_root_node) {
+    connect(_root_node.get(), &node_base::treeChanged, this,
+            [this](auto changed_node, auto, auto mode) {
+              if (mode == node_base::ChangeOperation::REMOVED) {
+                beginResetModel();
+                endResetModel();
+                return;
+              }
 
-            auto node = changed_node.lock();
-            dataChanged(createIndex(0, 0, node.get()),
-                        createIndex(node->childCount() + 1, 4, node.get()));
-          });
+              auto node = changed_node.lock();
+              dataChanged(createIndex(0, 0, node.get()),
+                          createIndex(node->childCount() + 1, 4, node.get()));
+            });
+  }
   endResetModel();
 }
 
