@@ -201,4 +201,5 @@ private:
 auto YOYO_IO_SHARED_EXPORT manager() -> std::weak_ptr<io_manager>;
 auto YOYO_IO_SHARED_EXPORT init_manager(std::shared_ptr<io_manager> manager) -> void;
 auto YOYO_IO_SHARED_EXPORT deinit_manager() -> void;
+auto YOYO_IO_SHARED_EXPORT add_default() -> void;
 } // namespace yoyo::io

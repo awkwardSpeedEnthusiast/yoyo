@@ -1,4 +1,6 @@
 #include "io_manager.h"
+#include "json/node_deserializer_json.hpp"
+#include "json/node_serializer_json.hpp"
 
 #include "yoyo/node_factory.h"
 
@@ -28,6 +30,20 @@ auto init_manager(std::shared_ptr<io_manager> manager) -> void
 auto deinit_manager() -> void
 {
   ::global_io_manager.reset();
+}
+
+auto add_default() -> void
+{
+  io_manager::install_serializer({ 0x1c, 0xbe, 0x13, 0xed, 0xa1, 0x6f, 0x4d, 0x58, 0xb0, 0xae, 0x27,
+                                   0x1c, 0xf0, 0x0b, 0x17, 0x55 },
+                                 "Json", "Json file format", "*.json", [](auto const& factories) {
+                                   return std::make_shared<node_serializer_json>(factories);
+                                 });
+  io_manager::install_deserializer({ 0x1c, 0xbe, 0x13, 0xed, 0xa1, 0x6f, 0x4d, 0x58, 0xb0, 0xae,
+                                     0x27, 0x1c, 0xf0, 0x0b, 0x17, 0x55 },
+                                   "Json", "Json file format", "*.json", [](auto const& factories) {
+                                     return std::make_shared<node_deserializer_json>(factories);
+                                   });
 }
 
 class io_manager::impl
