@@ -64,12 +64,8 @@ public:
 
   auto createMimeData(boost::uuids::uuid id) -> QMimeData*
   {
-    QByteArray d;
-    QDataStream dataStream(&d, QIODevice::WriteOnly);
-
-    dataStream << QString::fromStdString(boost::uuids::to_string(id));
     auto data = new QMimeData;
-    data->setData(mimetype_gui_new, d);
+    data->setData(mimetype_gui_new, QByteArray::fromStdString(boost::uuids::to_string(id)));
     return data;
   }
 

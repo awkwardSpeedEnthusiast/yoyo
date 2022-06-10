@@ -10,8 +10,6 @@
 #include <QMimeData>
 #include <QMouseEvent>
 
-//#include <QDebug>
-
 #include <boost/uuid/string_generator.hpp>
 
 #include <functional>
@@ -299,9 +297,7 @@ auto gui_node_widget::checkDragEvent_other(QMimeData const* /*data*/, Qt::MouseB
 
 auto gui_node_widget::dragEnterEvent(QDragEnterEvent* event) -> void
 {
-  if (!((fromWidget(childAt(event->pos())) == this)
-        || ((childAt(event->pos()) == nullptr) && (children().count() == 0)))) {
-    event->ignore();
+  if (!((fromWidget(childAt(event->pos())) == this) || ((childAt(event->pos()) == nullptr)))) {
     return;
   }
 
@@ -327,9 +323,7 @@ auto gui_node_widget::dragEnterEvent(QDragEnterEvent* event) -> void
 
 auto gui_node_widget::dragMoveEvent(QDragMoveEvent* event) -> void
 {
-  if (!((fromWidget(childAt(event->pos())) == this)
-        || ((childAt(event->pos()) == nullptr) && (children().count() == 0)))) {
-    event->ignore();
+  if (!((fromWidget(childAt(event->pos())) == this) || ((childAt(event->pos()) == nullptr)))) {
     return;
   }
 
@@ -355,9 +349,7 @@ auto gui_node_widget::dragMoveEvent(QDragMoveEvent* event) -> void
 
 auto gui_node_widget::dropEvent(QDropEvent* event) -> void
 {
-  if (!((fromWidget(childAt(event->pos())) == this)
-        || ((childAt(event->pos()) == nullptr) && (children().count() == 0)))) {
-    event->ignore();
+  if (!((fromWidget(childAt(event->pos())) == this) || ((childAt(event->pos()) == nullptr)))) {
     return;
   }
 
@@ -387,10 +379,7 @@ auto gui_node_widget::dropEvent(QDropEvent* event) -> void
   if (event->mimeData()->hasFormat(mimetype_gui_new)
       && checkDragEvent_new(event->mimeData(), event->mouseButtons())) {
     auto data = event->mimeData()->data(mimetype_gui_new);
-    QDataStream dataStream(&data, QIODevice::ReadOnly);
-    QString id_number;
-    dataStream >> id_number;
-    auto id = boost::uuids::string_generator {}(id_number.toStdString());
+    auto id = boost::uuids::string_generator {}(data.toStdString());
 
     if (event->mouseButtons() == Qt::RightButton) {
       Q_EMIT pp->exchangeRequested(parent, id);
