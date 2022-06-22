@@ -6,6 +6,7 @@
 #include <QLayout>
 #include <QMetaObject>
 #include <QMetaProperty>
+#include <QTimer>
 
 #include <string>
 
@@ -46,9 +47,12 @@ layout_input::layout_input(std::shared_ptr<node_base> node, std::string property
         Q_EMIT propertyChanged(propertyName, QVariant::fromValue(_invisible_buffer));
       }
     };
-    onPropertyChanged(
-      node->property(propertyName.c_str()).value<properties::invisible_layout_direction_t>());
-    Q_EMIT visibilityChanged(_invisible_buffer._visible);
+
+    QTimer::singleShot(1, this, [this, node, propertyName]() {
+      onPropertyChanged(
+        node->property(propertyName.c_str()).value<properties::invisible_layout_direction_t>());
+      Q_EMIT visibilityChanged(_invisible_buffer._visible);
+    });
   }
 
   connect(node.get(), prop.notifySignal(), this, staticMetaObject.method(method_index));

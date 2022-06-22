@@ -61,9 +61,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
                 .property("prop8", "Property 8", "", "p8-tooltip", QVariant {})
                 .property("prop9", "Property 9", "", "p9-tooltip", QVariant {})
                 .build();
-  ASSERT_EQ(_widget->children().size(), 5);
-  auto content = _widget->children()[4];
-  EXPECT_EQ(content->children().size(), 3);
+  EXPECT_EQ(child_count(), 3);
 
   EXPECT_CALL(*object, prop1())
     .WillOnce(Return(yoyo::properties::limited_int8_t { 42, -100, 100 }));
@@ -85,27 +83,28 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
 
   _widget->itemSelected(object, docu);
 
-  EXPECT_EQ(content->children().size(), 5 + 2 * 9);
+  EXPECT_EQ(child_count(), 5 + 2 * 9);
   auto item_count = 1;
   // first row: type
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto label = dynamic_cast<QLabel*>(get_child(item_count++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "Type");
-    label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    label = dynamic_cast<QLabel*>(get_child(item_count++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "number_mock");
   }
   // second row: name
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::qstring_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -122,14 +121,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop1: limited_int8_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop1")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop1")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toInt(), 42);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -148,14 +148,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop2: limited_int16_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop2")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop2")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toInt(), -183);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -177,14 +178,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop3: limited_int32_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop3")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop3")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "50.000");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -206,14 +208,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop4: limited_int64_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop4")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop4")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toInt(), 20);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -235,14 +238,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop5: limited_uint8_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop5")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop5")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toInt(), 5);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -264,14 +268,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop6: limited_uint16_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop6")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop6")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "200");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -293,14 +298,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop7: limited_uint32_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop7")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop7")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "70");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -322,14 +328,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop8: limited_uint64_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop8")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop8")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "2.000");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -351,14 +358,15 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
   }
   // prop9: limited_float_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop9")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop9")).toStdString());
-    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
-              "yoyo::gui::number_input"s);
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::number_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), QLocale::system().toString(0.7).toStdString());
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -381,6 +389,7 @@ TEST_F(PropertyWidgetTest, limitedNumberProperty)
     QTest::keyClick(input, Qt::Key_Return);
   }
   testing::Mock::VerifyAndClear(object.get());
+  testing::Mock::AllowLeak(object.get());
 }
 
 #include "PropertyWidgetLimitedNumberTests.moc"

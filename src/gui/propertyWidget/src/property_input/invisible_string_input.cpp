@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QMetaObject>
 #include <QMetaProperty>
+#include <QTimer>
 
 namespace yoyo::gui
 {
@@ -25,7 +26,9 @@ invisible_string_input::invisible_string_input(std::shared_ptr<node_base> node,
     Q_EMIT propertyChanged(propertyName, QVariant::fromValue(_buffer));
   });
 
-  onPropertyChanged(node->property(propertyName.c_str()).value<properties::invisible_string_t>());
+  QTimer::singleShot(1, this, [this, node, propertyName]() {
+    onPropertyChanged(node->property(propertyName.c_str()).value<properties::invisible_string_t>());
+  });
 }
 
 invisible_string_input::~invisible_string_input() = default;

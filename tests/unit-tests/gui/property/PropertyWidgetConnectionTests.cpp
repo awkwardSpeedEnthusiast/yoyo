@@ -47,9 +47,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
                 .property("prop2", "Property 2", "", "p2-tooltip", QVariant {})
                 .property("prop3", "Property 3", "", "p3-tooltip", QVariant {})
                 .build();
-  ASSERT_EQ(_widget->children().size(), 5);
-  auto content = _widget->children()[4];
-  EXPECT_EQ(content->children().size(), 3);
+  EXPECT_EQ(child_count(), 3);
 
   yoyo::properties::connection_t prop1 { {}, {}, {}, "", "", "aDataObject" };
   EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
@@ -61,28 +59,29 @@ TEST_F(PropertyWidgetTest, connectionProperty)
 
   _widget->itemSelected(object, docu);
 
-  EXPECT_EQ(content->children().size(), 5 + 3 * 2);
-  int item_index = 1;
+  EXPECT_EQ(child_count(), 5 + 3 * 2);
+  int item_count = 1;
 
   // first row: type
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto label = dynamic_cast<QLabel*>(get_child(item_count++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "Type");
-    label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    label = dynamic_cast<QLabel*>(get_child(item_count++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "connection_mock");
   }
   // second row: name
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::qstring_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -99,16 +98,17 @@ TEST_F(PropertyWidgetTest, connectionProperty)
   }
   // prop1: connecton_t
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop1")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop1")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::connection_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 7);
-    auto input_in = dynamic_cast<QLineEdit*>(content->children()[item_index]->children()[2]);
-    auto input_out = dynamic_cast<QLineEdit*>(content->children()[item_index]->children()[4]);
-    auto input_auto = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[6]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::connection_input"s);
+    ASSERT_EQ(c1->children().size(), 7);
+    auto input_in = dynamic_cast<QLineEdit*>(c1->children()[2]);
+    auto input_out = dynamic_cast<QLineEdit*>(c1->children()[4]);
+    auto input_auto = dynamic_cast<QLineEdit*>(c1->children()[6]);
     ASSERT_NE(input_in, nullptr);
     ASSERT_NE(input_out, nullptr);
     ASSERT_NE(input_auto, nullptr);
@@ -153,14 +153,15 @@ TEST_F(PropertyWidgetTest, connectionProperty)
   }
   // prop2: in_connection
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop2")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop2")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::connection_in_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::connection_in_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "invisible");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -179,14 +180,15 @@ TEST_F(PropertyWidgetTest, connectionProperty)
   }
   // prop3: out_connection
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_count++);
+    auto c2 = get_child(item_count++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop3")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop3")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::connection_out_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::connection_out_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "ownValue");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -208,6 +210,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     EXPECT_EQ(input->text().toStdString(), "changed again prop3");
   }
   testing::Mock::VerifyAndClear(object.get());
+  testing::Mock::AllowLeak(object.get());
 }
 
 #include "PropertyWidgetConnectionTests.moc"

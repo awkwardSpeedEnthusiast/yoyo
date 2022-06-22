@@ -12,8 +12,11 @@ class PropertyWidgetTest : public yoyo::test::guiFixture
 public:
   auto SetUp() -> void override;
   auto createWidget() -> void;
+  auto get_child(size_t index) -> QWidget*;
+  auto child_count() -> size_t;
 
   std::shared_ptr<yoyo::gui::property_widget> _widget;
+  QWidget* _content { nullptr };
 };
 
 class mock_node : public yoyo::node_base

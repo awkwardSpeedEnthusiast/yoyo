@@ -62,9 +62,7 @@ TEST_F(PropertyWidgetTest, stringProperty)
                 .property("prop4", "Property 4", "", "p4-tooltip", QVariant {})
                 .property("prop5", "Property 5", "", "p5-tooltip", QVariant {})
                 .build();
-  ASSERT_EQ(_widget->children().size(), 5);
-  auto content = _widget->children()[4];
-  EXPECT_EQ(content->children().size(), 3);
+  EXPECT_EQ(child_count(), 3);
 
   EXPECT_CALL(*object, prop1()).WillOnce(Return("MyProp1"));
   yoyo::properties::invisible_string_t prop2 { "invisible", false };
@@ -78,27 +76,30 @@ TEST_F(PropertyWidgetTest, stringProperty)
   object->setName("mockObject1");
 
   _widget->itemSelected(object, docu);
+  QApplication::processEvents();
 
-  EXPECT_EQ(content->children().size(), 5 + 5 * 2);
+  EXPECT_EQ(child_count(), 5 + 5 * 2);
 
   // first row: type
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[1]);
+    auto label = dynamic_cast<QLabel*>(get_child(1));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "Type");
-    label = dynamic_cast<QLabel*>(content->children()[2]);
+    label = dynamic_cast<QLabel*>(get_child(2));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "string_mock");
   }
   // second row: name
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[3]);
+    auto c1 = get_child(3);
+    auto c2 = get_child(4);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
-    ASSERT_EQ(content->children()[4]->metaObject()->className(), "yoyo::gui::qstring_input"s);
-    ASSERT_EQ(content->children()[4]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[4]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -115,13 +116,15 @@ TEST_F(PropertyWidgetTest, stringProperty)
   }
   // third row: prop1
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[5]);
+    auto c1 = get_child(5);
+    auto c2 = get_child(6);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop1")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop1")).toStdString());
-    ASSERT_EQ(content->children()[6]->metaObject()->className(), "yoyo::gui::qstring_input"s);
-    ASSERT_EQ(content->children()[6]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[6]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "MyProp1");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -138,14 +141,15 @@ TEST_F(PropertyWidgetTest, stringProperty)
   }
   // fourth row: prop2
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[7]);
+    auto c1 = get_child(7);
+    auto c2 = get_child(8);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop2")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop2")).toStdString());
-    ASSERT_EQ(content->children()[8]->metaObject()->className(),
-              "yoyo::gui::invisible_string_input"s);
-    ASSERT_EQ(content->children()[8]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[8]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::invisible_string_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "invisible");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -171,14 +175,15 @@ TEST_F(PropertyWidgetTest, stringProperty)
   }
   // fifth row: prop3
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[9]);
+    auto c1 = get_child(9);
+    auto c2 = get_child(10);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop3")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop3")).toStdString());
-    ASSERT_EQ(content->children()[10]->metaObject()->className(),
-              "yoyo::gui::connected_string_input"s);
-    ASSERT_EQ(content->children()[10]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[10]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::connected_string_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "ownValue");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -201,14 +206,15 @@ TEST_F(PropertyWidgetTest, stringProperty)
   }
   // sixth row: prop4
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[11]);
+    auto c1 = get_child(11);
+    auto c2 = get_child(12);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop4")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop4")).toStdString());
-    ASSERT_EQ(content->children()[12]->metaObject()->className(),
-              "yoyo::gui::pattern_string_input"s);
-    ASSERT_EQ(content->children()[12]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[12]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::pattern_string_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "currentValue");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -231,14 +237,16 @@ TEST_F(PropertyWidgetTest, stringProperty)
   }
   // seventh row: prop5
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[13]);
+    auto c1 = get_child(13);
+    auto c2 = get_child(14);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop5")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop5")).toStdString());
-    ASSERT_EQ(content->children()[14]->metaObject()->className(), "yoyo::gui::text_input"s);
-    ASSERT_EQ(content->children()[14]->children().size(), 3);
-    auto input = dynamic_cast<QTextEdit*>(content->children()[14]->children()[1]);
-    auto save = dynamic_cast<QPushButton*>(content->children()[14]->children()[2]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::text_input"s);
+    ASSERT_EQ(c1->children().size(), 3);
+    auto input = dynamic_cast<QTextEdit*>(c1->children()[1]);
+    auto save = dynamic_cast<QPushButton*>(c1->children()[2]);
     ASSERT_NE(input, nullptr);
     ASSERT_NE(save, nullptr);
     EXPECT_EQ(input->toPlainText().toStdString(), "a\nlonger\ntext");

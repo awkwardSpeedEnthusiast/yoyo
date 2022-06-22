@@ -34,7 +34,6 @@ TEST_F(PropertyWidgetTest, undo)
                 .property("name", "Name", "", "Name-tooltip", QVariant {})
                 .property("prop1", "Property 1", "", "p1-tooltip", QVariant {})
                 .build();
-  auto content = _widget->children()[4];
   ON_CALL(*object, set_prop1(_)).WillByDefault(Invoke([object](auto v) {
     object->prop1Changed(v);
   }));
@@ -46,13 +45,14 @@ TEST_F(PropertyWidgetTest, undo)
   auto handler = yoyo::command::commandhandler();
   ASSERT_NE(handler, nullptr);
 
-  EXPECT_EQ(content->children().size(), 5 + 2 * 1);
+  EXPECT_EQ(child_count(), 5 + 2 * 1);
   auto item_count = 3;
   // undo name
   {
+    auto c1 = get_child(item_count++);
     item_count++;
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
 
@@ -83,9 +83,10 @@ TEST_F(PropertyWidgetTest, undo)
   handler->clearStack();
   // undo prop1
   {
+    auto c1 = get_child(item_count++);
     item_count++;
-    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
 
     EXPECT_FALSE(handler->hasCommandToUndo());
@@ -115,6 +116,7 @@ TEST_F(PropertyWidgetTest, undo)
     EXPECT_EQ(handler->nextUndo().toStdString(), "Set property prop1");
   }
   EXPECT_TRUE(testing::Mock::VerifyAndClear(object.get()));
+  testing::Mock::AllowLeak(object.get());
 }
 
 #include "PropertyWidgetUndoTests.moc"

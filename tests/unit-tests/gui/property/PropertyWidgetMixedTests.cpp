@@ -54,9 +54,7 @@ TEST_F(PropertyWidgetTest, mixedProperty)
                 .property("prop5", "Property 5", "", "p5-tooltip", QVariant {})
                 .property("prop6", "Property 6", "", "p6-tooltip", QVariant {})
                 .build();
-  ASSERT_EQ(_widget->children().size(), 5);
-  auto content = _widget->children()[4];
-  EXPECT_EQ(content->children().size(), 3);
+  EXPECT_EQ(child_count(), 3);
 
   EXPECT_CALL(*object, prop1()).WillOnce(Return(true));
   EXPECT_CALL(*object, prop2()).WillOnce(Return(yoyo::types::access_t::NONE));
@@ -74,29 +72,31 @@ TEST_F(PropertyWidgetTest, mixedProperty)
 
   _widget->itemSelected(object, docu);
   _widget->show();
+  QApplication::processEvents();
 
-  EXPECT_EQ(content->children().size(), 5 + 6 * 2);
+  EXPECT_EQ(child_count(), 5 + 6 * 2);
   int item_index = 1;
 
   // first row: type
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto label = dynamic_cast<QLabel*>(get_child(item_index++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "Type");
-    label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    label = dynamic_cast<QLabel*>(get_child(item_index++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "mixed_mock");
   }
   // second row: name
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::qstring_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -113,14 +113,16 @@ TEST_F(PropertyWidgetTest, mixedProperty)
   }
   // prop1: bool
   {
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    ASSERT_GT(child_count(), item_index);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop1")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop1")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(), "yoyo::gui::bool_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QCheckBox*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::bool_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QCheckBox*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->isChecked(), true);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -141,15 +143,16 @@ TEST_F(PropertyWidgetTest, mixedProperty)
   }
   // prop2: access_t
   {
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop2")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop2")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::access_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QComboBox*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::access_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QComboBox*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->currentIndex(), 0);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -168,15 +171,16 @@ TEST_F(PropertyWidgetTest, mixedProperty)
   }
   // prop3: layout_direction_t
   {
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop3")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop3")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::layout_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QComboBox*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::layout_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QComboBox*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->currentIndex(), 1);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -191,15 +195,16 @@ TEST_F(PropertyWidgetTest, mixedProperty)
   }
   // prop4: invisible_layout_direction_t
   {
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop4")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop4")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::layout_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QComboBox*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::layout_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QComboBox*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->currentIndex(), 0);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -228,15 +233,16 @@ TEST_F(PropertyWidgetTest, mixedProperty)
   }
   // prop5: connected_boolean_t
   {
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop5")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop5")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::connected_boolean_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QComboBox*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::connected_boolean_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QComboBox*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->currentIndex(), 0);
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -257,18 +263,19 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     ON_CALL(*object, set_prop6(_)).WillByDefault(Invoke([object](auto v) {
       Q_EMIT object->prop6Changed(v);
     }));
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop6")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop6")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::script_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 5);
-    auto input_type = dynamic_cast<QComboBox*>(content->children()[item_index]->children()[1]);
-    auto input_file = dynamic_cast<QLineEdit*>(content->children()[item_index]->children()[2]);
-    auto input_text = dynamic_cast<QTextEdit*>(content->children()[item_index]->children()[3]);
-    auto input_save = dynamic_cast<QPushButton*>(content->children()[item_index++]->children()[4]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::script_input"s);
+    ASSERT_EQ(c1->children().size(), 5);
+    auto input_type = dynamic_cast<QComboBox*>(c1->children()[1]);
+    auto input_file = dynamic_cast<QLineEdit*>(c1->children()[2]);
+    auto input_text = dynamic_cast<QTextEdit*>(c1->children()[3]);
+    auto input_save = dynamic_cast<QPushButton*>(c1->children()[4]);
     ASSERT_NE(input_type, nullptr);
     ASSERT_NE(input_file, nullptr);
     ASSERT_NE(input_text, nullptr);
@@ -315,5 +322,6 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     QTest::mouseClick(input_save, Qt::LeftButton);
   }
   testing::Mock::VerifyAndClear(object.get());
+  testing::Mock::AllowLeak(object.get());
 }
 #include "PropertyWidgetMixedTests.moc"

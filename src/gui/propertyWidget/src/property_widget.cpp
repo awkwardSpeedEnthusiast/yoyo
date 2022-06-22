@@ -53,14 +53,14 @@ auto property_widget::itemSelected(std::shared_ptr<node_base> item,
 
     if (it != property::factory.end()) {
       try {
-        auto input = it->second(item, property.name(), this);
+        auto input = it->second(item, property.name(), ui->content_widget);
 
         if (!input) {
           return;
         }
 
         auto [title, d, tooltip, dd] = docu->property(property.name());
-        auto label = std::make_shared<QLabel>(this);
+        auto label = std::make_shared<QLabel>(ui->content_widget);
         ui->formLayout->setWidget(row, QFormLayout::LabelRole, label.get());
         ui->formLayout->setWidget(row, QFormLayout::FieldRole, input.get());
         label->setText(title);

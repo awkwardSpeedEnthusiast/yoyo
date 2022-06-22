@@ -37,9 +37,7 @@ TEST_F(PropertyWidgetTest, enumProperty)
                 .property("name", "Name", "", "Name-tooltip", QVariant {})
                 .property("prop1", "Property 1", "", "p1-tooltip", QVariant {})
                 .build();
-  ASSERT_EQ(_widget->children().size(), 5);
-  auto content = _widget->children()[4];
-  EXPECT_EQ(content->children().size(), 3);
+  EXPECT_EQ(child_count(), 3);
 
   yoyo::properties::enum_t prop1 { false, {} };
   EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
@@ -48,28 +46,29 @@ TEST_F(PropertyWidgetTest, enumProperty)
   _widget->itemSelected(object, docu);
   QApplication::processEvents();
 
-  EXPECT_EQ(content->children().size(), 5 + 1 * 2);
+  EXPECT_EQ(child_count(), 5 + 1 * 2);
   int item_index = 1;
 
   // first row: type
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto label = dynamic_cast<QLabel*>(get_child(item_index++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "Type");
-    label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    label = dynamic_cast<QLabel*>(get_child(item_index++));
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), "enum_mock");
   }
   // second row: name
   {
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(),
-              "yoyo::gui::qstring_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 2);
-    auto input = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[1]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
@@ -90,19 +89,21 @@ TEST_F(PropertyWidgetTest, enumProperty)
       object->prop1Changed(v);
     }));
     using sc = yoyo::properties::script_t;
-    ASSERT_GT(content->children().size(), item_index);
-    auto label = dynamic_cast<QLabel*>(content->children()[item_index++]);
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop1")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop1")).toStdString());
-    ASSERT_EQ(content->children()[item_index]->metaObject()->className(), "yoyo::gui::enum_input"s);
-    ASSERT_EQ(content->children()[item_index]->children().size(), 13);
-    auto input_enabled = dynamic_cast<QCheckBox*>(content->children()[item_index]->children()[2]);
-    auto input_select = dynamic_cast<QComboBox*>(content->children()[item_index]->children()[4]);
-    auto input_data = dynamic_cast<QLineEdit*>(content->children()[item_index]->children()[6]);
-    auto input_value = dynamic_cast<QLineEdit*>(content->children()[item_index]->children()[8]);
-    auto input_title = dynamic_cast<QLineEdit*>(content->children()[item_index]->children()[10]);
-    auto input_event = dynamic_cast<QLineEdit*>(content->children()[item_index++]->children()[12]);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::enum_input"s);
+    ASSERT_EQ(c1->children().size(), 13);
+    auto input_enabled = dynamic_cast<QCheckBox*>(c1->children()[2]);
+    auto input_select = dynamic_cast<QComboBox*>(c1->children()[4]);
+    auto input_data = dynamic_cast<QLineEdit*>(c1->children()[6]);
+    auto input_value = dynamic_cast<QLineEdit*>(c1->children()[8]);
+    auto input_title = dynamic_cast<QLineEdit*>(c1->children()[10]);
+    auto input_event = dynamic_cast<QLineEdit*>(c1->children()[12]);
     ASSERT_NE(input_enabled, nullptr);
     ASSERT_NE(input_select, nullptr);
     ASSERT_NE(input_data, nullptr);
@@ -221,5 +222,6 @@ TEST_F(PropertyWidgetTest, enumProperty)
     EXPECT_EQ(input_event->text(), "");
   }
   testing::Mock::VerifyAndClear(object.get());
+  testing::Mock::AllowLeak(object.get());
 }
 #include "PropertyWidgetEnumTests.moc"
