@@ -222,7 +222,6 @@ modules and handling their visibility through menu actions.
 
 It also contains an application class, which is the owner of the data-model. It owns not only the
 node factories and the \ref modules_plugin, but also the defined \ref modules_engine and the
-\ref modules_io. It is responsible for handling user request for loading and storing.
-
-\todo Implement yoyo::application.
+\ref modules_io. The file_management object is responsible for handling user request for loading and
+storing.
 */

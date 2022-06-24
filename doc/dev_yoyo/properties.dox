@@ -1,8 +1,8 @@
 /**
 \page properties Node Properties in yoyo
 
-Nodes make up the Yoyo data-model. They are organized in a tree structure (thus the name). Each node
-has a set of properties, that define its behavior and/or the behavior of its neighboring nodes.
+\ref nodes make up the Yoyo data-model. They are organized in a tree structure (thus the name). Each
+node has a set of properties, that define its behavior and/or the behavior of its neighboring nodes.
 
 There are some properties all nodes have in common, like the name (identifier) or the read-only
 property type. But mostly they are defined for the individual node type.
