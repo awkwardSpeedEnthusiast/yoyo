@@ -30,6 +30,7 @@ public:
   auto store_state(QSettings& settings) -> void;
   auto restore_state(QSettings& settings) -> void;
 
+  auto setup_undo() -> void;
 Q_SIGNALS:
   void newFile_requested();
   void openFile_requested();

@@ -1,6 +1,8 @@
 #include "yoyo_main_window.h"
 #include "ui_yoyo_main_window.h"
 
+#include "command_handler.h"
+
 #include <QSettings>
 
 #include <string>
@@ -113,6 +115,27 @@ auto yoyo_main_window::restore_state(QSettings& settings) -> void
     settings.value("main_window/propertyWidgetVisible", false).toBool());
   _ui->actionLog_Box->setChecked(settings.value("main_window/logWidgetVisible", false).toBool());
   _ui->actionHelp->setChecked(settings.value("main_window/helpWidgetVisible", false).toBool());
+}
+
+auto yoyo_main_window::setup_undo() -> void
+{
+  if (auto handler = command::commandhandler()) {
+    connect(handler, &command::command_handler::topRedoItemChanged, this,
+            [this](bool isAvailable, QString name) {
+              _ui->actionRedo->setEnabled(isAvailable);
+              _ui->actionRedo->setText(tr("Redo %1").arg(name));
+            });
+    connect(handler, &command::command_handler::topUndoItemChanged, this,
+            [this](bool isAvailable, QString name) {
+              _ui->actionUndo->setEnabled(isAvailable);
+              _ui->actionUndo->setText(tr("Undo %1").arg(name));
+            });
+    connect(_ui->actionUndo, &QAction::triggered, handler, &command::command_handler::undo);
+    connect(_ui->actionRedo, &QAction::triggered, handler, &command::command_handler::redo);
+  } else {
+    _ui->actionUndo->setVisible(false);
+    _ui->actionRedo->setVisible(false);
+  }
 }
 
 } // namespace yoyo

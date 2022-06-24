@@ -104,13 +104,13 @@ auto yoyo_application::impl::read_settings() -> void
 {
   QSettings settings { QSettings::IniFormat, QSettings::UserScope, QApplication::organizationName(),
                        QApplication::applicationName() };
-  _main_window->restore_state(settings);
-  set_edit_mode(_main_window->edit_mode());
-
   if (!command::commandhandler()) {
     command::initialize_commandhandler(
       new command::command_handler(settings.value("command/stackSize", 10000).toULongLong()));
   }
+
+  _main_window->restore_state(settings);
+  set_edit_mode(_main_window->edit_mode());
 }
 
 auto yoyo_application::impl::store_settings() -> void
@@ -123,6 +123,9 @@ auto yoyo_application::impl::store_settings() -> void
 auto yoyo_application::impl::set_edit_mode(bool active) -> void
 {
   _editmode = active;
+  if (auto handler = command::commandhandler()) {
+    handler->setEditMode(active);
+  }
   if (!_configuration || _configuration->childCount() < 2) {
     return;
   }
@@ -259,6 +262,7 @@ auto yoyo_application::setup() -> void
           &yoyo_main_window::history_changed);
 
   _p->read_settings();
+  _p->_main_window->setup_undo();
   _p->_main_window->show();
 }
 
