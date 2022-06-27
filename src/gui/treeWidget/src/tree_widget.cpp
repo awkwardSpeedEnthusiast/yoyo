@@ -18,7 +18,6 @@ tree_widget::tree_widget(std::vector<std::shared_ptr<node_factory>> factories, Q
 {
   ui->setupUi(this);
   ui->treeView->setModel(_model.get());
-
   connect(ui->treeView, &QWidget::customContextMenuRequested, this, [this](auto point) {
     _menu->execute(_model->nodeForIndex(ui->treeView->indexAt(point)),
                    ui->treeView->viewport()->mapToGlobal(point));

@@ -23,9 +23,8 @@ struct node_base::impl {
 
 node_base::node_base(QString type, boost::uuids::uuid identifier)
   : QObject()
-  , _p { std::make_unique<impl>(std::move(type), identifier.is_nil()
-                                                   ? boost::uuids::random_generator {}()
-                                                   : std::move(identifier)) }
+  , _p { std::make_unique<impl>(
+      std::move(type), identifier.is_nil() ? boost::uuids::random_generator {}() : identifier) }
 {
 }
 
@@ -94,6 +93,7 @@ auto node_base::addChild(const std::shared_ptr<node_base>& child, int index) -> 
   }
 
   childAboutToBeAdded(child);
+  Q_EMIT treeChanged(weak_from_this(), child, -1, ChangeOperation::PRE_ADD);
 
   child->_p->_parent = weak_from_this();
   connect(child.get(), &node_base::treeChanged, this, &node_base::treeChanged);
@@ -109,7 +109,7 @@ auto node_base::addChild(const std::shared_ptr<node_base>& child, int index) -> 
   }
 
   childAdded(child);
-  Q_EMIT treeChanged(weak_from_this(), child, ChangeOperation::ADDED);
+  Q_EMIT treeChanged(weak_from_this(), child, -1, ChangeOperation::ADDED);
 }
 
 auto node_base::removeChild(std::shared_ptr<node_base> const& child) -> void
@@ -121,6 +121,9 @@ auto node_base::removeChild(std::shared_ptr<node_base> const& child) -> void
   }
 
   childAboutToBeRemoved(child);
+  int old_index = std::distance(_p->_children.begin(), position);
+  Q_EMIT treeChanged(weak_from_this(), child, old_index, ChangeOperation::PRE_REMOVE);
+
   child->_p->_parent = {};
   _p->_children.erase(position);
   disconnect(child.get(), &node_base::treeChanged, this, &node_base::treeChanged);
@@ -129,7 +132,7 @@ auto node_base::removeChild(std::shared_ptr<node_base> const& child) -> void
   disconnect(child.get(), &node_base::scriptExecutionRequested, this,
              &node_base::scriptExecutionRequested);
   childRemoved(child);
-  Q_EMIT treeChanged(weak_from_this(), child, ChangeOperation::REMOVED);
+  Q_EMIT treeChanged(weak_from_this(), child, old_index, ChangeOperation::REMOVED);
 }
 
 auto node_base::removeChild(size_t index) -> void
@@ -157,6 +160,10 @@ auto node_base::moveChild(std::shared_ptr<node_base> const& child, size_t target
   }
 
   auto index = std::distance(_p->_children.begin(), position);
+  // The pre move signal must contain the target index instead of the old index. The current index
+  // can be easily retrieved with node_base::childIndex, but the target index cannot be retrieved
+  // yet.
+  Q_EMIT treeChanged(weak_from_this(), child, targetIndex, ChangeOperation::PRE_MOVE);
   // No notifications necessary, because children are neither added nor removed, only reordered.
   _p->_children.erase(position);
 
@@ -168,7 +175,7 @@ auto node_base::moveChild(std::shared_ptr<node_base> const& child, size_t target
     childMoved(child, index, targetIndex);
   }
 
-  Q_EMIT treeChanged(weak_from_this(), child, ChangeOperation::MOVED);
+  Q_EMIT treeChanged(weak_from_this(), child, index, ChangeOperation::MOVED);
 }
 
 auto node_base::begin() -> iterator

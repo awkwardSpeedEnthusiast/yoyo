@@ -155,6 +155,26 @@ auto tree_model::headerData(int section, Qt::Orientation /*orientation*/, int ro
   return {};
 }
 
+auto tree_model::flags(const QModelIndex& index) const -> Qt::ItemFlags
+{
+  if (!index.isValid()) {
+    return QAbstractItemModel::flags(index);
+  }
+
+  auto node = nodeForIndex(index);
+  if (!node) {
+    return QAbstractItemModel::flags(index);
+  }
+
+  if (node->metaObject()->inherits(&data_node::staticMetaObject)
+      || node->metaObject()->inherits(&gui_node::staticMetaObject)) {
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled
+         | QAbstractItemModel::flags(index);
+  }
+  return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled
+       | QAbstractItemModel::flags(index);
+}
+
 auto tree_model::mimeData(QModelIndexList const& indexes) const -> QMimeData*
 {
   if (indexes.count() != 1) {
@@ -179,12 +199,12 @@ auto tree_model::mimeTypes() const -> QStringList
 
 auto tree_model::supportedDragActions() const -> Qt::DropActions
 {
-  return Qt::CopyAction | Qt::MoveAction;
+  return Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
 }
 
 auto tree_model::supportedDropActions() const -> Qt::DropActions
 {
-  return Qt::CopyAction | Qt::MoveAction;
+  return Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
 }
 
 auto tree_model::calculateTarget(int row, QModelIndex const& index, Qt::DropAction action) const
@@ -300,7 +320,7 @@ auto tree_model::dropMimeData(QMimeData const* data, Qt::DropAction action, int 
           auto source = s.lock();
 
           if (target && source) {
-            target->moveChild(source, index);
+            target->moveChild(source, (index < 0 ? target->childCount() : index));
           }
         },
         [t_path = utilities::calculatePath<utilities::path_strategy_t::INDEX>(target), at = i,
@@ -320,7 +340,7 @@ auto tree_model::dropMimeData(QMimeData const* data, Qt::DropAction action, int 
 
           if (target) {
             auto source = target->childAt(at);
-            target->moveChild(source, index);
+            target->moveChild(source, (index < 0 ? target->childCount() : index));
           }
         },
       });
@@ -385,16 +405,39 @@ auto tree_model::setRootNode(std::shared_ptr<node_base> root) -> void
   _root_node = root;
   if (_root_node) {
     connect(_root_node.get(), &node_base::treeChanged, this,
-            [this](auto changed_node, auto, auto mode) {
-              if (mode == node_base::ChangeOperation::REMOVED) {
-                beginResetModel();
-                endResetModel();
+            [this](auto changed_node, auto child_node, auto old_index, auto mode) {
+              auto node = changed_node.lock();
+              auto child = child_node.lock();
+              auto node_index = indexForNode(node);
+              switch (mode) {
+              case node_base::ChangeOperation::PRE_REMOVE: {
+                beginRemoveRows(node_index, old_index, old_index);
                 return;
               }
-
-              auto node = changed_node.lock();
-              dataChanged(createIndex(0, 0, node.get()),
-                          createIndex(node->childCount() + 1, 4, node.get()));
+              case node_base::ChangeOperation::REMOVED: {
+                endRemoveRows();
+                return;
+              }
+              case node_base::ChangeOperation::PRE_ADD: {
+                auto start = node->childIndex(child);
+                beginInsertRows(node_index, start, start);
+                break;
+              }
+              case node_base::ChangeOperation::ADDED: {
+                endInsertRows();
+                break;
+              }
+              case node_base::ChangeOperation::PRE_MOVE: {
+                auto ind = node->childIndex(child);
+                beginMoveRows(node_index, ind, ind, node_index,
+                              (old_index > ind ? old_index + 1 : old_index));
+                break;
+              }
+              case node_base::ChangeOperation::MOVED: {
+                endMoveRows();
+                break;
+              }
+              }
             });
   }
   endResetModel();

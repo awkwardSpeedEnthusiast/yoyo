@@ -378,12 +378,13 @@ public:
     }
 
     QObject::connect(n.get(), &node_base::treeChanged,
-                     [this](std::weak_ptr<node_base>, std::weak_ptr<node_base> object,
+                     [this](std::weak_ptr<node_base>, std::weak_ptr<node_base> object, auto,
                             node_base::ChangeOperation operationType) {
                        switch (operationType) {
                        case node_base::ChangeOperation::MOVED: return;
                        case node_base::ChangeOperation::ADDED: on_node_add(object); break;
                        case node_base::ChangeOperation::REMOVED: on_node_remove(object); break;
+                       default: break;
                        }
                      });
 

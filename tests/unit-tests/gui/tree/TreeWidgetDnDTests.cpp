@@ -8,22 +8,33 @@
 class TreeWidgetDnDTest : public TreeWidgetTest
 {
 public:
+  auto TearDown() -> void override
+  {
+    if (_widget) {
+      _widget->setConfiguration(nullptr);
+    }
+    if (_configuration) {
+      EXPECT_EQ(_configuration.use_count(), 1);
+      _configuration.reset();
+    }
+    TreeWidgetTest::TearDown();
+  }
   auto setupDataTree() -> void
   {
     createWidget();
     retrieveListView();
     ASSERT_NE(view, nullptr);
 
-    auto configuration = setupConfiguration();
+    _configuration = setupConfiguration();
     {
-      addChild(configuration->childAt(0), 0, 0, 1, "group1");
-      addChild(configuration->childAt(0), 1, 0, 1, "group2");
-      addChild(configuration->childAt(0)->childAt(0), 0, 1, 1, "aBit");
-      addChild(configuration->childAt(0)->childAt(0), 1, 2, 1, "aString");
-      addChild(configuration->childAt(0)->childAt(1), 0, 3, 1, "anInteger");
-      addChild(configuration->childAt(0)->childAt(1), 1, 4, 1, "unsignedInteger");
+      addChild(_configuration->childAt(0), 0, 0, 1, "group1");
+      addChild(_configuration->childAt(0), 1, 0, 1, "group2");
+      addChild(_configuration->childAt(0)->childAt(0), 0, 1, 1, "aBit");
+      addChild(_configuration->childAt(0)->childAt(0), 1, 2, 1, "aString");
+      addChild(_configuration->childAt(0)->childAt(1), 0, 3, 1, "anInteger");
+      addChild(_configuration->childAt(0)->childAt(1), 1, 4, 1, "unsignedInteger");
     }
-    _widget->setConfiguration(configuration);
+    _widget->setConfiguration(_configuration);
     view->expandAll();
     model = view->model();
     ASSERT_NE(model, nullptr);
@@ -35,22 +46,23 @@ public:
     retrieveListView();
     ASSERT_NE(view, nullptr);
 
-    auto configuration = setupConfiguration();
+    _configuration = setupConfiguration();
     {
-      addChild(configuration->childAt(1), 0, 0, 2, "group1");
-      addChild(configuration->childAt(1), 1, 0, 2, "group2");
-      addChild(configuration->childAt(1)->childAt(0), 0, 1, 2, "aButton");
-      addChild(configuration->childAt(1)->childAt(0), 1, 2, 2, "aCheckbox");
-      addChild(configuration->childAt(1)->childAt(1), 0, 3, 2, "aComboBox");
-      addChild(configuration->childAt(1)->childAt(1), 1, 4, 2, "aLineEdit");
+      addChild(_configuration->childAt(1), 0, 0, 2, "group1");
+      addChild(_configuration->childAt(1), 1, 0, 2, "group2");
+      addChild(_configuration->childAt(1)->childAt(0), 0, 1, 2, "aButton");
+      addChild(_configuration->childAt(1)->childAt(0), 1, 2, 2, "aCheckbox");
+      addChild(_configuration->childAt(1)->childAt(1), 0, 3, 2, "aComboBox");
+      addChild(_configuration->childAt(1)->childAt(1), 1, 4, 2, "aLineEdit");
     }
-    _widget->setConfiguration(configuration);
+    _widget->setConfiguration(_configuration);
     view->expandAll();
     model = view->model();
     ASSERT_NE(model, nullptr);
   }
 
   QAbstractItemModel* model { nullptr };
+  std::shared_ptr<yoyo::node_base> _configuration;
 };
 
 class TreeWidgetDnDTestActions : public TreeWidgetDnDTest,

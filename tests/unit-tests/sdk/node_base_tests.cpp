@@ -10,6 +10,7 @@ using testing::Invoke;
 using testing::Return;
 using testing::StrictMock;
 using testing::WithArg;
+using op_t = yoyo::node_base::ChangeOperation;
 
 namespace yoyo
 {
@@ -72,14 +73,14 @@ TEST(nodeBaseTest, structure)
   auto n4 = std::make_shared<StrictMock<yoyo::node_mock>>("child-type");
 
   struct Receiver {
-    MOCK_METHOD(void, onTreeChanged, (std::weak_ptr<yoyo::node_base> node));
+    MOCK_METHOD(void, onTreeChanged, (std::weak_ptr<yoyo::node_base> node, op_t op));
     MOCK_METHOD(void, onExchangeRequested,
                 (std::shared_ptr<yoyo::node_base> node, boost::uuids::uuid id));
     MOCK_METHOD(void, onAddRequested,
                 (std::shared_ptr<yoyo::node_base> node, boost::uuids::uuid id, int index));
   } receiver;
   QObject::connect(root.get(), &yoyo::node_base::treeChanged,
-                   [&receiver](auto n) { receiver.onTreeChanged(n); });
+                   [&receiver](auto n, auto, auto, auto op) { receiver.onTreeChanged(n, op); });
   QObject::connect(root.get(), &yoyo::node_base::exchangeRequested,
                    [&receiver](auto n, auto id) { receiver.onExchangeRequested(n, id); });
   QObject::connect(root.get(), &yoyo::node_base::addRequested,
@@ -124,7 +125,8 @@ TEST(nodeBaseTest, structure)
     EXPECT_CALL(*root, childAboutToBeAdded(std::dynamic_pointer_cast<yoyo::node_base>(n1)))
       .InSequence(seq);
     EXPECT_CALL(*root, childAdded(std::dynamic_pointer_cast<yoyo::node_base>(n1))).InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForRoot));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_ADD));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::ADDED)).WillOnce(WithArg<0>(Invoke(checkForRoot)));
     root->addChild(n1);
     EXPECT_EQ(root->childCount(), 1);
     EXPECT_EQ(root->childAt(0), n1);
@@ -154,7 +156,8 @@ TEST(nodeBaseTest, structure)
     EXPECT_CALL(*root, childAboutToBeAdded(std::dynamic_pointer_cast<yoyo::node_base>(n2)))
       .InSequence(seq);
     EXPECT_CALL(*root, childAdded(std::dynamic_pointer_cast<yoyo::node_base>(n2))).InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForRoot));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_ADD));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::ADDED)).WillOnce(WithArg<0>(Invoke(checkForRoot)));
     root->addChild(n2);
     EXPECT_EQ(root->childCount(), 2);
     EXPECT_EQ(root->childAt(0), n1);
@@ -173,7 +176,8 @@ TEST(nodeBaseTest, structure)
     EXPECT_CALL(*root, childAboutToBeAdded(std::dynamic_pointer_cast<yoyo::node_base>(n3)))
       .InSequence(seq);
     EXPECT_CALL(*root, childAdded(std::dynamic_pointer_cast<yoyo::node_base>(n3))).InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForRoot));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_ADD));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::ADDED)).WillOnce(WithArg<0>(Invoke(checkForRoot)));
     root->addChild(n3, 1);
     EXPECT_EQ(root->childCount(), 3);
     EXPECT_EQ(root->childAt(0), n1);
@@ -187,7 +191,8 @@ TEST(nodeBaseTest, structure)
   }
   // Internal move.
   {
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForRoot));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_MOVE));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::MOVED)).WillOnce(WithArg<0>(Invoke(checkForRoot)));
     EXPECT_CALL(*root, childMoved(_, 1, 0));
     root->moveChild(n3, 0);
     EXPECT_EQ(root->childCount(), 3);
@@ -196,7 +201,8 @@ TEST(nodeBaseTest, structure)
     EXPECT_EQ(root->childAt(2), n2);
   }
   {
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForRoot));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_MOVE));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::MOVED)).WillOnce(WithArg<0>(Invoke(checkForRoot)));
     EXPECT_CALL(*root, childMoved(_, 1, 2));
     root->moveChild(n1, 3);
     EXPECT_EQ(root->childCount(), 3);
@@ -216,7 +222,8 @@ TEST(nodeBaseTest, structure)
     EXPECT_CALL(*n1, childAboutToBeAdded(std::dynamic_pointer_cast<yoyo::node_base>(n4)))
       .InSequence(seq);
     EXPECT_CALL(*n1, childAdded(std::dynamic_pointer_cast<yoyo::node_base>(n4))).InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForN1));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_ADD));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::ADDED)).WillOnce(WithArg<0>(Invoke(checkForN1)));
     n1->addChild(n4);
     EXPECT_EQ(root->childCount(), 3);
     EXPECT_EQ(n1->childCount(), 1);
@@ -250,9 +257,11 @@ TEST(nodeBaseTest, structure)
     EXPECT_CALL(*n1, childAboutToBeAdded(std::dynamic_pointer_cast<yoyo::node_base>(n2)))
       .InSequence(seq);
     EXPECT_CALL(*n1, childAdded(std::dynamic_pointer_cast<yoyo::node_base>(n2))).InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_))
-      .WillOnce(Invoke(checkForRoot))
-      .WillOnce(Invoke(checkForN1));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_REMOVE));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::REMOVED))
+      .WillOnce(WithArg<0>(Invoke(checkForRoot)));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_ADD));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::ADDED)).WillOnce(WithArg<0>(Invoke(checkForN1)));
     n1->addChild(n2);
     EXPECT_EQ(root->childCount(), 2);
     EXPECT_EQ(n1->childCount(), 2);
@@ -265,7 +274,8 @@ TEST(nodeBaseTest, structure)
     EXPECT_CALL(*n1, childAboutToBeRemoved(std::dynamic_pointer_cast<yoyo::node_base>(n2)))
       .InSequence(seq);
     EXPECT_CALL(*n1, childRemoved(std::dynamic_pointer_cast<yoyo::node_base>(n2))).InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForN1));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_REMOVE));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::REMOVED)).WillOnce(WithArg<0>(Invoke(checkForN1)));
     n1->removeChild(n2);
     EXPECT_EQ(root->childCount(), 2);
     EXPECT_EQ(n1->childCount(), 1);
@@ -277,7 +287,9 @@ TEST(nodeBaseTest, structure)
       .InSequence(seq);
     EXPECT_CALL(*root, childRemoved(std::dynamic_pointer_cast<yoyo::node_base>(n1)))
       .InSequence(seq);
-    EXPECT_CALL(receiver, onTreeChanged(_)).WillOnce(Invoke(checkForRoot));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::PRE_REMOVE));
+    EXPECT_CALL(receiver, onTreeChanged(_, op_t::REMOVED))
+      .WillOnce(WithArg<0>(Invoke(checkForRoot)));
     root->removeChild(1);
     EXPECT_EQ(root->childCount(), 1);
     EXPECT_EQ(n1->parent().lock(), nullptr);

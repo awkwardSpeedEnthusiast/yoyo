@@ -50,7 +50,7 @@ public:
   /// This enum is used in the treeChanged signal to specify which operation
   /// had been performed on the changed node .
   ///
-  enum class ChangeOperation { ADDED, REMOVED, MOVED };
+  enum class ChangeOperation { PRE_ADD, ADDED, PRE_REMOVE, REMOVED, PRE_MOVE, MOVED };
 
 public:
   ///
@@ -284,10 +284,14 @@ Q_SIGNALS:
   /// this node. The signal is propagated along the tree to the root node.
   /// \param changedNode the parent node, where changes had been made,
   /// \param object the object, which had been moved,
+  /// \param index_before_change the index of the object inside the changedNode before the
+  ///         structural change. This will be -1 for add. In case of pre-move, this will be the
+  ///         target index instead of the actual index before change to have complete information
+  ///         about the operation.
   /// \param operationType the type of change, which had been done.
   ///
   void treeChanged(std::weak_ptr<node_base> changedNode, std::weak_ptr<node_base> object,
-                   ChangeOperation operationType);
+                   int index_before_change, ChangeOperation operationType);
   ///
   /// \brief exchange requested signal
   ///

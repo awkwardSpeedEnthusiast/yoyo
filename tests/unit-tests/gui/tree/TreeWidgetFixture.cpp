@@ -9,14 +9,47 @@ using std::string_literals::operator""s;
 
 auto TreeWidgetTest::SetUp() -> void
 {
-  yoyo::command::initialize_commandhandler(new yoyo::command::command_handler(100));
+  if (!yoyo::command::commandhandler()) {
+    yoyo::command::initialize_commandhandler(new yoyo::command::command_handler(100));
+  }
   yoyo::command::commandhandler()->setEditMode(true);
 
-  yoyo::install_fundamental_nodes(*_fundamental_factory);
-  yoyo::install_data_nodes(*_data_factory);
-  yoyo::install_gui_nodes(*_gui_factory);
-  yoyo::install_protocol_nodes(*_protocol_factory);
-  yoyo::install_communication_nodes(*_communication_factory);
+  if (!_fundamental_factory) {
+    _fundamental_factory = std::make_shared<yoyo::node_factory>(&yoyo::node_base::staticMetaObject);
+    yoyo::install_fundamental_nodes(*_fundamental_factory);
+  }
+  if (!_data_factory) {
+    _data_factory = std::make_shared<yoyo::node_factory>(&yoyo::data_node::staticMetaObject);
+    yoyo::install_data_nodes(*_data_factory);
+  }
+  if (!_gui_factory) {
+    _gui_factory = std::make_shared<yoyo::node_factory>(&yoyo::gui_node::staticMetaObject);
+    yoyo::install_gui_nodes(*_gui_factory);
+  }
+  if (!_protocol_factory) {
+    _protocol_factory =
+      std::make_shared<yoyo::node_factory>(&yoyo::protocol_node::staticMetaObject);
+    yoyo::install_protocol_nodes(*_protocol_factory);
+  }
+  if (!_communication_factory) {
+    _communication_factory =
+      std::make_shared<yoyo::node_factory>(&yoyo::communication_node::staticMetaObject);
+    yoyo::install_communication_nodes(*_communication_factory);
+  }
+}
+
+auto TreeWidgetTest::TearDown() -> void
+{
+  yoyo::command::commandhandler()->clearStack();
+  if (_widget) {
+    _widget->setConfiguration(nullptr);
+  }
+  _widget.reset();
+  EXPECT_EQ(_fundamental_factory.use_count(), 1);
+  EXPECT_EQ(_data_factory.use_count(), 1);
+  EXPECT_EQ(_gui_factory.use_count(), 1);
+  EXPECT_EQ(_protocol_factory.use_count(), 1);
+  EXPECT_EQ(_communication_factory.use_count(), 1);
 }
 
 auto TreeWidgetTest::createWidget() -> void

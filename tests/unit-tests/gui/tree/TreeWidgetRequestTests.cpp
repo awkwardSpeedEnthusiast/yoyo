@@ -52,7 +52,7 @@ auto operator==(std::weak_ptr<yoyo::node_base> const& lhs,
 
 struct TreeChangeReceiver {
   MOCK_METHOD(void, treeChanged,
-              (std::weak_ptr<yoyo::node_base> parent, std::weak_ptr<yoyo::node_base>, CO));
+              (std::weak_ptr<yoyo::node_base> parent, std::weak_ptr<yoyo::node_base>, int, CO));
 };
 
 TEST_F(TreeWidgetRequestTest, exchange)
@@ -60,28 +60,29 @@ TEST_F(TreeWidgetRequestTest, exchange)
   setupTree();
   testing::StrictMock<TreeChangeReceiver> receiver;
   QObject lifetimer;
-  QObject::connect(configuration.get(), &yoyo::node_base::treeChanged, &lifetimer,
-                   [&receiver](auto a, auto b, auto c) { receiver.treeChanged(a, b, c); });
+  QObject::connect(
+    configuration.get(), &yoyo::node_base::treeChanged, &lifetimer,
+    [&receiver](auto a, auto b, auto c, auto d) { receiver.treeChanged(a, b, c, d); });
   auto requestingItem = configuration->childAt(1)->childAt(0);
   auto sameId = requestingItem->staticTypeId();
   auto buttonId = std::get<boost::uuids::uuid>(_gui_factory->installed_nodes()[1]);
   // exchange for same id is caught
-  EXPECT_CALL(receiver, treeChanged(_, _, _)).Times(0);
+  EXPECT_CALL(receiver, treeChanged(_, _, _, _)).Times(0);
   requestingItem->exchangeRequested(requestingItem, sameId);
   // objects with children may not be exchanged for items, that cannot take children
-  EXPECT_CALL(receiver, treeChanged(_, _, _)).Times(0);
+  EXPECT_CALL(receiver, treeChanged(_, _, _, _)).Times(0);
   requestingItem->exchangeRequested(requestingItem, buttonId);
 
   requestingItem = configuration->childAt(1)->childAt(1)->childAt(1);
   sameId = requestingItem->staticTypeId();
   // exchange for same id is caught
-  EXPECT_CALL(receiver, treeChanged(_, _, _)).Times(0);
+  EXPECT_CALL(receiver, treeChanged(_, _, _, _)).Times(0);
   requestingItem->exchangeRequested(requestingItem, sameId);
 
   requestingItem = configuration->childAt(0)->childAt(0)->childAt(0);
   {
     EXPECT_FALSE(requestingItem->acceptsChildren());
-    EXPECT_CALL(receiver, treeChanged(requestingItem->parent(), requestingItem->weak_from_this(),
+    EXPECT_CALL(receiver, treeChanged(requestingItem->parent(), requestingItem->weak_from_this(), _,
                                       CO::REMOVED))
       .Times(0);
     EXPECT_EQ(requestingItem->type().toStdString(), "bit");
@@ -97,11 +98,17 @@ TEST_F(TreeWidgetRequestTest, exchange)
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "line_edit");
 
-  EXPECT_CALL(receiver,
-              treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::ADDED))
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, -1,
+                                    CO::PRE_ADD))
+    .InSequence(seq);
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, -1,
+                                    CO::ADDED))
     .InSequence(seq);
   EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
-                                    requestingItem->weak_from_this(), CO::REMOVED))
+                                    requestingItem->weak_from_this(), _, CO::PRE_REMOVE))
+    .InSequence(seq);
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
+                                    requestingItem->weak_from_this(), _, CO::REMOVED))
     .InSequence(seq);
   requestingItem->exchangeRequested(requestingItem, buttonId);
 
@@ -115,9 +122,15 @@ TEST_F(TreeWidgetRequestTest, exchange)
     EXPECT_EQ(handler->nextUndo().toStdString(), "Change item type from line_edit to button");
 
     EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
-                                      requestingItem->weak_from_this(), CO::ADDED))
+                                      requestingItem->weak_from_this(), -1, CO::PRE_ADD))
       .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
+                                      requestingItem->weak_from_this(), -1, CO::ADDED))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                      CO::PRE_REMOVE))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
                                       CO::REMOVED))
       .InSequence(seq);
     handler->undo();
@@ -133,11 +146,17 @@ TEST_F(TreeWidgetRequestTest, exchange)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Change item type from line_edit to button");
 
-    EXPECT_CALL(receiver,
-                treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                      -1, CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                      -1, CO::ADDED))
       .InSequence(seq);
     EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
-                                      requestingItem->weak_from_this(), CO::REMOVED))
+                                      requestingItem->weak_from_this(), _, CO::PRE_REMOVE))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
+                                      requestingItem->weak_from_this(), _, CO::REMOVED))
       .InSequence(seq);
     handler->redo();
 
@@ -155,15 +174,16 @@ TEST_F(TreeWidgetRequestTest, add)
 
   testing::StrictMock<TreeChangeReceiver> receiver;
   QObject lifetimer;
-  QObject::connect(configuration.get(), &yoyo::node_base::treeChanged, &lifetimer,
-                   [&receiver](auto a, auto b, auto c) { receiver.treeChanged(a, b, c); });
+  QObject::connect(
+    configuration.get(), &yoyo::node_base::treeChanged, &lifetimer,
+    [&receiver](auto a, auto b, auto c, auto d) { receiver.treeChanged(a, b, c, d); });
   auto buttonId = std::get<boost::uuids::uuid>(_gui_factory->installed_nodes()[1]);
   // doesn't work for data-nodes
   {
     auto requestingItem = configuration->childAt(0)->childAt(1);
     EXPECT_TRUE(requestingItem->acceptsChildren());
 
-    EXPECT_CALL(receiver, treeChanged(_, _, CO::ADDED)).Times(0);
+    EXPECT_CALL(receiver, treeChanged(_, _, -1, CO::ADDED)).Times(0);
     requestingItem->addRequested(
       requestingItem, std::get<boost::uuids::uuid>(_data_factory->installed_nodes()[1]), 1);
   }
@@ -172,7 +192,7 @@ TEST_F(TreeWidgetRequestTest, add)
     auto requestingItem = configuration->childAt(1)->childAt(1)->childAt(0);
     EXPECT_FALSE(requestingItem->acceptsChildren());
 
-    EXPECT_CALL(receiver, treeChanged(_, _, CO::ADDED)).Times(0);
+    EXPECT_CALL(receiver, treeChanged(_, _, -1, CO::ADDED)).Times(0);
     requestingItem->addRequested(requestingItem, buttonId, 1);
   }
   {
@@ -180,7 +200,8 @@ TEST_F(TreeWidgetRequestTest, add)
 
     EXPECT_EQ(requestingItem->childCount(), 2);
 
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, CO::ADDED));
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD));
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED));
     requestingItem->addRequested(requestingItem, buttonId, 1);
 
     EXPECT_EQ(requestingItem->childCount(), 3);
@@ -194,7 +215,9 @@ TEST_F(TreeWidgetRequestTest, add)
     EXPECT_TRUE(handler->hasCommandToUndo());
     EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
 
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                      CO::PRE_REMOVE));
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
                                       CO::REMOVED));
     handler->undo();
 
@@ -209,8 +232,10 @@ TEST_F(TreeWidgetRequestTest, add)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
 
-    EXPECT_CALL(receiver,
-                treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::ADDED));
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                      -1, CO::PRE_ADD));
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                      -1, CO::ADDED));
     handler->redo();
 
     EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 3);
@@ -230,14 +255,15 @@ TEST_F(TreeWidgetRequestTest, addForData)
     configuration->childAt(0)->childAt(1)->childAt(0));
   testing::StrictMock<TreeChangeReceiver> receiver;
   QObject lifetimer;
-  QObject::connect(configuration.get(), &yoyo::node_base::treeChanged, &lifetimer,
-                   [&receiver](auto a, auto b, auto c) { receiver.treeChanged(a, b, c); });
+  QObject::connect(
+    configuration.get(), &yoyo::node_base::treeChanged, &lifetimer,
+    [&receiver](auto a, auto b, auto c, auto d) { receiver.treeChanged(a, b, c, d); });
   testing::Sequence seq;
   // doesn't work for items that don't accept children
   {
     auto requestingItem =
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(0)->childAt(0));
-    EXPECT_CALL(receiver, treeChanged(_, _, _)).Times(0).InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(_, _, _, _)).Times(0).InSequence(seq);
     ASSERT_NE(requestingItem, nullptr);
     requestingItem->defaultForDataRequested(path, requestingItem, 0, false, false, true);
   }
@@ -248,7 +274,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(0));
     ASSERT_NE(requestingItem, nullptr);
     EXPECT_EQ(requestingItem->childCount(), 2);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED))
       .InSequence(seq);
     requestingItem->defaultForDataRequested(path, requestingItem, 0, false, false, true);
     ASSERT_EQ(requestingItem->childCount(), 3);
@@ -270,7 +298,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
     auto requestingItem =
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(1));
     ASSERT_NE(requestingItem, nullptr);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED))
       .InSequence(seq);
     requestingItem->defaultForDataRequested(path, requestingItem, -1, false, true, false);
     EXPECT_EQ(requestingItem->childCount(), 3);
@@ -293,7 +323,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
     auto requestingItem =
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(1));
     ASSERT_NE(requestingItem, nullptr);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED))
       .InSequence(seq);
     requestingItem->defaultForDataRequested(path, requestingItem, -1, true, false, false);
     EXPECT_EQ(requestingItem->childCount(), 4);
@@ -315,8 +347,11 @@ TEST_F(TreeWidgetRequestTest, addForData)
   { { EXPECT_TRUE(handler->hasCommandToUndo());
   EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
 
-  EXPECT_CALL(receiver,
-              treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::REMOVED))
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                    CO::PRE_REMOVE))
+    .InSequence(seq);
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                    CO::REMOVED))
     .InSequence(seq);
   handler->undo();
 
@@ -329,8 +364,11 @@ TEST_F(TreeWidgetRequestTest, addForData)
   EXPECT_TRUE(handler->hasCommandToUndo());
   EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
 
-  EXPECT_CALL(receiver,
-              treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::REMOVED))
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                    CO::PRE_REMOVE))
+    .InSequence(seq);
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                    CO::REMOVED))
     .InSequence(seq);
   handler->undo();
 
@@ -342,8 +380,11 @@ TEST_F(TreeWidgetRequestTest, addForData)
   EXPECT_TRUE(handler->hasCommandToUndo());
   EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
 
-  EXPECT_CALL(receiver,
-              treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, CO::REMOVED))
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
+                                    CO::PRE_REMOVE))
+    .InSequence(seq);
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
+                                    CO::REMOVED))
     .InSequence(seq);
   handler->undo();
 
@@ -358,8 +399,11 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
 
-    EXPECT_CALL(receiver,
-                treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
+                                      CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
+                                      CO::ADDED))
       .InSequence(seq);
     handler->redo();
 
@@ -384,8 +428,11 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
 
-    EXPECT_CALL(receiver,
-                treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                      CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
+                                      CO::ADDED))
       .InSequence(seq);
     handler->redo();
 
@@ -411,8 +458,11 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
 
-    EXPECT_CALL(receiver,
-                treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                      -1, CO::PRE_ADD))
+      .InSequence(seq);
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                      -1, CO::ADDED))
       .InSequence(seq);
     handler->redo();
 

@@ -3,11 +3,11 @@
 namespace yoyo
 {
 struct documentation::impl {
-  impl(QString const& t, QString const& d, QString const& s, std::map<QString, property_t> const& p)
-    : _type { t }
-    , _description { d }
-    , _styling { s }
-    , _properties { p }
+  impl(QString t, QString d, QString s, std::map<QString, property_t> p)
+    : _type { std::move(t) }
+    , _description { std::move(d) }
+    , _styling { std::move(s) }
+    , _properties { std::move(p) }
   {
   }
   QString const _type;

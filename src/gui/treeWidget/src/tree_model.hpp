@@ -28,6 +28,7 @@ public:
   auto data(QModelIndex const& index, int role = Qt::DisplayRole) const -> QVariant override;
   auto headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const
     -> QVariant override;
+  auto flags(const QModelIndex& index) const -> Qt::ItemFlags override;
 
   auto mimeData(QModelIndexList const& indexes) const -> QMimeData* override;
   auto mimeTypes() const -> QStringList override;
