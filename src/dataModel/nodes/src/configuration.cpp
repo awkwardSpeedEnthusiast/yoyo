@@ -32,8 +32,9 @@ auto configuration::acceptsChildren() const -> bool
 
 auto configuration::acceptsChild(std::shared_ptr<node_base> const& child) const -> bool
 {
-  return child->staticTypeId() == data_root::typeId()
-      || child->staticTypeId() == gui_root::typeId();
+  return child->staticTypeId() == fundamental::data_root_id
+      || child->staticTypeId() == fundamental::gui_root_id
+      || child->staticTypeId() == fundamental::configuration_data_id;
 }
 
 auto configuration::acceptsParent(std::shared_ptr<node_base> const&) const -> bool
@@ -44,66 +45,6 @@ auto configuration::acceptsParent(std::shared_ptr<node_base> const&) const -> bo
 auto configuration::version() const -> yoyo::properties::invisible_string_t
 {
   return _version;
-}
-
-auto configuration::afterLoad() const -> yoyo::properties::script_t
-{
-  return _afterLoad;
-}
-
-auto configuration::beforeClose() const -> yoyo::properties::script_t
-{
-  return _beforeClose;
-}
-
-auto configuration::timerPeriod() const -> int
-{
-  return _timerPeriod;
-}
-
-auto configuration::timerScript() const -> yoyo::properties::script_t
-{
-  return _timerScript;
-}
-
-auto configuration::setAfterLoad(yoyo::properties::script_t script) -> void
-{
-  if (_afterLoad == script) {
-    return;
-  }
-
-  _afterLoad = script;
-  Q_EMIT afterLoadChanged(_afterLoad);
-}
-
-auto configuration::setBeforeClose(yoyo::properties::script_t script) -> void
-{
-  if (_beforeClose == script) {
-    return;
-  }
-
-  _beforeClose = script;
-  Q_EMIT beforeCloseChanged(_beforeClose);
-}
-
-auto configuration::setTimerPeriod(int intervalInS) -> void
-{
-  if (_timerPeriod == intervalInS) {
-    return;
-  }
-
-  _timerPeriod = intervalInS;
-  Q_EMIT timerPeriodChanged(_timerPeriod);
-}
-
-auto configuration::setTimerScript(yoyo::properties::script_t script) -> void
-{
-  if (_timerScript == script) {
-    return;
-  }
-
-  _timerScript = script;
-  Q_EMIT timerScriptChanged(_timerScript);
 }
 
 auto configuration::childAboutToBeAdded(std::shared_ptr<node_base> const& /*child*/) -> bool

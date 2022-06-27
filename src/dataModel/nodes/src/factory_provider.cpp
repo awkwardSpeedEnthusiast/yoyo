@@ -1,6 +1,7 @@
 #include "factory_provider.hpp"
 
 #include "configuration.hpp"
+#include "configuration_data.hpp"
 #include "dataNodes/bit_node.hpp"
 #include "dataNodes/data_group.hpp"
 #include "dataNodes/int8node.hpp"
@@ -329,6 +330,30 @@ auto updateDocumentation<yoyo::configuration>(documentation::builder& builder) -
 }
 
 template <>
+auto updateDocumentation<yoyo::configuration_data>(documentation::builder& builder) -> void
+{
+  updateDocumentation<node_base>(builder);
+  builder.description("This item contains user configurable data for the configuration.")
+    .property(
+      "afterLoad", "After load script",
+      "The after load script will be executed directly after the configuration has been loaded"
+      "completely.",
+      "Script to be executed directly after load.", {})
+    .property(
+      "beforeClose", "Before close script",
+      "The before close script will be executed directly before the configuration is to be closed.",
+      "Script to be executed directly before close.", {})
+    .property(
+      "timerPeriod", "Periodic timer period",
+      "The periodic timer period is the time interval in seconds, which passes between triggering "
+      "the periodic script. If the provided interval is 0 or negative, the script is disabled.",
+      "Time between trigger events for the periodic script. \nDisabled if 0 or negative.", -1)
+    .property("timerScript", "Periodic script",
+              "The periodic script is to be executed in periodic intervals, if set and enabled.",
+              "Script to execute in periodic intervals.", {});
+}
+
+template <>
 auto updateDocumentation<yoyo::data_root>(documentation::builder& builder) -> void
 {
   updateDocumentation<node_base>(builder);
@@ -337,7 +362,7 @@ auto updateDocumentation<yoyo::data_root>(documentation::builder& builder) -> vo
 template <>
 auto updateDocumentation<yoyo::gui_root>(documentation::builder& builder) -> void
 {
-  updateDocumentation<node_base>(builder);
+  updateDocumentation<gui_node>(builder);
 }
 
 auto install_gui_nodes(node_factory& gui_factory) -> void
@@ -367,8 +392,11 @@ auto install_fundamental_nodes(node_factory& factory) -> void
 {
   ::install<yoyo::configuration>(
     factory, "Configuration", {}, [](node_factory::node_id_list const&) {
-      return node_factory::node_id_list { { data_root::typeId(), &data_root::staticMetaObject, {} },
-                                          { gui_root::typeId(), &gui_root::staticMetaObject, {} } };
+      return node_factory::node_id_list {
+        { data_root::typeId(), &data_root::staticMetaObject, {} },
+        { gui_root::typeId(), &gui_root::staticMetaObject, {} },
+        { configuration_data::typeId(), &configuration_data::staticMetaObject, {} },
+      };
     });
   ::install<yoyo::data_root>(factory, "Signals", {}, [](node_factory::node_id_list const& l) {
     node_factory::node_id_list result;
@@ -384,6 +412,9 @@ auto install_fundamental_nodes(node_factory& factory) -> void
     });
     return result;
   });
+  ::install<yoyo::configuration_data>(
+    factory, "Configuration data", {},
+    [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; });
 }
 
 auto install_communication_nodes(node_factory&) -> void {}

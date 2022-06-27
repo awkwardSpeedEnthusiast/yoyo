@@ -104,7 +104,7 @@ public:
   auto data(int column) const -> QVariant override
   {
     switch (column) {
-    case 0: return _node->name();
+    case 0: return _node->name()._s;
     case 1: return _node->type();
     case 2: return _node->property("title");
     }
@@ -221,7 +221,7 @@ public:
   {
     switch (column) {
     case 0: return _node->type();
-    case 1: return _node->name();
+    case 1: return _node->name()._s;
     }
 
     return {};
@@ -254,7 +254,8 @@ auto create_data_adapter(node_base* node) -> std::shared_ptr<data_adapter>
   }
 
   if ((node->metaObject()->className() == "yoyo::data_root"s)
-      || (node->metaObject()->className() == "yoyo::gui_root"s)) {
+      || (node->metaObject()->className() == "yoyo::gui_root"s)
+      || (node->metaObject()->className() == "yoyo::configuration_data"s)) {
     return std::make_shared<default_data_adapter>(node);
   }
 

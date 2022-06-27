@@ -37,7 +37,7 @@ TEST_F(lineEditTest, properties)
   object->init();
   EXPECT_EQ(object->type(), "line_edit");
   EXPECT_FALSE(object->identifier().is_nil());
-  EXPECT_EQ(object->name(), "");
+  EXPECT_EQ(object->name()._s, "");
   EXPECT_EQ(object->layoutDirection()._s, yoyo::types::layout_direction_t::HORIZONTAL);
   EXPECT_EQ(object->layoutDirection()._visible, false);
   EXPECT_EQ(object->styleSheet(), yoyo::properties::text_t { "" });

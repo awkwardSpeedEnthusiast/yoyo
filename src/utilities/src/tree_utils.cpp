@@ -15,10 +15,10 @@ auto calculatePath(std::shared_ptr<node_base> node) -> QString
     }
     if (auto parent = node->parent().lock()) {
       if (parent->type() == "Signals" || (parent->type() == "Layout")) {
-        return node->name();
+        return node->name()._s;
       }
 
-      return calculatePath<T>(parent) + "." + node->name();
+      return calculatePath<T>(parent) + "." + node->name()._s;
     }
   } else {
     if (auto parent = node->parent().lock()) {
@@ -44,7 +44,7 @@ std::shared_ptr<yoyo::node_base> findChildOfName(QString const& path,
   yoyo::node_base::const_iterator it = parent->end();
   if constexpr (T == path_strategy_t::NAME) {
     it = std::find_if(parent->begin(), parent->end(),
-                      [&path](auto child) { return child->name() == path; });
+                      [&path](auto child) { return child->name()._s == path; });
   } else if constexpr (T == path_strategy_t::INDEX) {
     it = parent->begin() + path.rightRef(path.length() - 5).toUInt();
   }

@@ -122,5 +122,5 @@ auto TreeWidgetTest::addChild(std::shared_ptr<yoyo::node_base> parent, size_t in
   }
 
   parent->addChild(new_node, index);
-  new_node->setName(name);
+  new_node->setName({ name, true });
 }

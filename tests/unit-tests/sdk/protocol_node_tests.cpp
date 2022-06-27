@@ -56,7 +56,7 @@ TEST(ProtocolTests, properties)
             yoyo::protocol_node::staticMetaObject.propertyOffset());
 
   struct Receiver {
-    MOCK_METHOD(void, nameChanged, (QString n));
+    MOCK_METHOD(void, nameChanged, (yoyo::properties::invisible_string_t n));
     MOCK_METHOD(void, inputChanged, (yoyo::properties::connection_t c));
     MOCK_METHOD(void, outputChanged, (yoyo::properties::connection_t c));
   } receiver;
@@ -70,15 +70,19 @@ TEST(ProtocolTests, properties)
 
   {
     auto nameProperty = meta->property(meta->indexOfProperty("name"));
-    EXPECT_EQ(object->name().toStdString(), "");
-    EXPECT_CALL(receiver, nameChanged(QString("myObject")));
-    object->setName("myObject");
-    EXPECT_EQ(object->name().toStdString(), "myObject");
-    EXPECT_CALL(receiver, nameChanged(QString("foo")));
-    nameProperty.write(object.get(), "foo");
-    EXPECT_EQ(nameProperty.read(object.get()).toString().toStdString(), "foo");
+    EXPECT_EQ(object->name()._s.toStdString(), "");
+    EXPECT_CALL(receiver, nameChanged(yoyo::properties::invisible_string_t { "myObject", true }));
+    object->setName({ "myObject", true });
+    EXPECT_EQ(object->name()._s.toStdString(), "myObject");
+    EXPECT_CALL(receiver, nameChanged(yoyo::properties::invisible_string_t { "foo", true }));
+    nameProperty.write(object.get(),
+                       QVariant::fromValue(yoyo::properties::invisible_string_t { "foo", true }));
+    EXPECT_EQ(nameProperty.read(object.get())
+                .value<yoyo::properties::invisible_string_t>()
+                ._s.toStdString(),
+              "foo");
     EXPECT_CALL(receiver, nameChanged(_)).Times(0);
-    object->setName("foo");
+    object->setName({ "foo", true });
   }
 
   {

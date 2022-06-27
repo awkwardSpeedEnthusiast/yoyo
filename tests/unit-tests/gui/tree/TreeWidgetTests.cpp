@@ -32,10 +32,10 @@ TEST_F(TreeWidgetTest, loadedConfig)
   {
     configuration->childAt(0)->addChild(
       _data_factory->createNode(std::get<0>(_data_factory->installed_nodes()[0]), {}));
-    configuration->childAt(0)->childAt(0)->setName("myGroup");
+    configuration->childAt(0)->childAt(0)->setName({ "myGroup", true });
     configuration->childAt(0)->childAt(0)->addChild(
       _data_factory->createNode(std::get<0>(_data_factory->installed_nodes()[1]), {}));
-    configuration->childAt(0)->childAt(0)->childAt(0)->setName("myData");
+    configuration->childAt(0)->childAt(0)->childAt(0)->setName({ "myData", true });
 
     configuration->childAt(1)->addChild(
       _gui_factory->createNode(std::get<0>(_gui_factory->installed_nodes()[0]), {}));
@@ -104,7 +104,7 @@ TEST_F(TreeWidgetTest, addRemove)
   {
     configuration->childAt(0)->addChild(
       _data_factory->createNode(std::get<0>(_data_factory->installed_nodes()[0]), {}));
-    configuration->childAt(0)->childAt(0)->setName("myGroup");
+    configuration->childAt(0)->childAt(0)->setName({ "myGroup", true });
 
     QApplication::processEvents();
     view->expandAll();
@@ -115,7 +115,7 @@ TEST_F(TreeWidgetTest, addRemove)
 
     configuration->childAt(0)->childAt(0)->addChild(
       _data_factory->createNode(std::get<0>(_data_factory->installed_nodes()[1]), {}));
-    configuration->childAt(0)->childAt(0)->childAt(0)->setName("myData");
+    configuration->childAt(0)->childAt(0)->childAt(0)->setName({ "myData", true });
 
     QApplication::processEvents();
     view->expandAll();

@@ -416,7 +416,7 @@ auto connectivity_manager::impl::on_node_add(std::weak_ptr<node_base> node) -> v
     if (meta->inherits(&data_node::staticMetaObject)) {
       _reference_nodes.insert(
         std::make_pair(n.get(), QObject::connect(n.get(), &data_node::nameChanged,
-                                                 [this](QString) { reevaluate_connections(); })));
+                                                 [this](auto) { reevaluate_connections(); })));
     } else {
       static QStringList const connection_types { "yoyo::properties::connection_t",
                                                   "yoyo::properties::in_connection_t",

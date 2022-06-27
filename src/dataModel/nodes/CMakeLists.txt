@@ -2,6 +2,7 @@ ifx_add_library(nodes SHARED
     HEADERS
         include/configuration.hpp
         include/factory_provider.hpp
+        src/configuration_data.hpp
         src/data_root.hpp
         src/gui_root.hpp
         src/dataNodes/uint8node.hpp
@@ -17,6 +18,7 @@ ifx_add_library(nodes SHARED
         src/basicGui/combo_box.hpp
     SOURCES
         src/configuration.cpp
+        src/configuration_data.cpp
         src/factory_provider.cpp
         src/data_root.cpp
         src/gui_root.cpp

@@ -50,7 +50,7 @@ TEST_F(guiNodeTest, properties)
 
   EXPECT_EQ(object->type(), "mock_node");
   EXPECT_FALSE(object->identifier().is_nil());
-  EXPECT_EQ(object->name(), "");
+  EXPECT_EQ(object->name()._s, "");
   EXPECT_EQ(object->layoutDirection()._s, yoyo::types::layout_direction_t::HORIZONTAL);
   EXPECT_EQ(object->layoutDirection()._visible, false);
   EXPECT_EQ(object->styleSheet(), yoyo::properties::text_t { "" });
@@ -79,7 +79,7 @@ TEST_F(guiNodeTest, properties)
   ASSERT_NE(object->widget(), nullptr);
 
   struct Receiver {
-    MOCK_METHOD(void, onNameChanged, (QString name));
+    MOCK_METHOD(void, onNameChanged, (yoyo::properties::invisible_string_t name));
     MOCK_METHOD(void, onLayoutDirectionChanged,
                 (yoyo::properties::invisible_layout_direction_t ld));
     MOCK_METHOD(void, onStyleSheetChanged, (yoyo::properties::text_t name));
@@ -111,9 +111,9 @@ TEST_F(guiNodeTest, properties)
                    [&receiver](auto v) { receiver.onVisibleChanged(v); });
 
   {
-    EXPECT_CALL(receiver, onNameChanged(QString("foo")));
-    object->setName("foo");
-    EXPECT_EQ(object->name(), "foo");
+    EXPECT_CALL(receiver, onNameChanged(yoyo::properties::invisible_string_t { "foo", true }));
+    object->setName({ "foo", true });
+    EXPECT_EQ(object->name()._s, "foo");
   }
   {
     using ld = yoyo::types::layout_direction_t;

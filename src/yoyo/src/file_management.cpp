@@ -93,6 +93,7 @@ auto file_management::new_file() -> std::shared_ptr<node_base>
   auto configuration = _p->_factories[0]->createNode(fundamental::configuration_id, {});
   configuration->addChild(_p->_factories[0]->createNode(fundamental::data_root_id, {}));
   configuration->addChild(_p->_factories[0]->createNode(fundamental::gui_root_id, {}));
+  configuration->addChild(_p->_factories[0]->createNode(fundamental::configuration_data_id, {}));
   return configuration;
 }
 

@@ -356,7 +356,7 @@ public:
   {
     auto some_data = std::make_shared<testing::StrictMock<T>>();
     parent->addChild(some_data);
-    some_data->setName(name);
+    some_data->setName({ name, true });
     if constexpr (!std::is_same_v<T, data_container_mock>) {
       some_data->setTitle(title);
       some_data->setUnit({ unit, true });
@@ -435,7 +435,7 @@ TEST_F(ConnectivityTests, connectEmptyConfiguration)
 
   auto some_data = std::make_shared<testing::StrictMock<data_type_1>>();
   configuration->childAt(0)->addChild(some_data);
-  some_data->setName("myData");
+  some_data->setName({ "myData", true });
   some_data->setTitle("My Title");
 
   auto some_gui = std::make_shared<testing::StrictMock<gui_type_1>>();
@@ -486,7 +486,7 @@ TEST_F(ConnectivityTests, connectEmptyConfiguration)
     EXPECT_CALL(*some_gui, title())
       .WillOnce(Return(yoyo::properties::connected_string_t { "", "" }));
     EXPECT_CALL(*some_gui, setTitle(yoyo::properties::connected_string_t { "My Title", "" }));
-    some_data->setName("myData1");
+    some_data->setName({ "myData1", true });
 
     EXPECT_CALL(*some_gui, setter(QVariant(42)));
     some_data->emitValue(42);
@@ -502,7 +502,7 @@ TEST_F(ConnectivityTests, connectEmptyConfiguration)
     EXPECT_CALL(*some_gui, title())
       .WillOnce(Return(yoyo::properties::connected_string_t { "", "" }));
     EXPECT_CALL(*some_gui, setTitle(yoyo::properties::connected_string_t { "", "" }));
-    some_data->setName("myData");
+    some_data->setName({ "myData", true });
 
     some_data->emitValue("foo");
     some_data->emitValue(false);
@@ -513,7 +513,7 @@ TEST_F(ConnectivityTests, connectEmptyConfiguration)
   // Add a second set of items
   auto some_data1 = std::make_shared<testing::StrictMock<data_type_2>>();
   configuration->childAt(0)->addChild(some_data1);
-  some_data1->setName("myOtherData");
+  some_data1->setName({ "myOtherData", true });
   some_data1->setTitle("My other Title");
   some_data1->setUnit({ "A Unit", true });
 
@@ -573,7 +573,7 @@ TEST_F(ConnectivityTests, connectEmptyConfiguration)
   // And a second set of items
   auto some_data2 = std::make_shared<testing::StrictMock<data_type_2>>();
   configuration->childAt(0)->addChild(some_data2);
-  some_data2->setName("myOtherData2");
+  some_data2->setName({ "myOtherData2", true });
   some_data2->setTitle("My other Title");
   some_data2->setUnit({ "A Unit", true });
 
@@ -659,7 +659,7 @@ TEST_F(ConnectivityTests, connectEmptyConfiguration)
       .WillOnce(Return(yoyo::properties::connected_string_t { "", "" }));
     EXPECT_CALL(*some_gui2, setUnit(yoyo::properties::connected_string_t { "A Unit", "" }));
 
-    some_data1->setName("myData1");
+    some_data1->setName({ "myData1", true });
 
     EXPECT_CALL(*some_gui, setter(QVariant(42)));
     EXPECT_CALL(*some_gui1, setter(QVariant(42)));

@@ -10,6 +10,7 @@ boost::uuids::uuid const data_root::_typeId = fundamental::data_root_id;
 data_root::data_root(boost::uuids::uuid identifier)
   : node_base("Signals", identifier)
 {
+  setName({ "Signals", false });
 }
 
 auto data_root::typeId() -> boost::uuids::uuid

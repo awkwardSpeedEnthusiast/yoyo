@@ -36,7 +36,7 @@ TEST_F(buttonTest, properties)
   button->init();
   EXPECT_EQ(button->type(), "button");
   EXPECT_FALSE(button->identifier().is_nil());
-  EXPECT_EQ(button->name(), "");
+  EXPECT_EQ(button->name()._s, "");
   EXPECT_EQ(button->layoutDirection()._s, yoyo::types::layout_direction_t::HORIZONTAL);
   EXPECT_EQ(button->layoutDirection()._visible, false);
   EXPECT_EQ(button->styleSheet(), yoyo::properties::text_t { "" });

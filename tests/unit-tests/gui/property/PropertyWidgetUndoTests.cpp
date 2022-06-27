@@ -38,9 +38,10 @@ TEST_F(PropertyWidgetTest, undo)
     object->prop1Changed(v);
   }));
   EXPECT_CALL(*object, prop1()).WillOnce(Return(42));
-  object->setName("mockObject1");
+  object->setName({ "mockObject1", true });
 
   _widget->itemSelected(object, docu);
+  QTest::qWait(10);
 
   auto handler = yoyo::command::commandhandler();
   ASSERT_NE(handler, nullptr);
@@ -63,21 +64,21 @@ TEST_F(PropertyWidgetTest, undo)
 
     EXPECT_TRUE(handler->hasCommandToUndo());
     EXPECT_EQ(handler->nextUndo().toStdString(), "Set property name");
-    EXPECT_EQ(object->name(), "changedName");
+    EXPECT_EQ(object->name()._s, "changedName");
     EXPECT_EQ(input->text().toStdString(), "changedName");
 
     handler->undo();
     EXPECT_FALSE(handler->hasCommandToUndo());
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Set property name");
-    EXPECT_EQ(object->name(), "mockObject1");
+    EXPECT_EQ(object->name()._s, "mockObject1");
     EXPECT_EQ(input->text().toStdString(), "mockObject1");
 
     handler->redo();
     EXPECT_TRUE(handler->hasCommandToUndo());
     EXPECT_FALSE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextUndo().toStdString(), "Set property name");
-    EXPECT_EQ(object->name(), "changedName");
+    EXPECT_EQ(object->name()._s, "changedName");
     EXPECT_EQ(input->text().toStdString(), "changedName");
   }
   handler->clearStack();

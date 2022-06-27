@@ -38,7 +38,8 @@ auto gui_node::init() -> void
   _p->_widget = std::make_unique<gui_node_widget>(
     std::dynamic_pointer_cast<gui_node>(shared_from_this()), _p->_container);
   _p->_widget->setLayoutDirection(_p->_layout_direction._s);
-  connect(this, &node_base::nameChanged, _p->_widget.get(), &QObject::setObjectName);
+  connect(this, &node_base::nameChanged, _p->_widget.get(),
+          [this](auto n) { _p->_widget->setObjectName(n._s); });
 }
 
 auto gui_node::setEditMode(bool mode) -> void

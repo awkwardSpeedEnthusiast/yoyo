@@ -41,9 +41,9 @@ public:
     container->addChild(object);
     root->setEditMode(true);
     root->widget()->resize(100, 100);
-    object->setName("object");
-    container->setName("container");
-    root->setName("root");
+    object->setName({ "object", true });
+    container->setName({ "container", true });
+    root->setName({ "root", true });
   }
 
   auto TearDown() -> void override

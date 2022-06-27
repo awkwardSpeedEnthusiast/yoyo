@@ -10,13 +10,6 @@ class YOYO_NODES_SHARED_EXPORT configuration final : public node_base
   Q_OBJECT
 
   Q_PROPERTY(yoyo::properties::invisible_string_t version READ version)
-  Q_PROPERTY(
-    yoyo::properties::script_t afterLoad READ afterLoad WRITE setAfterLoad NOTIFY afterLoadChanged)
-  Q_PROPERTY(yoyo::properties::script_t beforeClose READ beforeClose WRITE setBeforeClose NOTIFY
-               beforeCloseChanged)
-  Q_PROPERTY(int timerPeriod READ timerPeriod WRITE setTimerPeriod NOTIFY timerPeriodChanged)
-  Q_PROPERTY(yoyo::properties::script_t timerScript READ timerScript WRITE setTimerScript NOTIFY
-               timerScriptChanged)
 
 public:
   explicit configuration(boost::uuids::uuid identifier = boost::uuids::uuid {});
@@ -32,22 +25,8 @@ public:
   auto acceptsParent(std::shared_ptr<node_base> const& parent) const -> bool final;
 
   auto version() const -> yoyo::properties::invisible_string_t;
-  auto afterLoad() const -> yoyo::properties::script_t;
-  auto beforeClose() const -> yoyo::properties::script_t;
-  auto timerPeriod() const -> int;
-  auto timerScript() const -> yoyo::properties::script_t;
 
-  auto setAfterLoad(yoyo::properties::script_t script) -> void;
-  auto setBeforeClose(yoyo::properties::script_t script) -> void;
-  auto setTimerPeriod(int intervalInS) -> void;
-  auto setTimerScript(yoyo::properties::script_t script) -> void;
   static auto typeId() -> boost::uuids::uuid;
-
-Q_SIGNALS:
-  void afterLoadChanged(yoyo::properties::script_t script);
-  void beforeCloseChanged(yoyo::properties::script_t script);
-  void timerPeriodChanged(int intervalInS);
-  void timerScriptChanged(yoyo::properties::script_t script);
 
 private:
   auto childAboutToBeAdded(std::shared_ptr<node_base> const& child) -> bool final;

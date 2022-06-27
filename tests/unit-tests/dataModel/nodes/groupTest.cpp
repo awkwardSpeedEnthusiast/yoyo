@@ -43,7 +43,7 @@ TEST_F(groupTest, properties)
 
   EXPECT_EQ(object->type(), "group");
   EXPECT_FALSE(object->identifier().is_nil());
-  EXPECT_EQ(object->name(), "");
+  EXPECT_EQ(object->name()._s, "");
 
   EXPECT_TRUE(object->acceptsChild(child1));
   EXPECT_TRUE(object->acceptsParent(child1));

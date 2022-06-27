@@ -42,22 +42,22 @@ TEST(nodeBaseTest, properties)
   yoyo::node_mock object("mock_node");
   EXPECT_EQ(object.type(), "mock_node");
   EXPECT_FALSE(object.identifier().is_nil());
-  EXPECT_EQ(object.name(), "");
+  EXPECT_EQ(object.name()._s, "");
 
   struct Receiver {
-    MOCK_METHOD(void, onNameChanged, (QString name));
+    MOCK_METHOD(void, onNameChanged, (yoyo::properties::invisible_string_t name));
   } receiver;
 
   QObject::connect(&object, &yoyo::node_base::nameChanged,
                    [&receiver](auto name) { receiver.onNameChanged(name); });
 
-  EXPECT_CALL(receiver, onNameChanged(QString("foo")));
-  object.setName("foo");
-  EXPECT_EQ(object.name(), "foo");
+  EXPECT_CALL(receiver, onNameChanged(yoyo::properties::invisible_string_t { "foo", true }));
+  object.setName({ "foo", true });
+  EXPECT_EQ(object.name()._s, "foo");
 
-  EXPECT_CALL(receiver, onNameChanged(QString("bar")));
-  object.setName("bar");
-  EXPECT_EQ(object.name(), "bar");
+  EXPECT_CALL(receiver, onNameChanged(yoyo::properties::invisible_string_t { "bar", false }));
+  object.setName({ "bar", false });
+  EXPECT_EQ(object.name()._s, "bar");
 
   auto id = boost::uuids::random_generator {}();
   yoyo::node_mock object2 { "mock2", id };

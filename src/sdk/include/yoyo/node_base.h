@@ -27,7 +27,7 @@ class YOYO_SDK_SHARED_EXPORT node_base : public QObject,
   /// \brief name property
   ///
   /// This is the name of the object, which is to be available for Gui access.
-  Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+  Q_PROPERTY(yoyo::properties::invisible_string_t name READ name WRITE setName NOTIFY nameChanged)
 
   ///
   /// \brief type property
@@ -94,14 +94,14 @@ public:
   /// This is the getter for the name property.
   /// \return the current value for name.
   ///
-  auto name() const -> QString;
+  auto name() const -> yoyo::properties::invisible_string_t;
   ///
   /// \brief set name
   ///
   /// This is the setter for the name property. Emits the nameChanged signal.
   /// \param value the new name.
   ///
-  auto setName(QString const& value) -> void;
+  auto setName(yoyo::properties::invisible_string_t const& value) -> void;
   ///
   /// \brief type
   ///
@@ -276,7 +276,7 @@ Q_SIGNALS:
   /// This signal is emitted, when the name of the node has changed.
   /// \param name the new name of the node.
   ///
-  void nameChanged(QString const& name);
+  void nameChanged(yoyo::properties::invisible_string_t const& name);
   ///
   /// \brief tree changed signal
   ///

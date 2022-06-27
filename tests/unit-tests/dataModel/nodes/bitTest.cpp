@@ -12,7 +12,7 @@ TEST(BitNodeTest, properties)
   auto object = std::make_shared<yoyo::bit_node>();
   EXPECT_EQ(object->type(), "bit");
   EXPECT_FALSE(object->identifier().is_nil());
-  EXPECT_EQ(object->name(), "");
+  EXPECT_EQ(object->name()._s, "");
 
   auto meta = object->metaObject();
   EXPECT_GE(meta->indexOfProperty("name"), yoyo::node_base::staticMetaObject.propertyOffset());

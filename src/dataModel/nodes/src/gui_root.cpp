@@ -13,6 +13,7 @@ auto gui_root::typeId() -> boost::uuids::uuid
 gui_root::gui_root(boost::uuids::uuid identifier)
   : gui_node("Layout", nullptr, identifier)
 {
+  setName({ "Layout", false });
 }
 
 auto gui_root::staticTypeId() const -> boost::uuids::uuid

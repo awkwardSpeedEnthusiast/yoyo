@@ -14,7 +14,7 @@ struct node_base::impl {
   {
   }
 
-  QString _name;
+  yoyo::properties::invisible_string_t _name {};
   QString const _type;
   std::vector<std::shared_ptr<node_base>> _children;
   std::weak_ptr<node_base> _parent;
@@ -30,12 +30,12 @@ node_base::node_base(QString type, boost::uuids::uuid identifier)
 
 node_base::~node_base() = default;
 
-auto node_base::name() const -> QString
+auto node_base::name() const -> yoyo::properties::invisible_string_t
 {
   return _p->_name;
 }
 
-auto node_base::setName(QString const& value) -> void
+auto node_base::setName(yoyo::properties::invisible_string_t const& value) -> void
 {
   if (_p->_name == value) {
     return;

@@ -314,7 +314,7 @@ auto tree_model::dropMimeData(QMimeData const* data, Qt::DropAction action, int 
 
     if (auto handler = command::commandhandler()) {
       handler->execute({
-        tr("Move item %1 position").arg(source->name()),
+        tr("Move item %1 position").arg(source->name()._s),
         [t = target->weak_from_this(), s = source->weak_from_this(), index = i]() {
           auto target = t.lock();
           auto source = s.lock();
@@ -351,7 +351,7 @@ auto tree_model::dropMimeData(QMimeData const* data, Qt::DropAction action, int 
     if (auto handler = command::commandhandler()) {
       auto parent = source->parent().lock();
       handler->execute({
-        tr("Move item %1 position").arg(source->name()),
+        tr("Move item %1 position").arg(source->name()._s),
         [t = target->weak_from_this(), s = source->weak_from_this(), index = i]() {
           auto target = t.lock();
           auto source = s.lock();

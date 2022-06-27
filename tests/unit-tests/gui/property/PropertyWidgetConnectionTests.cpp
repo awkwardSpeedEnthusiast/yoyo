@@ -55,9 +55,10 @@ TEST_F(PropertyWidgetTest, connectionProperty)
   EXPECT_CALL(*object, prop2()).WillOnce(Return(prop2));
   yoyo::properties::out_connection_t prop3 { {}, {}, "ownValue" };
   EXPECT_CALL(*object, prop3()).WillOnce(Return(prop3));
-  object->setName("mockObject1");
+  object->setName({ "mockObject1", true });
 
   _widget->itemSelected(object, docu);
+  QApplication::processEvents();
 
   EXPECT_EQ(child_count(), 5 + 3 * 2);
   int item_count = 1;
@@ -79,7 +80,7 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
-    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::invisible_string_input"s);
     ASSERT_EQ(c1->children().size(), 2);
     auto input = dynamic_cast<QLineEdit*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
@@ -87,13 +88,13 @@ TEST_F(PropertyWidgetTest, connectionProperty)
     EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
               std::get<2>(docu->property("name")).toStdString());
 
-    object->setName("anOtherName");
+    object->setName({ "anOtherName", true });
     EXPECT_EQ(input->text().toStdString(), "anOtherName");
 
     input->setText("changedName");
     QTest::keyClick(input, Qt::Key_Return);
 
-    EXPECT_EQ(object->name(), "changedName");
+    EXPECT_EQ(object->name()._s, "changedName");
     EXPECT_EQ(input->text().toStdString(), "changedName");
   }
   // prop1: connecton_t
