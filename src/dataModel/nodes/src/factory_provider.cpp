@@ -2,6 +2,8 @@
 
 #include "configuration.hpp"
 #include "configuration_data.hpp"
+#include "message_field.hpp"
+
 #include "dataNodes/bit_node.hpp"
 #include "dataNodes/data_group.hpp"
 #include "dataNodes/int8node.hpp"
@@ -365,6 +367,33 @@ auto updateDocumentation<yoyo::gui_root>(documentation::builder& builder) -> voi
   updateDocumentation<gui_node>(builder);
 }
 
+template <>
+auto updateDocumentation<yoyo::message_field>(documentation::builder& builder) -> void
+{
+  updateDocumentation<node_base>(builder);
+  builder
+    .description("The message-field defines how to fill the message with data. It defines the "
+                 "position of the data and the size of it. The field is linked to a signal, that "
+                 "provides or receives the data.")
+    .property("connection", "Name",
+              "This property holds the connection to the signal/data object to propagate values to "
+              "or to receive values from.",
+              "The signal to connect to.", {})
+    .property("bitPos", "Bit-pos", "The position inside the bitfield to start the message-field.",
+              "Bitfield position within the message in bit", 0)
+    .property(
+      "bufferLength", "Buffer",
+      "The length of the buffer for transmission. Set to zero (0) to disable. String type signals "
+      "essentially need buffered message fields, if the messages are not sent as stream.",
+      "Buffer lenghts for transmit messages. \"0\" disables the buffer. \n"
+      "Note that signals of string type must be buffered, if message is not sent as stream",
+      0)
+    .property("bufferAsPackage", "Buffer as package",
+              "Data can be transmitted as raw byte data or as packages. Use this property to "
+              "switch on the package option.",
+              "If enabled, the data are buffered as packet instead of raw data byte", false);
+}
+
 auto install_gui_nodes(node_factory& gui_factory) -> void
 {
   auto noChildren = [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; };
@@ -414,6 +443,9 @@ auto install_fundamental_nodes(node_factory& factory) -> void
   });
   ::install<yoyo::configuration_data>(
     factory, "Configuration data", {},
+    [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; });
+  ::install<yoyo::message_field>(
+    factory, "Message Field", {},
     [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; });
 }
 

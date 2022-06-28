@@ -5,6 +5,7 @@ ifx_add_library(nodes SHARED
         src/configuration_data.hpp
         src/data_root.hpp
         src/gui_root.hpp
+        src/message_field.hpp
         src/dataNodes/uint8node.hpp
         src/dataNodes/int8node.hpp
         src/dataNodes/string_node.hpp
@@ -22,6 +23,7 @@ ifx_add_library(nodes SHARED
         src/factory_provider.cpp
         src/data_root.cpp
         src/gui_root.cpp
+        src/message_field.cpp
         src/dataNodes/uint8node.cpp
         src/dataNodes/int8node.cpp
         src/dataNodes/string_node.cpp
