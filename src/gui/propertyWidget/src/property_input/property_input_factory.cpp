@@ -1,5 +1,4 @@
 #include "property_input_factory.hpp"
-#include "access_input.hpp"
 #include "bool_input.hpp"
 #include "connected_boolean_input.hpp"
 #include "connected_string_input.hpp"
@@ -7,6 +6,7 @@
 #include "connection_input.hpp"
 #include "connection_out_input.hpp"
 #include "enum_input.hpp"
+#include "enumeration_input.hpp"
 #include "invisible_string_input.hpp"
 #include "layout_input.hpp"
 #include "number_input.hpp"
@@ -85,7 +85,7 @@ std::map<std::string, property::creator> const property::factory {
     } },
   { "yoyo::types::access_t",
     [](auto n, auto p, auto parent) {
-      return std::make_shared<yoyo::gui::access_input>(n, p, parent);
+      return std::make_shared<yoyo::gui::enumeration_input>(n, p, parent);
     } },
   { "yoyo::types::layout_direction_t",
     [](auto n, auto p, auto parent) {
@@ -174,6 +174,10 @@ std::map<std::string, property::creator> const property::factory {
   { "yoyo::properties::script_t",
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::script_input>(n, p, parent);
-    } }
+    } },
+  { "yoyo::properties::transmission_direction_t",
+    [](auto n, auto p, auto parent) {
+      return std::make_shared<yoyo::gui::enumeration_input>(n, p, parent);
+    } },
 };
 } // namespace yoyo::gui

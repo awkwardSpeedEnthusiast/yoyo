@@ -2,6 +2,7 @@
 
 #include "configuration.hpp"
 #include "configuration_data.hpp"
+#include "message.hpp"
 #include "message_field.hpp"
 
 #include "dataNodes/bit_node.hpp"
@@ -394,6 +395,55 @@ auto updateDocumentation<yoyo::message_field>(documentation::builder& builder) -
               "If enabled, the data are buffered as packet instead of raw data byte", false);
 }
 
+template <>
+auto updateDocumentation<yoyo::message>(documentation::builder& builder) -> void
+{
+  updateDocumentation<yoyo::node_base>(builder);
+  builder
+    .description(
+      "The message defines the data chunk which is send over the communication interface.")
+    .property("interval", "Interval",
+              "The behavior of this property depends on the transmission direction:\n"
+              " - Tx: the interval between send operations. In case Send on new data is enabled, "
+              "this corresponds to the minimal interval between messages.\n"
+              " - Rx: the expected interval between received messages.\n\n"
+              "Use an interval value of smaller than 0 to disable.\nInterval in seconds.",
+              "The interval (in seconds) between messages:\n"
+              " - Tx: the interval between send messages. If send on new data is enabled, this "
+              "corresponds to the minimal interval between messages.\n"
+              " - Rx: expected received message interval.\n\n"
+              "Use value < 0 to disable.",
+              -1)
+    .property("sendOnNewData", "Send on new data",
+              "Set this property to true to prevent repeatedly sending unchanged values.",
+              "Message is only sent, if new data is available for one of the fields.", false)
+    .property(
+      "direction", "Direction",
+      "This is the message direction: Tx is outgoing, Rx is incoming with reference to Yoyo.",
+      "Message direction:\n"
+      " - Tx: Message is sent by Yoyo.\n"
+      " - Rx: Message is received by Yoyo.",
+      QVariant::fromValue(yoyo::properties::transmission_direction_t::RX))
+    .property("isStandard", "Message type",
+              "For CAN interfaces two message types are supported: standard and extended. This "
+              "property is true, if the standard message type is used, false for extended.",
+              "Applicable for CAN message only:\n"
+              " - checked: use standard message type\n"
+              " - unchecked: use extended message type",
+              true)
+    .property(
+      "messageLength", "Message Length",
+      "When messages are sent and not in stream mode, this defines the length of the message.",
+      "Message length in byte used when message is send. Only valid if stream is not set", 0)
+    .property(
+      "isStream", "Stream",
+      "If enabled, the message is filled with the data of the first connected field to build a "
+      "stream, else the message is filled by the data as defined by the field offset",
+      "If enabled, the message is filled with the data of the first connected field to build a "
+      "stream, else the message is filled by the data as defined by the field offset",
+      false);
+}
+
 auto install_gui_nodes(node_factory& gui_factory) -> void
 {
   auto noChildren = [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; };
@@ -447,6 +497,12 @@ auto install_fundamental_nodes(node_factory& factory) -> void
   ::install<yoyo::message_field>(
     factory, "Message Field", {},
     [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; });
+  ::install<yoyo::message>(factory, "Message", {}, [](node_factory::node_id_list const& l) {
+    node_factory::node_id_list result;
+    std::copy_if(l.begin(), l.end(), std::back_inserter(result),
+                 [](auto const& n) { return std::get<0>(n) == fundamental::message_field_id; });
+    return result;
+  });
 }
 
 auto install_communication_nodes(node_factory&) -> void {}

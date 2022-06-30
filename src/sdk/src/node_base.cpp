@@ -234,6 +234,7 @@ auto registerAllPropertyTypes() -> void
   qRegisterMetaType<uint16_t>();
   qRegisterMetaType<uint32_t>();
   qRegisterMetaType<uint64_t>();
+  qRegisterMetaType<yoyo::properties::transmission_direction_t>();
 }
 
 auto value_equals(QVariant const& lhs, QVariant const& rhs) -> bool

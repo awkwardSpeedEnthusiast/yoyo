@@ -4,6 +4,8 @@
 
 #include "yoyo/documentation_utilities.h"
 
+#include <bitset>
+
 namespace yoyo
 {
 boost::uuids::uuid const message_field::_typeId = fundamental::message_field_id;
@@ -13,7 +15,7 @@ message_field::message_field(boost::uuids::uuid id)
   , _connection { [this](std::function<void(QVariant)> subscriber) {
                    return _signal.connect(subscriber);
                  },
-                  [this](QVariant value) { Q_EMIT valueReceived(value); },
+                  [this](QVariant value) { dataOutgoing(value); },
                   [](types::value_t) { return true; },
                   "",
                   "",
@@ -22,9 +24,60 @@ message_field::message_field(boost::uuids::uuid id)
   setName({ "Message field", false });
 }
 
-auto message_field::propagateValue(QVariant v) -> void
+auto message_field::setStreaming(bool isStreaming) -> void
 {
-  _signal(v);
+  _isStreaming = isStreaming;
+}
+
+auto message_field::incommingData(QByteArray const& v) -> void
+{
+  if (_isStreaming) {
+    _signal(v);
+  } else {
+    auto pos = _bitPos._value;
+    if (v.count() * 8 < pos + _bufferLength) {
+      return;
+    }
+    QByteArray out_data;
+    if (pos % 8 == 0) {
+      for (auto i = pos / 8; i < (pos + _bufferLength) / 8; i++) {
+        out_data.append(v[i]);
+      }
+      if (_bufferLength % 8) {
+        auto tail = v[(pos + _bufferLength) / 8];
+        std::bitset<8> set = tail;
+        for (auto i = _bufferLength % 8; i < 8; i++) {
+          set.reset(i);
+        }
+        out_data.append(static_cast<char>(set.to_ulong()));
+      }
+    } else {
+      auto index = pos / 8;
+      auto bit = pos % 8;
+      std::bitset<8> set;
+
+      for (auto i = 0; i < _bufferLength / 8; i++) {
+        set = v[index + i];
+        set <<= bit;
+        set = (std::bitset<8>(v[index + i + 1]) << bit);
+        out_data.append(static_cast<char>(set.to_ulong()));
+      }
+      if (_bufferLength % 8) {
+        set = v[index + _bufferLength / 8];
+        set <<= bit;
+        for (auto i = _bufferLength % 8; i < 8; i++) {
+          set.reset(i);
+        }
+        out_data.append(static_cast<char>(set.to_ulong()));
+      }
+    }
+    _signal(out_data);
+  }
+}
+
+auto message_field::dataOutgoing(QVariant const& v) -> void
+{
+  Q_EMIT outgoingData(v.toByteArray());
 }
 
 auto message_field::connection() const -> yoyo::properties::connection_t

@@ -51,6 +51,7 @@ TEST(JsonTest, property)
   EXPECT_NE(prop::io.find("yoyo::properties::limited_float_t"), prop::io.end());
   EXPECT_NE(prop::io.find("yoyo::properties::script_t"), prop::io.end());
   EXPECT_NE(prop::io.find("yoyo::properties::text_t"), prop::io.end());
+  EXPECT_NE(prop::io.find("yoyo::properties::transmission_direction_t"), prop::io.end());
 }
 
 struct test_data {
@@ -150,6 +151,10 @@ public:
       { { "yoyo::properties::script_t" },
         [](QVariant const& v1, QVariant const& v2) {
           EXPECT_EQ(v1.value<yoyo::properties::script_t>(), v2.value<yoyo::properties::script_t>());
+        } },
+      { { "yoyo::properties::enum_t" },
+        [](QVariant const& v1, QVariant const& v2) {
+          EXPECT_EQ(v1.value<yoyo::properties::enum_t>(), v2.value<yoyo::properties::enum_t>());
         } },
     };
 
@@ -429,4 +434,24 @@ INSTANTIATE_TEST_SUITE_P(
                   "Fuuu", yoyo::properties::script_t::type::NATIVE }) },
     test_data { QString { "yoyo::properties::script_t" },
                 QVariant::fromValue(yoyo::properties::script_t {
-                  "bla", yoyo::properties::script_t::type::IMAGE }) }));
+                  "bla", yoyo::properties::script_t::type::IMAGE }) },
+    test_data { QString { "yoyo::properties::transmission_direction_t" },
+                QVariant::fromValue(yoyo::properties::transmission_direction_t::RX) },
+    test_data { QString { "yoyo::properties::transmission_direction_t" },
+                QVariant::fromValue(yoyo::properties::transmission_direction_t::TX) },
+    test_data { QString { "yoyo::properties::enum_t" },
+                QVariant::fromValue(yoyo::properties::enum_t { false, {} }) },
+    test_data { QString { "yoyo::properties::enum_t" },
+                QVariant::fromValue(yoyo::properties::enum_t { true, {} }) },
+    test_data {
+      QString { "yoyo::properties::enum_t" },
+      QVariant::fromValue(yoyo::properties::enum_t {
+        false,
+        { { 0x0, { "v1", "v1", { "s1", yoyo::properties::script_t::type::FILE } } },
+          { 0x3, { "v2", "v2", { "s2", yoyo::properties::script_t::type::IMAGE } } } } }) },
+    test_data {
+      QString { "yoyo::properties::enum_t" },
+      QVariant::fromValue(yoyo::properties::enum_t {
+        true,
+        { { 0x0, { "v1", "v1", { "s1", yoyo::properties::script_t::type::FILE } } },
+          { 0x3, { "v2", "v2", { "s2", yoyo::properties::script_t::type::IMAGE } } } } }) }));

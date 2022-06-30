@@ -3,6 +3,7 @@
 
 #include "yoyo/property_types.h"
 
+#include <QJsonArray>
 #include <QJsonObject>
 
 #include <iostream>
@@ -325,8 +326,59 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           yoyo::properties::out_connection_t { {}, {}, o[yoyo::io::json::key_out].toString() });
       }) },
   { "yoyo::properties::enum_t",
-    std::make_pair([](QVariant v) -> QJsonValue { return v.toString(); },
-                   [](QJsonValue v) -> QVariant { return v.toString(); }) },
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        auto val = v.value<yoyo::properties::enum_t>();
+        QJsonObject object;
+        object.insert(yoyo::io::json::key_enum_active, val._enabled);
+        QJsonArray items;
+        std::for_each(val._values.begin(), val._values.end(), [&items](auto i) {
+          QJsonObject o;
+          o.insert(yoyo::io::json::key_enum_data, QJsonValue::fromVariant(QVariant { i.first }));
+          o.insert(yoyo::io::json::key_enum_value, std::get<0>(i.second));
+          o.insert(yoyo::io::json::key_enum_title, std::get<1>(i.second));
+          o.insert(yoyo::io::json::key_enum_match_text, std::get<2>(i.second)._text);
+          o.insert(yoyo::io::json::key_enum_match_type,
+                   static_cast<int>(std::get<2>(i.second)._script_type));
+          items.append(o);
+        });
+        object.insert(yoyo::io::json::key_enum_items, items);
+        return object;
+      },
+      [](QJsonValue v) -> QVariant {
+        if (!v.isObject()) {
+          return {};
+        }
+        auto object = v.toObject();
+        if (!object.contains(yoyo::io::json::key_enum_active)
+            || !object.contains(yoyo::io::json::key_enum_items)
+            || !object[yoyo::io::json::key_enum_items].isArray()) {
+          return {};
+        }
+        QJsonArray items = object[yoyo::io::json::key_enum_items].toArray();
+        decltype(yoyo::properties::enum_t::_values) elements;
+        for (auto const& item : items) {
+          if (!item.isObject()) {
+            continue;
+          }
+          auto o = item.toObject();
+          if (!o.contains(yoyo::io::json::key_enum_data)
+              || !o.contains(yoyo::io::json::key_enum_title)
+              || !o.contains(yoyo::io::json::key_enum_value)
+              || !o.contains(yoyo::io::json::key_enum_match_text)
+              || !o.contains(yoyo::io::json::key_enum_match_type)) {
+            continue;
+          }
+          elements.insert({ o[yoyo::io::json::key_enum_data].toVariant().toULongLong(),
+                            { o[yoyo::io::json::key_enum_value].toString(),
+                              o[yoyo::io::json::key_enum_title].toString(),
+                              { o[yoyo::io::json::key_enum_match_text].toString(),
+                                static_cast<yoyo::properties::script_t::type>(
+                                  o[yoyo::io::json::key_enum_match_type].toInt()) } } });
+        }
+        return QVariant::fromValue(
+          yoyo::properties::enum_t { object[yoyo::io::json::key_enum_active].toBool(), elements });
+      }) },
   { "yoyo::properties::patterned_string_t",
     std::make_pair(
       [](QVariant v) -> QJsonValue { return v.value<yoyo::properties::patterned_string_t>()._s; },
@@ -502,6 +554,15 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
         return QVariant::fromValue(yoyo::properties::script_t {
           o[yoyo::io::json::key_text].toString(),
           static_cast<yoyo::properties::script_t::type>(o[yoyo::io::json::key_type].toInt()) });
+      }) },
+  { "yoyo::properties::transmission_direction_t",
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return static_cast<uint8_t>(v.value<yoyo::properties::transmission_direction_t>());
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<yoyo::properties::transmission_direction_t>(v.toInt()));
       }) },
 };
 } // namespace yoyo::io::json

@@ -30,7 +30,10 @@ public:
   message_field& operator=(message_field const&) = delete;
   message_field& operator=(message_field&&) = delete;
 
-  auto propagateValue(QVariant v) -> void;
+  auto incommingData(QByteArray const& v) -> void;
+  auto dataOutgoing(QVariant const& v) -> void;
+
+  auto setStreaming(bool isStreaming) -> void;
 
   auto connection() const -> yoyo::properties::connection_t;
   auto bitPos() const -> yoyo::properties::limited_uint8_t;
@@ -62,7 +65,7 @@ Q_SIGNALS:
   void bufferLengthChanged(uint16_t v);
   void bufferAsPackageChanged(bool v);
 
-  void valueReceived(QVariant v);
+  void outgoingData(QByteArray v);
 
 private:
   static boost::uuids::uuid const _typeId;
@@ -71,6 +74,7 @@ private:
   yoyo::properties::limited_uint8_t _bitPos { 0, 0, 64 };
   uint16_t _bufferLength { 0 };
   bool _bufferAsPackage { false };
+  bool _isStreaming { false };
 
   boost::signals2::signal<void(QVariant)> _signal;
 };

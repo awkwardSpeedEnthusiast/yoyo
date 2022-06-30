@@ -12,7 +12,7 @@ ifx_add_library(propertyWidget SHARED
         src/property_input/connection_input.hpp
         src/property_input/text_input.hpp
         src/property_input/bool_input.hpp
-        src/property_input/access_input.hpp
+        src/property_input/enumeration_input.hpp
         src/property_input/layout_input.hpp
         src/property_input/connected_boolean_input.hpp
         src/property_input/script_input.hpp
@@ -34,7 +34,7 @@ ifx_add_library(propertyWidget SHARED
         src/property_input/text_input.cpp
         src/property_input/text_input.ui
         src/property_input/bool_input.cpp
-        src/property_input/access_input.cpp
+        src/property_input/enumeration_input.cpp
         src/property_input/layout_input.cpp
         src/property_input/connected_boolean_input.cpp
         src/property_input/script_input.cpp

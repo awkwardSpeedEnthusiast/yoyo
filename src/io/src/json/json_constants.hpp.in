@@ -1,6 +1,7 @@
 #pragma once
 
-namespace yoyo::io::json {
+namespace yoyo::io::json
+{
 constexpr auto const io_type_identifier = "# Json Yoyo file";
 
 constexpr auto const key_node_type = "node_type";
@@ -16,4 +17,11 @@ constexpr auto const key_text = "text";
 constexpr auto const key_in = "in";
 constexpr auto const key_out = "out";
 constexpr auto const key_auto = "auto";
-} // namespace
+constexpr auto const key_enum_active = "enabled";
+constexpr auto const key_enum_items = "items";
+constexpr auto const key_enum_data = "data";
+constexpr auto const key_enum_title = "title";
+constexpr auto const key_enum_value = "value";
+constexpr auto const key_enum_match_text = "text";
+constexpr auto const key_enum_match_type = "type";
+} // namespace yoyo::io::json

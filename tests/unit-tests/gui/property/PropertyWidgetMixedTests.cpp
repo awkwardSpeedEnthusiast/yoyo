@@ -30,6 +30,8 @@ class mixed_node_mock : public mock_node
   Q_PROPERTY(
     yoyo::properties::connected_boolean_t prop5 READ prop5 WRITE set_prop5 NOTIFY prop5Changed)
   Q_PROPERTY(yoyo::properties::script_t prop6 READ prop6 WRITE set_prop6 NOTIFY prop6Changed)
+  Q_PROPERTY(
+    yoyo::properties::transmission_direction_t prop7 READ prop7 WRITE set_prop7 NOTIFY prop7Changed)
 public:
   using mock_node::mock_node;
 
@@ -39,6 +41,7 @@ public:
   DECLARE_PROPERTY(yoyo::properties::invisible_layout_direction_t, prop4);
   DECLARE_PROPERTY(yoyo::properties::connected_boolean_t, prop5);
   DECLARE_PROPERTY(yoyo::properties::script_t, prop6);
+  DECLARE_PROPERTY(yoyo::properties::transmission_direction_t, prop7);
 };
 
 TEST_F(PropertyWidgetTest, mixedProperty)
@@ -68,13 +71,20 @@ TEST_F(PropertyWidgetTest, mixedProperty)
   EXPECT_CALL(*object, prop4()).WillOnce(Return(prop4));
   EXPECT_CALL(*object, prop5()).WillOnce(Return(prop5));
   EXPECT_CALL(*object, prop6()).WillOnce(Return(prop6));
+  EXPECT_CALL(*object, prop7()).WillOnce(Return(yoyo::properties::transmission_direction_t::TX));
+  ON_CALL(*object, set_prop2(_)).WillByDefault(Invoke([&object](auto v) {
+    object->prop2Changed(v);
+  }));
+  ON_CALL(*object, set_prop7(_)).WillByDefault(Invoke([&object](auto v) {
+    object->prop7Changed(v);
+  }));
   object->setName({ "mockObject1", true });
 
   _widget->itemSelected(object, docu);
   _widget->show();
   QApplication::processEvents();
 
-  EXPECT_EQ(child_count(), 5 + 6 * 2);
+  EXPECT_EQ(child_count(), 5 + 7 * 2);
   int item_index = 1;
 
   // first row: type
@@ -150,7 +160,7 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     ASSERT_NE(label, nullptr);
     EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop2")).toStdString());
     EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop2")).toStdString());
-    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::access_input"s);
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::enumeration_input"s);
     ASSERT_EQ(c1->children().size(), 2);
     auto input = dynamic_cast<QComboBox*>(c1->children()[1]);
     ASSERT_NE(input, nullptr);
@@ -321,6 +331,36 @@ TEST_F(PropertyWidgetTest, mixedProperty)
     input_text->setText("aGroup.myData=5\n");
     QTest::mouseClick(input_save, Qt::LeftButton);
   }
+  // prop7: transmission_direction_t
+  {
+    ASSERT_GT(child_count(), item_index);
+    auto c1 = get_child(item_index++);
+    auto c2 = get_child(item_index++);
+    auto label = dynamic_cast<QLabel*>(c2);
+    ASSERT_NE(label, nullptr);
+    EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop7")).toStdString());
+    EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop7")).toStdString());
+    ASSERT_EQ(c1->metaObject()->className(), "yoyo::gui::enumeration_input"s);
+    ASSERT_EQ(c1->children().size(), 2);
+    auto input = dynamic_cast<QComboBox*>(c1->children()[1]);
+    ASSERT_NE(input, nullptr);
+    EXPECT_EQ(input->currentIndex(), 0);
+    EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
+              std::get<2>(docu->property("prop7")).toStdString());
+
+    object->prop7Changed(yoyo::properties::transmission_direction_t::RX);
+    EXPECT_EQ(input->currentIndex(), 1);
+
+    EXPECT_CALL(*object, prop7()).WillOnce(Return(yoyo::properties::transmission_direction_t::TX));
+    EXPECT_CALL(*object, set_prop7(yoyo::properties::transmission_direction_t::TX));
+    input->setCurrentIndex(0);
+
+    EXPECT_CALL(*object, prop7()).WillOnce(Return(yoyo::properties::transmission_direction_t::RX));
+    EXPECT_CALL(*object, set_prop7(yoyo::properties::transmission_direction_t::RX));
+    input->setCurrentIndex(1);
+    QApplication::processEvents();
+  }
+
   testing::Mock::VerifyAndClear(object.get());
   testing::Mock::AllowLeak(object.get());
 }

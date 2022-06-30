@@ -882,6 +882,17 @@ enum class integer_format_t {
   HEXAL,
 };
 
+///
+/// \brief transmission direction for messages
+///
+/// Transmission of messages can come in two directions: incomming (RX) and outgoing (TX). This enum
+/// defines the direction in which messages are transceived.
+///
+enum class transmission_direction_t {
+  TX,
+  RX,
+};
+
 using invisible_string_t = invisible_t<QString>;
 using invisible_layout_direction_t = invisible_t<types::layout_direction_t>;
 using limited_uint8_t = limited_value_t<uint8_t>;
@@ -950,3 +961,4 @@ Q_DECLARE_METATYPE(uint8_t)
 Q_DECLARE_METATYPE(uint16_t)
 Q_DECLARE_METATYPE(uint32_t)
 Q_DECLARE_METATYPE(uint64_t)
+Q_DECLARE_METATYPE(yoyo::properties::transmission_direction_t)
