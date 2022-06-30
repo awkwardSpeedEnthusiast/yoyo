@@ -84,17 +84,18 @@ TEST_F(PluginManagerTests, pluginDescription)
   auto data = yoyo::plugin::read("/this/is/a/bad/path.json");
   EXPECT_EQ(data, nullptr);
 
-  auto test_plugin_path = boost::filesystem::current_path() / "test_plugin";
+  auto test_plugin_path =
+    boost::filesystem::current_path().parent_path() / "test_plugins" / "test_plugin_a";
   EXPECT_TRUE(boost::filesystem::exists(test_plugin_path / "test_plugin_description.json"));
-  EXPECT_TRUE(boost::filesystem::exists(test_plugin_path / "test-plugin.dll"));
+  EXPECT_TRUE(boost::filesystem::exists(test_plugin_path / "test-plugin-a.dll"));
   data = yoyo::plugin::read(test_plugin_path / "test_plugin_description.json");
   ASSERT_NE(data, nullptr);
 
   EXPECT_EQ(data->id(), test_plugin_id);
-  EXPECT_EQ(data->name(), "test plugin");
-  EXPECT_EQ(data->description(), "This is a plugin for testing purposes.");
+  EXPECT_EQ(data->name(), "test plugin A");
+  EXPECT_EQ(data->description(), "This is a A plugin for testing purposes.");
   EXPECT_EQ(data->description_location(), test_plugin_path / "test_plugin_description.json");
-  EXPECT_EQ(data->location(), test_plugin_path / "test-plugin.dll");
+  EXPECT_EQ(data->location(), test_plugin_path / "test-plugin-a.dll");
   EXPECT_THAT(data->depends_on(), testing::IsEmpty());
 }
 
