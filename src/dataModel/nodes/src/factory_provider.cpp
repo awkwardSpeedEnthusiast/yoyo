@@ -22,6 +22,7 @@
 #include "gui_root.hpp"
 
 #include "yoyo/documentation_utilities.h"
+#include "yoyo/communication_node.h"
 
 namespace
 {
@@ -505,9 +506,7 @@ auto install_fundamental_nodes(node_factory& factory) -> void
   ::install<yoyo::configuration>(
     factory, "Configuration", {}, [](node_factory::node_id_list const&) {
       return node_factory::node_id_list {
-        { data_root::typeId(), &data_root::staticMetaObject, {} },
-        { gui_root::typeId(), &gui_root::staticMetaObject, {} },
-        { configuration_data::typeId(), &configuration_data::staticMetaObject, {} },
+        { communication_root::typeId(), &communication_root::staticMetaObject, "ComInterface" },
       };
     });
   ::install<yoyo::data_root>(factory, "Signals", {}, [](node_factory::node_id_list const& l) {
@@ -547,7 +546,7 @@ auto install_fundamental_nodes(node_factory& factory) -> void
     factory, "ComInterface", {}, [](node_factory::node_id_list const& l) {
       node_factory::node_id_list result;
       std::copy_if(l.begin(), l.end(), std::back_inserter(result), [](auto const& n) {
-        return std::get<0>(n) == fundamental::message_container_id;
+        return std::get<0>(n) == fundamental::message_container_id || std::get<QMetaObject const*>(n)->inherits(&communication_node::staticMetaObject);
       });
       return result;
     });

@@ -34,7 +34,8 @@ auto configuration::acceptsChild(std::shared_ptr<node_base> const& child) const 
 {
   return child->staticTypeId() == fundamental::data_root_id
       || child->staticTypeId() == fundamental::gui_root_id
-      || child->staticTypeId() == fundamental::configuration_data_id;
+      || child->staticTypeId() == fundamental::configuration_data_id
+      || child->staticTypeId() == fundamental::communication_root_id;
 }
 
 auto configuration::acceptsParent(std::shared_ptr<node_base> const&) const -> bool

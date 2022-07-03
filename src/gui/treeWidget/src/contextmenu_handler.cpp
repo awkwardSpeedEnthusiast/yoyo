@@ -5,6 +5,7 @@
 #include "command_handler.h"
 #include "yoyo/data_node.h"
 #include "yoyo/gui_node.h"
+#include "yoyo/communication_node.h"
 #include "yoyo/node_base.h"
 #include "yoyo/node_factory.h"
 
@@ -21,6 +22,19 @@ namespace
 auto const data_root_name = "yoyo::data_root"s;
 auto const gui_root_name = "yoyo::gui_root"s;
 auto const configuration_name = "yoyo::configuration"s;
+auto const communication_root_name = "yoyo::communication_root"s;
+auto const message_container_name = "yoyo::message_container"s;
+auto const message_name = "yoyo::message"s;
+auto const message_field_name = "yoyo::message_field"s;
+
+constexpr boost::uuids::uuid const communication_root_id = { 0x02, 0xb1, 0x79, 0x7a, 0x6e, 0x71,
+                                                             0x45, 0x13, 0xa4, 0x43, 0x25, 0x24,
+                                                             0x5b, 0x75, 0xe0, 0xa9 };
+constexpr boost::uuids::uuid const message_container_id = { 0x95, 0x18, 0xae, 0x42, 0xbd, 0xdd,
+                                                            0x4d, 0x55, 0xba, 0x07, 0x6c, 0xcb,
+                                                            0x68, 0xe2, 0xfc, 0xf4 };
+constexpr boost::uuids::uuid const message_id = { 0x1f, 0x07, 0x73, 0xbc, 0x68, 0x5e, 0x4d, 0xc0,
+                                                  0x88, 0xc4, 0xb0, 0x59, 0x95, 0x19, 0xc5, 0xa0 };
 
 auto get_root(std::shared_ptr<yoyo::node_base> node) -> std::shared_ptr<yoyo::node_base>
 {
@@ -172,6 +186,7 @@ auto addActionsToAdd(QMenu* menu, std::shared_ptr<yoyo::node_base> parent,
                      std::shared_ptr<yoyo::node_factory> target_factory) -> void
 {
   auto nodelist = target_factory->installed_nodes();
+  nodelist = target_factory->child_list(parent->staticTypeId(), nodelist);
   std::for_each(nodelist.begin(), nodelist.end(), [menu, parent, target_factory](auto node) {
     auto add = menu->addAction(std::get<2>(node));
     QObject::connect(add, &QAction::triggered, parent.get(),
@@ -235,7 +250,20 @@ auto contextmenu_handler::execute(std::shared_ptr<node_base> current, QPoint p) 
       ::addActionsToAdd(addMenu, current, _factories[1]);
     } else if (isGui(current)) {
       ::addActionsToAdd(addMenu, current, _factories[2]);
+    } else if (current->metaObject()->inherits(&communication_node_base::staticMetaObject)) {
+      ::addActionsToAdd(addMenu, current, _factories[4]);
+    } else if (current->staticTypeId() == communication_root_id) {
+      if (std::find_if(current->begin(), current->end(), [](auto n){return n->metaObject()->inherits(&communication_node::staticMetaObject);}) == current->end()) {
+        ::addActionsToAdd(addMenu, current, _factories[4]);
+      }
+      if (std::find_if(current->begin(), current->end(), [](auto n){return n->staticTypeId() == message_container_id;}) == current->end()){
+        ::addActionsToAdd(addMenu, current, _factories[0]);
+      }
+    } else if (current->metaObject()->className() == message_name ||
+               current->metaObject()->className() == message_container_name) {
+      ::addActionsToAdd(addMenu, current, _factories[0]);
     }
+
   }
 
   {
@@ -250,15 +278,33 @@ auto contextmenu_handler::execute(std::shared_ptr<node_base> current, QPoint p) 
       } else if (meta->className() == data_root_name) {
         ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
                               _factories[0], _factories[1]);
-      } else if (meta->className() == gui_root_name) {
-        ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
-                              _factories[0], _factories[2]);
       } else if (meta->inherits(&data_node::staticMetaObject)) {
         ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
                               _factories[1], _factories[1]);
+      } else if (meta->className() == gui_root_name) {
+        ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
+                              _factories[0], _factories[2]);
       } else if (meta->inherits(&gui_node::staticMetaObject)) {
         ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
                               _factories[2], _factories[2]);
+      } else if (parent->staticTypeId() == communication_root_id) {
+        if (std::find_if(parent->begin(), parent->end(), [](auto n){return n->metaObject()->className() == message_container_name;})
+            == parent->end()){
+          ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
+                                _factories[0], _factories[0]);
+        }
+        if (std::find_if(parent->begin(), parent->end(), [](auto n){return n->metaObject()->inherits(&communication_node::staticMetaObject);}) == parent->end()){
+          ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
+                                _factories[0], _factories[4]);
+        }
+      } else if (parent->staticTypeId() == message_container_id
+                 || parent->staticTypeId() == message_id) {
+        ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
+                              _factories[0], _factories[0]);
+      } else if (parent->metaObject()->inherits(&communication_node::staticMetaObject)
+                 || parent->metaObject()->inherits(&communication_node_base::staticMetaObject)) {
+        ::addActionsToSibling(beforeMenu, afterMenu, parent, parent->childIndex(current),
+                              _factories[4], _factories[4]);
       }
     }
   }

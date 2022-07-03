@@ -446,7 +446,7 @@ auto tree_model::setRootNode(std::shared_ptr<node_base> root) -> void
 auto tree_model::nodeForIndex(QModelIndex const& index) const -> std::shared_ptr<node_base>
 {
   if (!index.isValid()) {
-    return {};
+    return _root_node;
   }
 
   auto p = index.internalPointer();

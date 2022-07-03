@@ -247,6 +247,44 @@ public:
   }
 };
 
+class message_data_adapter : public data_adapter
+{
+public:
+  message_data_adapter(node_base* node)
+    : data_adapter(node)
+  {
+  }
+
+  auto data(int column) const -> QVariant override
+  {
+    switch (column) {
+    case 0: return _node->type();
+    case 1: return _node->name()._s;
+    }
+
+    return {};
+  }
+
+  auto mimedata() const -> QMimeData* override
+  {
+    auto data = new QMimeData;
+    QByteArray ba;
+    QDataStream out(&ba, QIODevice::WriteOnly);
+    out << utilities::calculatePath<utilities::path_strategy_t::INDEX>(_node->shared_from_this());
+    data->setData(mimetype_communication_element, ba);
+    return data;
+  }
+
+  auto deserialize(QByteArray data, std::shared_ptr<node_base> root) const
+    -> std::shared_ptr<node_base> override
+  {
+    QDataStream out(&data, QIODevice::ReadOnly);
+    QString path;
+    out >> path;
+    return utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(path, root);
+  }
+};
+
 auto create_data_adapter(node_base* node) -> std::shared_ptr<data_adapter>
 {
   if (!node) {
@@ -255,8 +293,16 @@ auto create_data_adapter(node_base* node) -> std::shared_ptr<data_adapter>
 
   if ((node->metaObject()->className() == "yoyo::data_root"s)
       || (node->metaObject()->className() == "yoyo::gui_root"s)
+      || (node->metaObject()->className() == "yoyo::communication_root"s)
+      || (node->metaObject()->className() == "yoyo::message_container"s)
+      || (node->metaObject()->className() == "yoyo::message"s)
+      || (node->metaObject()->className() == "yoyo::message_field"s)
       || (node->metaObject()->className() == "yoyo::configuration_data"s)) {
     return std::make_shared<default_data_adapter>(node);
+  }
+
+  if ((node->metaObject()->className() == "yoyo::message"s)) {
+    return std::make_shared<message_data_adapter>(node);
   }
 
   if (node->metaObject()->inherits(&data_node::staticMetaObject)) {

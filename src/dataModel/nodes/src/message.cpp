@@ -27,6 +27,7 @@ message::message(boost::uuids::uuid id)
   : node_base { "Message", id }
   , _p { std::make_unique<impl>() }
 {
+  setName({"Message", false});
   _p->_timer.setSingleShot(false);
   connect(&_p->_timer, &QTimer::timeout, this, [this]() {
     std::for_each(_p->_buffer.begin(), _p->_buffer.end(),

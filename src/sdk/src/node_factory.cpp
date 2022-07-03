@@ -87,11 +87,7 @@ auto node_factory::impl::child_list(boost::uuids::uuid type_id, node_id_list con
     return {};
   }
 
-  if (list.empty()) {
-    return it->second._child_list(installed_nodes());
-  } else {
-    return it->second._child_list(list);
-  }
+  return it->second._child_list(list);
 }
 
 auto node_factory::install_node(boost::uuids::uuid type_id, QString type_name,
