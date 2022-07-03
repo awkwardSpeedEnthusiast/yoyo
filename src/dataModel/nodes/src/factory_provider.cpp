@@ -1,5 +1,6 @@
 #include "factory_provider.hpp"
 
+#include "communication_root.hpp"
 #include "configuration.hpp"
 #include "configuration_data.hpp"
 #include "message.hpp"
@@ -461,6 +462,21 @@ auto updateDocumentation<yoyo::message_container>(documentation::builder& builde
                       "the communication interface.");
 }
 
+template <>
+auto updateDocumentation<yoyo::communication_root>(documentation::builder& builder) -> void
+{
+  updateDocumentation<yoyo::node_base>(builder);
+  builder.description("This is the root node for each communication channel: communication root or"
+                      "ComInterface. To fully function, it needs exactly two children: a message"
+                      "container or DataMessageHandler and the actual communication interface.\n"
+                      "The DataMessageHandler manages the data once it has arrived in Yoyo and "
+                      "distributes it to nodes within Yoyo or collects data from different nodes in"
+                      "Yoyo to hand them over to the communication interface.\n"
+                      "The Communication Interface is the door to the outside world. It defines "
+                      "which means of communication is used (eg. CAN, tcp, udp).\n"
+                      "Each child type can only be added once.");
+}
+
 auto install_gui_nodes(node_factory& gui_factory) -> void
 {
   auto noChildren = [](node_factory::node_id_list const&) { return node_factory::node_id_list {}; };
@@ -525,6 +541,14 @@ auto install_fundamental_nodes(node_factory& factory) -> void
       node_factory::node_id_list result;
       std::copy_if(l.begin(), l.end(), std::back_inserter(result),
                    [](auto const& n) { return std::get<0>(n) == fundamental::message_id; });
+      return result;
+    });
+  ::install<yoyo::communication_root>(
+    factory, "ComInterface", {}, [](node_factory::node_id_list const& l) {
+      node_factory::node_id_list result;
+      std::copy_if(l.begin(), l.end(), std::back_inserter(result), [](auto const& n) {
+        return std::get<0>(n) == fundamental::message_container_id;
+      });
       return result;
     });
 }

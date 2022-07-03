@@ -5,29 +5,22 @@
 
 namespace yoyo
 {
-class YOYO_NODES_SHARED_EXPORT message_container final : public node_base
+class YOYO_NODES_SHARED_EXPORT communication_root final : public node_base
 {
   Q_OBJECT
 public:
-  message_container(boost::uuids::uuid id = boost::uuids::uuid {});
-  ~message_container() override;
-  message_container(message_container const&) = delete;
-  message_container(message_container&&) = delete;
-  message_container& operator=(message_container const&) = delete;
-  message_container& operator=(message_container&&) = delete;
-
-  auto incommingData(QByteArray const& data) -> void;
-  auto incommingDataWithId(QByteArray const& data, uint32_t id) -> void;
+  communication_root(boost::uuids::uuid id = boost::uuids::uuid {});
+  ~communication_root() override;
+  communication_root(communication_root const&) = delete;
+  communication_root(communication_root&&) = delete;
+  communication_root& operator=(communication_root const&) = delete;
+  communication_root& operator=(communication_root&&) = delete;
 
   auto staticTypeId() const -> boost::uuids::uuid final;
   auto acceptsChildren() const -> bool final;
   auto acceptsChild(std::shared_ptr<node_base> const& child) const -> bool final;
   auto acceptsParent(std::shared_ptr<node_base> const& parent) const -> bool final;
   static auto typeId() -> boost::uuids::uuid;
-
-Q_SIGNALS:
-  void dataReady(QByteArray data);
-  void dataIncomming(QByteArray data);
 
 private:
   auto childAboutToBeAdded(std::shared_ptr<node_base> const& child) -> bool final;

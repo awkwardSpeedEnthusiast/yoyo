@@ -196,6 +196,7 @@ class test_communication_node_b : public communication_node
     return false;
   }
   auto childMoved(std::shared_ptr<node_base> const&, size_t, size_t) -> void override {}
+  auto send_data(QByteArray const&) -> void override {}
 
 public:
   using communication_node::communication_node;

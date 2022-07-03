@@ -21,12 +21,12 @@ message_container::message_container(boost::uuids::uuid id)
 
 message_container::~message_container() = default;
 
-auto message_container::incommingData(QByteArray const& data)
+auto message_container::incommingData(QByteArray const& data) -> void
 {
   Q_EMIT dataIncomming(data);
 }
 
-auto message_container::incommingData(QByteArray const& data, uint32_t id)
+auto message_container::incommingDataWithId(QByteArray const& data, uint32_t id) -> void
 {
   for (auto& child : *this) {
     if (auto m = std::dynamic_pointer_cast<message>(child)) {

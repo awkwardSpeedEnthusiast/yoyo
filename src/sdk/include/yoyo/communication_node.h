@@ -33,5 +33,11 @@ public:
   communication_node& operator=(communication_node const& other) = delete;
   communication_node(communication_node&& other) = delete;
   communication_node& operator=(communication_node&& other) = delete;
+
+  virtual auto send_data(QByteArray const& data) -> void = 0;
+
+Q_SIGNALS:
+  void data_received(QByteArray data);
+  void data_with_id_received(QByteArray data, uint32_t);
 };
 } // namespace yoyo

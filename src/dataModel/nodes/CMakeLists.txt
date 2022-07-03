@@ -8,6 +8,7 @@ ifx_add_library(nodes SHARED
         src/message_field.hpp
         src/message.hpp
         src/message_container.hpp
+        src/communication_root.hpp
         src/dataNodes/uint8node.hpp
         src/dataNodes/int8node.hpp
         src/dataNodes/string_node.hpp
@@ -28,6 +29,7 @@ ifx_add_library(nodes SHARED
         src/message_field.cpp
         src/message.cpp
         src/message_container.cpp
+        src/communication_root.cpp
         src/dataNodes/uint8node.cpp
         src/dataNodes/int8node.cpp
         src/dataNodes/string_node.cpp
