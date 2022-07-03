@@ -17,7 +17,7 @@ struct message_container::impl {
 message_container::message_container(boost::uuids::uuid id)
   : node_base { "DataMessageHandler", id }
 {
-  setName({"DataMessageHandler", false});
+  setName({ "DataMessageHandler", false });
 }
 
 message_container::~message_container() = default;

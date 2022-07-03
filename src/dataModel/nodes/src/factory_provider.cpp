@@ -21,8 +21,8 @@
 #include "basicGui/line_edit.hpp"
 #include "gui_root.hpp"
 
-#include "yoyo/documentation_utilities.h"
 #include "yoyo/communication_node.h"
+#include "yoyo/documentation_utilities.h"
 
 namespace
 {
@@ -546,7 +546,8 @@ auto install_fundamental_nodes(node_factory& factory) -> void
     factory, "ComInterface", {}, [](node_factory::node_id_list const& l) {
       node_factory::node_id_list result;
       std::copy_if(l.begin(), l.end(), std::back_inserter(result), [](auto const& n) {
-        return std::get<0>(n) == fundamental::message_container_id || std::get<QMetaObject const*>(n)->inherits(&communication_node::staticMetaObject);
+        return std::get<0>(n) == fundamental::message_container_id
+            || std::get<QMetaObject const*>(n)->inherits(&communication_node::staticMetaObject);
       });
       return result;
     });
