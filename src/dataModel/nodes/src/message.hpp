@@ -27,7 +27,7 @@ class YOYO_NODES_SHARED_EXPORT message final : public node_base
 
 public:
   message(boost::uuids::uuid id = boost::uuids::uuid {});
-  ~message() override = default;
+  ~message() override;
   message(message const&) = delete;
   message(message&&) = delete;
   message& operator=(message const&) = delete;
@@ -80,13 +80,8 @@ Q_SIGNALS:
 private:
   static boost::uuids::uuid const _typeId;
 
-  yoyo::properties::patterned_string_t _id;
-  yoyo::properties::limited_float_t _interval;
-  bool _sendOnNewData;
-  yoyo::properties::transmission_direction_t _direction;
-  bool _isStandard;
-  yoyo::properties::limited_uint8_t _messageLength;
-  bool _isStream;
+  struct impl;
+  std::unique_ptr<impl> _p;
 };
 
 } // namespace yoyo

@@ -87,7 +87,7 @@ TEST_F(FactoryProviderTests, fundamentalNodes)
   EXPECT_THAT(factory.installed_nodes(), testing::SizeIs(0));
   yoyo::install_fundamental_nodes(factory);
 
-  EXPECT_THAT(factory.installed_nodes(), testing::SizeIs(6));
+  EXPECT_THAT(factory.installed_nodes(), testing::SizeIs(7));
 
   for (auto node_id : factory.installed_nodes()) {
     auto doc = factory.node_documentation(std::get<0>(node_id));

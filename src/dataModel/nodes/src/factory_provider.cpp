@@ -3,6 +3,7 @@
 #include "configuration.hpp"
 #include "configuration_data.hpp"
 #include "message.hpp"
+#include "message_container.hpp"
 #include "message_field.hpp"
 
 #include "dataNodes/bit_node.hpp"
@@ -402,6 +403,14 @@ auto updateDocumentation<yoyo::message>(documentation::builder& builder) -> void
   builder
     .description(
       "The message defines the data chunk which is send over the communication interface.")
+    .property("id", "Identifier",
+              "The identifier of a message is a string of a hex represented integer, which is the "
+              "identifier of the message used by the communication channel. The identifier must be "
+              "unique within a DataMessageContainer. It can be left empty, if the communication "
+              "interface doesn't use identifiers.",
+              "Identifier of the message. Must be unique within DataMessageContainer.\n"
+              "Use pattern \"0x[a-fA-F0-9]+\".",
+              {})
     .property("interval", "Interval",
               "The behavior of this property depends on the transmission direction:\n"
               " - Tx: the interval between send operations. In case Send on new data is enabled, "
@@ -442,6 +451,14 @@ auto updateDocumentation<yoyo::message>(documentation::builder& builder) -> void
       "If enabled, the message is filled with the data of the first connected field to build a "
       "stream, else the message is filled by the data as defined by the field offset",
       false);
+}
+
+template <>
+auto updateDocumentation<yoyo::message_container>(documentation::builder& builder) -> void
+{
+  updateDocumentation<yoyo::node_base>(builder);
+  builder.description("The message_container or DataMessageHandler hosts all defined messages for "
+                      "the communication interface.");
 }
 
 auto install_gui_nodes(node_factory& gui_factory) -> void
@@ -503,6 +520,13 @@ auto install_fundamental_nodes(node_factory& factory) -> void
                  [](auto const& n) { return std::get<0>(n) == fundamental::message_field_id; });
     return result;
   });
+  ::install<yoyo::message_container>(
+    factory, "DataMessageHandler", {}, [](node_factory::node_id_list const& l) {
+      node_factory::node_id_list result;
+      std::copy_if(l.begin(), l.end(), std::back_inserter(result),
+                   [](auto const& n) { return std::get<0>(n) == fundamental::message_id; });
+      return result;
+    });
 }
 
 auto install_communication_nodes(node_factory&) -> void {}
