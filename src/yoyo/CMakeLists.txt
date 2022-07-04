@@ -20,6 +20,9 @@ ifx_add_executable(yoyo
         PRIVATE yoyo::PropertyWidget
         PRIVATE yoyo::TreeWidget
         PRIVATE yoyo::PluginManager
+    INSTALL
+        ${CMAKE_INSTALL_BINDIR}
     DEFINES
         PRIVATE YOYO_VERSION="${YOYO_PROJECT_VERSION}"
 )
+ifx_deploy_system_libraries(yoyo)
