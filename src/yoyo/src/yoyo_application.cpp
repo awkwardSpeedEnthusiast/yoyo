@@ -18,6 +18,8 @@
 #include "yoyo/gui_node.h"
 #include "yoyo/protocol_node.h"
 
+#include <QDebug>
+#include <QDialog>
 #include <QSettings>
 
 #include <string>
@@ -80,10 +82,6 @@ yoyo_application::impl::impl()
   install_gui_nodes(*_factories[index_gui]);
   install_protocol_nodes(*_factories[index_protocol]);
   install_communication_nodes(*_factories[index_communication]);
-
-  _plugin_manager = std::make_shared<plugin::plugin_manager>(
-    _factories[index_data], _factories[index_gui], _factories[index_protocol],
-    _factories[index_communication]);
 }
 
 yoyo_application::yoyo_application(int& argc, char** argv)
@@ -95,7 +93,11 @@ yoyo_application::yoyo_application(int& argc, char** argv)
   setApplicationName("Yoyo");
   setApplicationVersion(YOYO_VERSION);
 
+  // These elements need the above values to be set, since they access settings.
   _p->_file_management = std::make_unique<file_management>(_p->_factories);
+  _p->_plugin_manager = std::make_shared<plugin::plugin_manager>(
+    _p->_factories[index_data], _p->_factories[index_gui], _p->_factories[index_protocol],
+    _p->_factories[index_communication]);
 }
 
 yoyo_application::~yoyo_application() = default;
@@ -136,12 +138,18 @@ auto yoyo_application::impl::set_edit_mode(bool active) -> void
 
 auto yoyo_application::impl::show_plugins() -> void
 {
+  QDialog d;
+  _plugins->setParent(&d);
+  d.exec();
+  _plugins->setParent(nullptr);
   _tools->update();
 }
 
 auto yoyo_application::impl::close_configuration() -> void
 {
+  /// \todo add execution of before close script
   _main_window->set_central_widget(nullptr);
+  _main_window->set_file_open(false);
   _tree->setConfiguration({});
   _properties->itemSelected({}, {});
   _configuration.reset();
@@ -163,6 +171,12 @@ auto yoyo_application::impl::add_configuration(std::shared_ptr<node_base> root) 
     if (auto guiroot = std::dynamic_pointer_cast<gui_node>(_configuration->childAt(1))) {
       guiroot->setEditMode(_editmode);
     }
+    connect(_configuration.get(), &node_base::scriptExecutionRequested, [](auto script) {
+      qInfo() << "Script execution requested for script" << script._text;
+    });
+    _main_window->set_file_open(true);
+
+    /// \todo add execution of after load script
   }
 }
 
@@ -264,6 +278,8 @@ auto yoyo_application::setup() -> void
   _p->read_settings();
   _p->_main_window->setup_undo();
   _p->_main_window->show();
+
+  _p->_plugins = std::make_unique<gui::plugin_widget>(_p->_plugin_manager);
 }
 
 } // namespace yoyo

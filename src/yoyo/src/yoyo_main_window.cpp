@@ -45,6 +45,7 @@ yoyo_main_window::yoyo_main_window(QWidget* parent)
   connect(_ui->actionTool_Box, &QAction::toggled, this, &yoyo_main_window::tools_requested);
   connect(_ui->actionProperty_Box, &QAction::toggled, this,
           &yoyo_main_window::properties_requested);
+  connect(_ui->actionPlugins, &QAction::triggered, this, &yoyo_main_window::plugins_requested);
 
   connect(_ui->actionAbout, &QAction::triggered, this, []() {
 
@@ -62,6 +63,11 @@ auto yoyo_main_window::set_edit_mode(bool mode) -> void
 auto yoyo_main_window::edit_mode() const -> bool
 {
   return _ui->actionEdit_mode->isChecked();
+}
+
+auto yoyo_main_window::set_file_open(bool is_open) -> void
+{
+  _ui->actionPlugins->setEnabled(!is_open);
 }
 
 auto yoyo_main_window::set_central_widget(QWidget* widget) -> void

@@ -128,6 +128,9 @@ using string_t = QString;
 /// of a line-edit.
 ///
 struct text_t {
+  ///
+  /// \brief the displayed text
+  ///
   QString _s;
 
   explicit text_t(QString const& s)

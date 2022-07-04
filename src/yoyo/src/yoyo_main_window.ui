@@ -115,6 +115,8 @@
     <addaction name="actionProperty_Box"/>
     <addaction name="separator"/>
     <addaction name="actionStyles"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlugins"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -251,6 +253,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionPlugins">
+   <property name="text">
+    <string>Plugins</string>
    </property>
   </action>
  </widget>

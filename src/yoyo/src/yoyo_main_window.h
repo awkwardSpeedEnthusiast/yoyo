@@ -23,6 +23,8 @@ public:
   auto set_edit_mode(bool mode) -> void;
   auto edit_mode() const -> bool;
 
+  auto set_file_open(bool is_open) -> void;
+
   auto set_central_widget(QWidget* widget) -> void;
 
   auto history_changed(std::vector<QString> history) -> void;
@@ -45,7 +47,7 @@ Q_SIGNALS:
   void tools_requested(bool isVisible);
   void tree_requested(bool isVisible);
   void properties_requested(bool isVisible);
-  void plugins_requested(bool isVisible);
+  void plugins_requested();
   void log_requested(bool isVisible);
   void help_requested(bool isVisible);
 
