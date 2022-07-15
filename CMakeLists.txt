@@ -45,6 +45,7 @@ if (BUILD_TESTING)
 endif()
 
 add_subdirectory(doc)
+add_subdirectory(installer)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Coverage")
     message(STATUS "Starting coverage build")
