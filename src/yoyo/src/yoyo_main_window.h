@@ -23,6 +23,8 @@ public:
   auto set_edit_mode(bool mode) -> void;
   auto edit_mode() const -> bool;
 
+  auto set_status_message(QString const& message, std::chrono::milliseconds timeout) -> void;
+
   auto set_file_open(bool is_open) -> void;
 
   auto set_central_widget(QWidget* widget) -> void;
@@ -54,6 +56,7 @@ Q_SIGNALS:
 private:
   std::unique_ptr<Ui::yoyo_main_window> _ui;
   bool _edit_mode;
+  QWidget* _l{nullptr};
 };
 
 } // namespace yoyo

@@ -4,6 +4,7 @@
 #include "command_handler.h"
 
 #include <QSettings>
+#include <QLabel>
 
 #include <string>
 
@@ -20,6 +21,8 @@ yoyo_main_window::yoyo_main_window(QWidget* parent)
     _ui->top_widget->setLayout(new QVBoxLayout(_ui->top_widget));
   }
   _ui->actionRecent_files->setMenu(new QMenu);
+  _l = new QLabel;
+  dynamic_cast<QLabel*>(_l)->setText("Edit mode enabled");
 
   connect(_ui->actionNew_Configuration, &QAction::triggered, this,
           &yoyo_main_window::newFile_requested);
@@ -38,7 +41,21 @@ yoyo_main_window::yoyo_main_window(QWidget* parent)
     Q_EMIT tools_requested(enabled && _ui->actionTool_Box->isChecked());
     Q_EMIT properties_requested(enabled && _ui->actionProperty_Box->isChecked());
     Q_EMIT editMode(enabled);
+    using namespace std::chrono_literals;
+    if (enabled) {
+      statusBar()->addWidget(_l);
+      _l->show();
+      set_status_message("Edit mode enabled", 2000ms);
+    } else {
+      statusBar()->removeWidget(_l);
+      set_status_message("Edit mode disabled", 2000ms);
+    }
   });
+
+  auto prototype_label = new QLabel;
+  prototype_label->setText("Prototype");
+  prototype_label->setStyleSheet("color: white; background-color: red; font-size: 20px");
+  statusBar()->addPermanentWidget(prototype_label);
 
   connect(_ui->actionBrowser_Box, &QAction::toggled, this, &yoyo_main_window::tree_requested);
   connect(_ui->actionLog_Box, &QAction::toggled, this, &yoyo_main_window::log_requested);
@@ -68,6 +85,11 @@ auto yoyo_main_window::edit_mode() const -> bool
 auto yoyo_main_window::set_file_open(bool is_open) -> void
 {
   _ui->actionPlugins->setEnabled(!is_open);
+}
+
+auto yoyo_main_window::set_status_message(QString const& message, std::chrono::milliseconds timeout) -> void
+{
+  statusBar()->showMessage(message, timeout.count());
 }
 
 auto yoyo_main_window::set_central_widget(QWidget* widget) -> void
