@@ -1,0 +1,29 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 21,
+      "patch": 0
+    },
+    "configurePresets": [
+    ],
+    "buildPresets": [
+      {
+        "name": "default",
+        "configurePreset": "Debug 64bit"
+      }
+    ],
+    "testPresets": [
+      {
+        "name": "default",
+        "configurePreset": "default",
+        "output": {"outputOnFailure": true},
+        "execution": {"noTestsAction": "error", "stopOnFailure": true}
+      }
+    ],
+    "vendor": {
+      "infineon.com/Yoyo/1.0": {
+        "autoFormat": false
+      }
+    }
+  }
