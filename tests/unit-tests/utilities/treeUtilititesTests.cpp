@@ -206,7 +206,7 @@ public:
   {
     auto some_data = std::make_shared<testing::StrictMock<T>>();
     parent->addChild(some_data);
-    some_data->setName(name);
+    some_data->setName({name, true});
     return some_data;
   }
 
