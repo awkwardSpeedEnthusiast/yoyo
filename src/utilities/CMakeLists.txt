@@ -1,16 +1,17 @@
-ifx_add_library(utilities
-    HEADERS
+my_add_library(utilities STATIC
+    HEADER
         include/tree_utils.hpp
-    SOURCES
+    SOURCE
         src/tree_utils.cpp
     DEPENDS
         PUBLIC yoyo::Sdk
-        PRIVATE Qt5::Widgets
-    PUBLIC_INCLUDES
+        PRIVATE Qt6::Widgets
+    INCLUDES
+      PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE_INCLUDES
+      PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-    INTERFACE_INCLUDES
+    INSTALL_INCLUDES
         include
     ALIAS yoyo::Utilities
 )

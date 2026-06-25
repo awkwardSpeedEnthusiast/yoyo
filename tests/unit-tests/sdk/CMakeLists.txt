@@ -1,6 +1,6 @@
-ifx_add_test(sdk_tests
-    MOCK QT
-    SOURCES
+my_add_test(sdk_tests
+    AUTOMOC
+    SOURCE
         node_base_tests.cpp
         node_factory_tests.cpp
         documentation_tests.cpp
@@ -10,14 +10,14 @@ ifx_add_test(sdk_tests
         protocol_node_tests.cpp
     DEPENDS
         PUBLIC yoyo::Sdk
-        PUBLIC Qt5::Widgets
-        PUBLIC Qt5::Test
+        PUBLIC Qt6::Widgets
+        PUBLIC Qt6::Test
         PUBLIC yoyo::Test::Utilities
 )
 
-#ifx_add_test(sdk_widget_tests
+#my_add_test(sdk_widget_tests
 #    WIDGET
-#    SOURCES
+#    SOURCE
 #        gui_node_widget_tests.cpp
 #    DEPENDS
 #        PUBLIC yoyo::Sdk

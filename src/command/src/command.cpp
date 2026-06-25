@@ -11,6 +11,44 @@ command::command(QString const& name, Operation toDo, Operation undo, Operation 
 {
 }
 
+command::command(command const& other)
+  : _currentStatus { other._currentStatus }
+  , _name { other._name }
+  , _toDo { other._toDo }
+  , _undo { other._undo }
+  , _redo { other._redo }
+{
+}
+
+command::command(command&& other)
+  : _currentStatus { std::move(other._currentStatus) }
+  , _name { std::move(other._name) }
+  , _toDo { std::move(other._toDo) }
+  , _undo { std::move(other._undo) }
+  , _redo { std::move(other._redo) }
+{
+}
+
+command& command::operator=(command const& other)
+{
+  _currentStatus = other._currentStatus;
+  _name = other._name;
+  _toDo = other._toDo;
+  _undo = other._undo;
+  _redo = other._redo;
+  return *this;
+}
+
+command& command::operator=(command&& other)
+{
+  std::swap(_currentStatus, other._currentStatus);
+  std::swap(_name, other._name);
+  std::swap(_toDo, other._toDo);
+  std::swap(_undo, other._undo);
+  std::swap(_redo, other._redo);
+  return *this;
+}
+
 auto command::name() const -> QString
 {
   return _name;

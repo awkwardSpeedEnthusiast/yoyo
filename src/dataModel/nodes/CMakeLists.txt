@@ -1,5 +1,6 @@
-ifx_add_library(nodes SHARED
-    HEADERS
+my_add_library(nodes SHARED
+    AUTOMOC AUTOUIC AUTORCC
+    HEADER
         include/configuration.hpp
         include/factory_provider.hpp
         src/configuration_data.hpp
@@ -20,7 +21,7 @@ ifx_add_library(nodes SHARED
         src/basicGui/check_box.hpp
         src/basicGui/line_edit.hpp
         src/basicGui/combo_box.hpp
-    SOURCES
+    SOURCE
         src/configuration.cpp
         src/configuration_data.cpp
         src/factory_provider.cpp
@@ -44,15 +45,16 @@ ifx_add_library(nodes SHARED
         src/node_resources.qrc
     DEPENDS
         PUBLIC yoyo::Sdk
-        PRIVATE Qt5::Widgets
-    PUBLIC_INCLUDES
+        PRIVATE Qt6::Widgets
+    INCLUDES
+      PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_BINARY_DIR}
-    PRIVATE_INCLUDES
+      PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/src/dataNodes
         ${CMAKE_CURRENT_SOURCE_DIR}/src/basicGui
     ALIAS yoyo::Nodes
     EXPORT_MACRO YOYO_NODES_SHARED_EXPORT
-    ADD_TEST_LIBRARY
+    #ADD_TEST_LIBRARY
 )

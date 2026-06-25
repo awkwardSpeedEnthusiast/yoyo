@@ -37,10 +37,10 @@ public:
   ///
   command(QString const& name, Operation toDo, Operation undo, Operation redo = Operation {});
   ~command() = default;
-  command(command const&) = default;
-  command(command&&) = default;
-  command& operator=(command const&) = default;
-  command& operator=(command&&) = default;
+  command(command const&);
+  command(command&&);
+  command& operator=(command const&);
+  command& operator=(command&&);
 
   ///
   /// \brief name
@@ -107,7 +107,7 @@ private:
   enum class Status { invalid, initial, executed, undone };
   Status _currentStatus { Status::invalid };
 
-  QString const _name;
+  QString _name;
   Operation _toDo;
   Operation _undo;
   Operation _redo;

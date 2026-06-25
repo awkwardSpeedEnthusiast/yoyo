@@ -2,64 +2,65 @@
 #include "plugin_manager.h"
 #include "plugin_settings.hpp"
 
+#include "qt_core_fixture.hpp"
+
 #include "yoyo/node_factory.h"
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QSettings>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/uuid/string_generator.hpp>
+
+#include <filesystem>
 
 namespace
 {
 constexpr auto const test_plugin_id =
-  boost::uuids::uuid { 0x27, 0x30, 0xbf, 0x79, 0x06, 0x30, 0x4a, 0x0b,
-                       0x80, 0x11, 0x27, 0xd6, 0xde, 0xa0, 0xc3, 0x63 };
-}
+  boost::uuids::string_generator {}("2730bf79-0630-4a0b-8011-27d6dea0c363");
+constexpr auto const plugin_extension =
+#ifdef __linux
+  ".so"
+#else
+  ".dll"
+#endif
+  ;
+constexpr auto const plugin_prefix =
+#ifdef __linux
+  "lib"
+#else
+  ""
+#endif
+  ;
 
-class PluginManagerTests : public testing::Test
+} // namespace
+
+class PluginManagerTests : public yoyo::test::qtCoreFixture
 {
 public:
-  static auto SetUpTestSuite() -> void
-  {
-    testing::Test::SetUpTestSuite();
-
-    if (!qApp) {
-      strcpy(arg0, "blabla\0");
-      char* args[1] = { arg0 };
-      app = std::make_unique<QApplication>(argc, args);
-    }
-
-    QApplication::setOrganizationName("PluginManagerTest");
-    QApplication::setOrganizationDomain("PluginManagerTest");
-    QApplication::setApplicationName("PluginManagerTest");
-    QApplication::setApplicationVersion("0.0.1");
-  }
-
   auto SetUp() -> void override
   {
+    yoyo::test::qtCoreFixture::SetUp();
+
     QSettings settings { QSettings::IniFormat, QSettings::UserScope,
-                         QApplication::organizationName(), QApplication::applicationName() };
+                         QCoreApplication::organizationName(),
+                         QCoreApplication::applicationName() };
     setting_file_name = settings.fileName().toStdString();
   }
 
   std::string setting_file_name;
-
-  static char* arg0;
-  static int argc;
-  static std::unique_ptr<QApplication> app;
 };
-std::unique_ptr<QApplication> PluginManagerTests::app;
-char* PluginManagerTests::arg0 = new char[7];
-int PluginManagerTests::argc = 1;
+
+using namespace std::string_literals;
 
 TEST_F(PluginManagerTests, settingsTest)
 {
   // empty settings
-  if (boost::filesystem::exists(setting_file_name)) {
-    boost::filesystem::remove(setting_file_name);
+  if (std::filesystem::exists(setting_file_name)) {
+    std::filesystem::remove(setting_file_name);
   }
 
   auto result = yoyo::plugin::read_settings();
@@ -87,7 +88,8 @@ TEST_F(PluginManagerTests, pluginDescription)
   auto test_plugin_path =
     boost::filesystem::current_path().parent_path() / "test_plugins" / "test_plugin_a";
   EXPECT_TRUE(boost::filesystem::exists(test_plugin_path / "test_plugin_description.json"));
-  EXPECT_TRUE(boost::filesystem::exists(test_plugin_path / "test-plugin-a.dll"));
+  EXPECT_TRUE(boost::filesystem::exists(test_plugin_path
+                                        / (plugin_prefix + "test-plugin-a"s + plugin_extension)));
   data = yoyo::plugin::read(test_plugin_path / "test_plugin_description.json");
   ASSERT_NE(data, nullptr);
 
@@ -95,14 +97,15 @@ TEST_F(PluginManagerTests, pluginDescription)
   EXPECT_EQ(data->name(), "test plugin A");
   EXPECT_EQ(data->description(), "This is a A plugin for testing purposes.");
   EXPECT_EQ(data->description_location(), test_plugin_path / "test_plugin_description.json");
-  EXPECT_EQ(data->location(), test_plugin_path / "test-plugin-a.dll");
+  EXPECT_EQ(data->location(),
+            test_plugin_path / (plugin_prefix + "test-plugin-a"s + plugin_extension));
   EXPECT_THAT(data->depends_on(), testing::IsEmpty());
 }
 
 TEST_F(PluginManagerTests, testPlugin)
 {
-  if (boost::filesystem::exists(setting_file_name)) {
-    boost::filesystem::remove(setting_file_name);
+  if (std::filesystem::exists(setting_file_name)) {
+    std::filesystem::remove(setting_file_name);
   }
 
   auto gui = std::make_shared<yoyo::node_factory>(&yoyo::node_base::staticMetaObject);
@@ -120,7 +123,8 @@ TEST_F(PluginManagerTests, testPlugin)
     EXPECT_EQ(data->name(), "test plugin A");
     EXPECT_EQ(data->description(), "This is a A plugin for testing purposes.");
     EXPECT_EQ(data->description_location(), test_plugin_path / "test_plugin_description.json");
-    EXPECT_EQ(data->location(), test_plugin_path / "test-plugin-a.dll");
+    EXPECT_EQ(data->location(),
+              test_plugin_path / (plugin_prefix + "test-plugin-a"s + plugin_extension));
     EXPECT_THAT(data->depends_on(), testing::IsEmpty());
 
     EXPECT_THAT(manager.known_plugins(), testing::IsEmpty());

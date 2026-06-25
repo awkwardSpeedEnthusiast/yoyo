@@ -11,6 +11,10 @@
 
 #include <string>
 
+#include <iostream>
+
+#define MY_METHOD(a) #a
+
 using std::string_literals::operator""s;
 
 namespace yoyo::gui
@@ -28,7 +32,7 @@ auto number_input::setup(std::shared_ptr<node_base> node, std::string propertyNa
 
   connect(_input.get(), &QLineEdit::returnPressed, this, slot);
 
-  _input->setText(QString::number(node->property(propertyName.c_str()).toLongLong(), 10));
+  _input->setText(QLocale::system().toString(node->property(propertyName.c_str()).toLongLong()));
   _input->setValidator(new QIntValidator(min, max, _input.get()));
 }
 
@@ -61,7 +65,7 @@ auto number_input::setup(std::shared_ptr<node_base> node, std::string propertyNa
     if (text.length() <= 2) {
       return;
     }
-
+    text = text.right(text.length() - 2);
     Q_EMIT propertyChanged(propertyName, text.toULongLong(nullptr, 16));
   };
 
@@ -79,26 +83,67 @@ auto number_input::setup(std::shared_ptr<node_base> node, std::string propertyNa
   auto prop =
     node->metaObject()->property(node->metaObject()->indexOfProperty(propertyName.c_str()));
   connect(node.get(), prop.notifySignal(), this, staticMetaObject.method(method_index));
-  std::function<void()> slot = [this, propertyName]() {
+
+  connect(_input.get(), &QLineEdit::returnPressed, this, [this, propertyName]() {
     auto text = _input->text();
     auto b = _buffer.value<properties::limited_value_t<T>>();
     if constexpr (std::is_floating_point_v<T>) {
       b._value = QLocale::system().toDouble(text);
     } else if constexpr (std::is_signed_v<T>) {
       b._value = QLocale::system().toLongLong(text);
-    } else {
-      b._value = QLocale::system().toULongLong(text);
+    } else if constexpr (std::is_unsigned_v<T>) {
+      if (text.length() >= 2) {
+        b._value = text.right(text.length() - 2).toULongLong(nullptr, 16);
+      }
     }
     Q_EMIT propertyChanged(propertyName, QVariant::fromValue(b));
-  };
+  });
 
-  connect(_input.get(), &QLineEdit::returnPressed, this, slot);
-
-  _input->setText(QLocale::system().toString(value._value));
+  if constexpr (std::is_signed_v<T>) {
+    _input->setText(QLocale::system().toString(value._value));
+  } else {
+    _input->setText("0x" + QString::number(value._value, 16));
+  }
   if constexpr (std::is_floating_point_v<T>) {
     _input->setValidator(new QDoubleValidator(value._min, value._max, 6, _input.get()));
-  } else {
+  } else if constexpr (std::is_signed_v<T>) {
     _input->setValidator(new QIntValidator(value._min, value._max, _input.get()));
+  }
+  if constexpr (std::is_unsigned_v<T>) {
+    _input->setInputMask("\\0\\x" + QString(2 * sizeof(T), 'h'));
+  }
+}
+
+template <typename T>
+void number_input::do_setup(std::shared_ptr<node_base> node, std::string const& property_name,
+                            int method_index)
+{
+  if constexpr (std::same_as<T, int8_t> || std::same_as<T, int16_t> || std::same_as<T, int32_t>
+                || std::same_as<T, int64_t> || std::same_as<T, char> || std::same_as<T, short>
+                || std::same_as<T, int> || std::same_as<T, long> || std::same_as<T, qlonglong>) {
+    setup(node, property_name, method_index, static_cast<long>(std::numeric_limits<T>::min()),
+          static_cast<long>(std::numeric_limits<T>::max()));
+  } else if constexpr (std::same_as<T, float> || std::same_as<T, double>) {
+    setup(node, property_name, method_index, std::numeric_limits<T>::min(),
+          std::numeric_limits<T>::max());
+  } else if constexpr (std::same_as<T, yoyo::properties::limited_uint8_t>
+                       || std::same_as<T, yoyo::properties::limited_uint16_t>
+                       || std::same_as<T, yoyo::properties::limited_uint32_t>
+                       || std::same_as<T, yoyo::properties::limited_uint64_t>
+                       || std::same_as<T, yoyo::properties::limited_int8_t>
+                       || std::same_as<T, yoyo::properties::limited_int16_t>
+                       || std::same_as<T, yoyo::properties::limited_int32_t>
+                       || std::same_as<T, yoyo::properties::limited_int64_t>) {
+    setup(node, property_name, method_index, node->property(property_name.c_str()).value<T>());
+  } else if constexpr (std::same_as<T, yoyo::properties::limited_float_t>) {
+    setup(node, property_name, method_index, node->property(property_name.c_str()).value<T>());
+  } else if constexpr (std::same_as<T, uint8_t> || std::same_as<T, uchar>
+                       || std::same_as<T, uint16_t> || std::same_as<T, ushort>
+                       || std::same_as<T, uint32_t> || std::same_as<T, uint>
+                       || std::same_as<T, uint64_t> || std::same_as<T, ulong>
+                       || std::same_as<T, qulonglong>) {
+    QString m = "\\0\\x" + QString { sizeof(T) * 2, 'h' };
+    setup(node, property_name, method_index, m);
   }
 }
 
@@ -109,91 +154,121 @@ number_input::number_input(std::shared_ptr<node_base> node, std::string property
 {
   layout()->addWidget(_input.get());
 
+  // clang-format off
+  static std::map<std::string, int> slot_indices = {
+    {"int8_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(int8_t)))},
+    {"int16_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(int16_t)))},
+    {"int32_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(int32_t)))},
+    {"int64_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(int64_t)))},
+    {"uint8_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(uint8_t)))},
+    {"uint16_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(uint16_t)))},
+    {"uint32_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(uint32_t)))},
+    {"uint64_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged_fixed(uint64_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_int8_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int8_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_int16_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int16_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_int32_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int32_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_int64_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int64_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_uint8_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint8_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_uint16_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint16_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_uint32_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint32_t)))},
+    {QMetaType::fromType<yoyo::properties::limited_uint64_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint64_t)))},
+    {"yoyo::properties::limited_int8_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int8_t)))},
+    {"yoyo::properties::limited_int16_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int16_t)))},
+    {"yoyo::properties::limited_int32_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int32_t)))},
+    {"yoyo::properties::limited_int64_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_int64_t)))},
+    {"yoyo::properties::limited_uint8_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint8_t)))},
+    {"yoyo::properties::limited_uint16_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint16_t)))},
+    {"yoyo::properties::limited_uint32_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint32_t)))},
+    {"yoyo::properties::limited_uint64_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_uint64_t)))},
+    {QMetaType::fromType<float>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(float)))},
+    {QMetaType::fromType<double>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(double)))},
+    {QMetaType::fromType<yoyo::properties::limited_float_t>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_float_t)))},
+    {"yoyo::properties::limited_float_t", staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(yoyo::properties::limited_float_t)))},
+    {QMetaType::fromType<char>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(char)))},
+    {QMetaType::fromType<short>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(short)))},
+    {QMetaType::fromType<int>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(int)))},
+    {QMetaType::fromType<long>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(long)))},
+    {QMetaType::fromType<qlonglong>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(qlonglong)))},
+    {QMetaType::fromType<uchar>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(uchar)))},
+    {QMetaType::fromType<ushort>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(ushort)))},
+    {QMetaType::fromType<uint>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(uint)))},
+    {QMetaType::fromType<ulong>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(ulong)))},
+    {QMetaType::fromType<qulonglong>().name(), staticMetaObject.indexOfMethod(MY_METHOD(onPropertyChanged(qulonglong)))},
+  };
+  // clang-format on
   auto prop =
     node->metaObject()->property(node->metaObject()->indexOfProperty(propertyName.c_str()));
 
-  if (prop.typeName() == "int8_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset(),
-          static_cast<long>(std::numeric_limits<int8_t>::min()),
-          std::numeric_limits<int8_t>::max());
-  } else if (prop.typeName() == "int16_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 1,
-          static_cast<long>(std::numeric_limits<int16_t>::min()),
-          std::numeric_limits<int16_t>::max());
-  } else if (prop.typeName() == "int32_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 2,
-          static_cast<long>(std::numeric_limits<int32_t>::min()),
-          std::numeric_limits<int32_t>::max());
-  } else if (prop.typeName() == "int64_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 3,
-          static_cast<long>(std::numeric_limits<int32_t>::min()),
-          std::numeric_limits<int32_t>::max());
-  } else if (prop.typeName() == "uint8_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 4, "\\0\\xhh");
-  } else if (prop.typeName() == "uint16_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 5, "\\0\\xhhhh");
-  } else if (prop.typeName() == "uint32_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 6, "\\0\\xhhhhhhhh");
-  } else if (prop.typeName() == "uint64_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 7, "\\0\\xhhhhhhhhhhhhhhhh");
-  } else if (prop.typeName() == "char"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 8,
-          static_cast<long>(std::numeric_limits<char>::min()), std::numeric_limits<char>::max());
-  } else if (prop.typeName() == "short"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 9,
-          static_cast<long>(std::numeric_limits<short>::min()), std::numeric_limits<short>::max());
-  } else if (prop.typeName() == "int"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 10,
-          static_cast<long>(std::numeric_limits<int>::min()), std::numeric_limits<int>::max());
-  } else if (prop.typeName() == "long"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 11,
-          std::numeric_limits<long>::min(), std::numeric_limits<long>::max());
-  } else if (prop.typeName() == "qlonglong"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 12,
-          std::numeric_limits<long>::min(), std::numeric_limits<long>::max());
-  } else if (prop.typeName() == "uchar"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 13, "\\0\\xhh");
-  } else if (prop.typeName() == "ushort"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 14, "\\0\\xhhhh");
-  } else if (prop.typeName() == "uint"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 15, "\\0\\xhhhhhhhh");
-  } else if (prop.typeName() == "ulong"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 16, "\\0\\xhhhhhhhhhhhhhhhh");
-  } else if (prop.typeName() == "qulonglong"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 17, "\\0\\xhhhhhhhhhhhhhhhh");
-  } else if (prop.typeName() == "yoyo::properties::limited_int8_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 18,
-          node->property(propertyName.c_str()).value<properties::limited_int8_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_int16_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 19,
-          node->property(propertyName.c_str()).value<properties::limited_int16_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_int32_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 20,
-          node->property(propertyName.c_str()).value<properties::limited_int32_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_int64_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 21,
-          node->property(propertyName.c_str()).value<properties::limited_int64_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_uint8_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 22,
-          node->property(propertyName.c_str()).value<properties::limited_uint8_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_uint16_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 23,
-          node->property(propertyName.c_str()).value<properties::limited_uint16_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_uint32_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 24,
-          node->property(propertyName.c_str()).value<properties::limited_uint32_t>());
-  } else if (prop.typeName() == "yoyo::properties::limited_uint64_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 25,
-          node->property(propertyName.c_str()).value<properties::limited_uint64_t>());
-  } else if (prop.typeName() == "float"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 26,
-          std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
-  } else if (prop.typeName() == "double"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 27,
-          std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
-  } else if (prop.typeName() == "yoyo::properties::limited_float_t"s) {
-    setup(node, propertyName, staticMetaObject.methodOffset() + 28,
-          node->property(propertyName.c_str()).value<properties::limited_float_t>());
+  auto notifyType = [](auto const& signature) -> std::string {
+    static QRegularExpression reg { ".*\\((.*)\\)" };
+    if (auto match = reg.match(signature); match.hasMatch()) {
+      return match.captured(1).toStdString();
+    }
+    return "";
+  };
+  auto it = slot_indices.find(notifyType(prop.notifySignal().methodSignature()));
+  if (it == slot_indices.end()) {
+    throw std::runtime_error("unknown type");
+  }
+
+  if (prop.typeName() == QMetaType::fromType<int8_t>().name()) {
+    do_setup<uint8_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<int16_t>().name()) {
+    do_setup<int16_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<int32_t>().name()) {
+    do_setup<int32_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<int64_t>().name()) {
+    do_setup<int32_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<uint8_t>().name()) {
+    do_setup<uint8_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<uint16_t>().name()) {
+    do_setup<uint16_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<uint32_t>().name()) {
+    do_setup<uint32_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<uint64_t>().name()) {
+    do_setup<uint64_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<char>().name()) {
+    do_setup<char>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<short>().name()) {
+    do_setup<short>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<int>().name()) {
+    do_setup<int>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<long>().name()) {
+    do_setup<long>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<qlonglong>().name()) {
+    do_setup<qlonglong>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<uchar>().name()) {
+    do_setup<uchar>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<ushort>().name()) {
+    do_setup<ushort>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<uint>().name()) {
+    do_setup<uint>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<ulong>().name()) {
+    do_setup<ulong>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<qulonglong>().name()) {
+    do_setup<qulonglong>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_int8_t>().name()) {
+    do_setup<yoyo::properties::limited_int8_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_int16_t>().name()) {
+    do_setup<yoyo::properties::limited_int16_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_int32_t>().name()) {
+    do_setup<yoyo::properties::limited_int32_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_int64_t>().name()) {
+    do_setup<yoyo::properties::limited_int64_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_uint8_t>().name()) {
+    do_setup<yoyo::properties::limited_uint8_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_uint16_t>().name()) {
+    do_setup<yoyo::properties::limited_uint16_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_uint32_t>().name()) {
+    do_setup<yoyo::properties::limited_uint32_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_uint64_t>().name()) {
+    do_setup<yoyo::properties::limited_uint64_t>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<float>().name()) {
+    do_setup<float>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<double>().name()) {
+    do_setup<double>(node, propertyName, it->second);
+  } else if (prop.typeName() == QMetaType::fromType<yoyo::properties::limited_float_t>().name()) {
+    do_setup<yoyo::properties::limited_float_t>(node, propertyName, it->second);
   } else {
     throw std::runtime_error("unknown type");
   }
@@ -318,25 +393,25 @@ auto number_input::onPropertyChanged(properties::limited_int64_t value) -> void
 auto number_input::onPropertyChanged(properties::limited_uint8_t value) -> void
 {
   _buffer = QVariant::fromValue(value);
-  _input->setText(QLocale::system().toString(value._value));
+  _input->setText("0x" + QString::number(value._value, 16));
 }
 
 auto number_input::onPropertyChanged(properties::limited_uint16_t value) -> void
 {
   _buffer = QVariant::fromValue(value);
-  _input->setText(QLocale::system().toString(value._value));
+  _input->setText("0x" + QString::number(value._value, 16));
 }
 
 auto number_input::onPropertyChanged(properties::limited_uint32_t value) -> void
 {
   _buffer = QVariant::fromValue(value);
-  _input->setText(QLocale::system().toString(value._value));
+  _input->setText("0x" + QString::number(value._value, 16));
 }
 
 auto number_input::onPropertyChanged(properties::limited_uint64_t value) -> void
 {
   _buffer = QVariant::fromValue(value);
-  _input->setText(QLocale::system().toString(value._value));
+  _input->setText("0x" + QString::number(value._value, 16));
 }
 
 auto number_input::onPropertyChanged(float value) -> void

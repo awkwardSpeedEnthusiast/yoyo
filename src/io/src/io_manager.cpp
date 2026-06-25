@@ -34,16 +34,16 @@ auto deinit_manager() -> void
 
 auto add_default() -> void
 {
-  io_manager::install_serializer({ 0x1c, 0xbe, 0x13, 0xed, 0xa1, 0x6f, 0x4d, 0x58, 0xb0, 0xae, 0x27,
-                                   0x1c, 0xf0, 0x0b, 0x17, 0x55 },
-                                 "Json", "Json file format", "*.json", [](auto const& factories) {
-                                   return std::make_shared<node_serializer_json>(factories);
-                                 });
-  io_manager::install_deserializer({ 0x1c, 0xbe, 0x13, 0xed, 0xa1, 0x6f, 0x4d, 0x58, 0xb0, 0xae,
-                                     0x27, 0x1c, 0xf0, 0x0b, 0x17, 0x55 },
-                                   "Json", "Json file format", "*.json", [](auto const& factories) {
-                                     return std::make_shared<node_deserializer_json>(factories);
-                                   });
+  io_manager::install_serializer(
+    boost::uuids::uuid { { 0x1c, 0xbe, 0x13, 0xed, 0xa1, 0x6f, 0x4d, 0x58, 0xb0, 0xae, 0x27, 0x1c,
+                           0xf0, 0x0b, 0x17, 0x55 } },
+    "Json", "Json file format", "*.json",
+    [](auto const& factories) { return std::make_shared<node_serializer_json>(factories); });
+  io_manager::install_deserializer(
+    boost::uuids::uuid { { 0x1c, 0xbe, 0x13, 0xed, 0xa1, 0x6f, 0x4d, 0x58, 0xb0, 0xae, 0x27, 0x1c,
+                           0xf0, 0x0b, 0x17, 0x55 } },
+    "Json", "Json file format", "*.json",
+    [](auto const& factories) { return std::make_shared<node_deserializer_json>(factories); });
 }
 
 class io_manager::impl

@@ -26,7 +26,7 @@ auto bit_node::setValue(QVariant const& value) -> void
     return;
   }
 
-  if (static_cast<QMetaType::Type>(value.type()) != QMetaType::Bool) {
+  if (value.metaType() != QMetaType::fromType<bool>()) {
     return;
   }
 

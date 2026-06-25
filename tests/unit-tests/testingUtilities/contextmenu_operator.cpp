@@ -214,6 +214,7 @@ auto contextmenu_operator::operate() -> void
   f.get();
   QTest::qWait(10);
   useThread->terminate();
+  useThread->wait();
 
   if (!_p->_thread) {
     delete useThread;

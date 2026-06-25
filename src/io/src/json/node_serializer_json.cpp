@@ -24,15 +24,13 @@ auto toObject(std::shared_ptr<yoyo::node_base> node,
   QJsonObject properties;
 
   std::shared_ptr<yoyo::documentation> description;
-  std::find_if(std::begin(factories), std::end(factories),
-               [&description, id = node->staticTypeId()](auto const& f) {
-                 if (auto d = f->node_documentation(id)) {
-                   description = d;
-                   return true;
-                 }
-
-                 return false;
-               });
+  if (auto it = std::ranges::find_if(factories,
+                                     [id = node->staticTypeId()](auto const& f) {
+                                       return f->node_documentation(id) != nullptr;
+                                     });
+      it != factories.end()) {
+    description = (*it)->node_documentation(node->staticTypeId());
+  }
 
   for (auto i = yoyo::node_base::staticMetaObject.propertyOffset(); i < meta->propertyCount();
        i++) {

@@ -37,7 +37,8 @@ layout_input::layout_input(std::shared_ptr<node_base> node, std::string property
       }
     };
     onPropertyChanged(node->property(propertyName.c_str()).value<types::layout_direction_t>());
-  } else if (prop.typeName() == "yoyo::properties::invisible_layout_direction_t"s) {
+  } else if (prop.typeName()
+             == QMetaType::fromType<yoyo::properties::invisible_layout_direction_t>().name()) {
     method_index++;
     slotFunction = [this, propertyName]() {
       auto value = static_cast<types::layout_direction_t>(_input->currentIndex());

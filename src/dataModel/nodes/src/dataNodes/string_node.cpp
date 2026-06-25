@@ -26,7 +26,7 @@ auto string_node::setValue(QVariant const& value) -> void
     return;
   }
 
-  if (static_cast<QMetaType::Type>(value.type()) != QMetaType::QString) {
+  if (value.metaType() != QMetaType::fromType<QString>()) {
     return;
   }
 

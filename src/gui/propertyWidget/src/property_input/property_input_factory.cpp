@@ -16,6 +16,8 @@
 #include "script_input.hpp"
 #include "text_input.hpp"
 
+#include <QMetaType>
+
 namespace yoyo::gui
 {
 std::map<std::string, property::creator> const property::factory {
@@ -83,99 +85,99 @@ std::map<std::string, property::creator> const property::factory {
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::types::access_t",
+  { QMetaType::fromType<yoyo::types::access_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::enumeration_input>(n, p, parent);
     } },
-  { "yoyo::types::layout_direction_t",
+  { QMetaType::fromType<yoyo::types::layout_direction_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::layout_input>(n, p, parent);
     } },
-  { "yoyo::properties::string_t",
+  { QMetaType::fromType<yoyo::properties::string_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::qstring_input>(n, p, parent);
     } },
-  { "yoyo::properties::text_t",
+  { QMetaType::fromType<yoyo::properties::text_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::text_input>(n, p, parent);
     } },
-  { "yoyo::properties::invisible_string_t",
+  { QMetaType::fromType<yoyo::properties::invisible_string_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::invisible_string_input>(n, p, parent);
     } },
-  { "yoyo::properties::invisible_layout_direction_t",
+  { QMetaType::fromType<yoyo::properties::invisible_layout_direction_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::layout_input>(n, p, parent);
     } },
-  { "yoyo::properties::connected_string_t",
+  { QMetaType::fromType<yoyo::properties::connected_string_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::connected_string_input>(n, p, parent);
     } },
-  { "yoyo::properties::connected_boolean_t",
+  { QMetaType::fromType<yoyo::properties::connected_boolean_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::connected_boolean_input>(n, p, parent);
     } },
-  { "yoyo::properties::connection_t",
+  { QMetaType::fromType<yoyo::properties::connection_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::connection_input>(n, p, parent);
     } },
-  { "yoyo::properties::in_connection_t",
+  { QMetaType::fromType<yoyo::properties::in_connection_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::connection_in_input>(n, p, parent);
     } },
-  { "yoyo::properties::out_connection_t",
+  { QMetaType::fromType<yoyo::properties::out_connection_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::connection_out_input>(n, p, parent);
     } },
-  { "yoyo::properties::enum_t",
+  { QMetaType::fromType<yoyo::properties::enum_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::enum_input>(n, p, parent);
     } },
-  { "yoyo::properties::patterned_string_t",
+  { QMetaType::fromType<yoyo::properties::patterned_string_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::pattern_string_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_uint8_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint8_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_uint16_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint16_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_uint32_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint32_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_uint64_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint64_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_int8_t",
+  { QMetaType::fromType<yoyo::properties::limited_int8_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_int16_t",
+  { QMetaType::fromType<yoyo::properties::limited_int16_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_int32_t",
+  { QMetaType::fromType<yoyo::properties::limited_int32_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_int64_t",
+  { QMetaType::fromType<yoyo::properties::limited_int64_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::limited_float_t",
+  { QMetaType::fromType<yoyo::properties::limited_float_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::number_input>(n, p, parent);
     } },
-  { "yoyo::properties::script_t",
+  { QMetaType::fromType<yoyo::properties::script_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::script_input>(n, p, parent);
     } },
-  { "yoyo::properties::transmission_direction_t",
+  { QMetaType::fromType<yoyo::properties::transmission_direction_t>().name(),
     [](auto n, auto p, auto parent) {
       return std::make_shared<yoyo::gui::enumeration_input>(n, p, parent);
     } },

@@ -7,6 +7,7 @@
 #include "tree_utils.hpp"
 
 #include <QDataStream>
+#include <QIODevice>
 #include <QMetaObject>
 #include <QMimeData>
 #include <QVariant>
@@ -38,7 +39,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~invalid_data_adapter() override = default;
   auto data(int /*column*/) const -> QVariant override
   {
     return {};
@@ -60,7 +61,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~default_data_adapter() override = default;
   auto data(int column) const -> QVariant override
   {
     if (column == 0) {
@@ -100,7 +101,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~data_data_adapter() override = default;
   auto data(int column) const -> QVariant override
   {
     switch (column) {
@@ -139,7 +140,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~gui_data_adapter() override = default;
   auto data(int column) const -> QVariant override
   {
     switch (column) {
@@ -178,7 +179,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~protocol_data_adapter() override = default;
   auto data(int column) const -> QVariant override
   {
     switch (column) {
@@ -216,7 +217,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~communication_data_adapter() override = default;
   auto data(int column) const -> QVariant override
   {
     switch (column) {
@@ -254,7 +255,7 @@ public:
     : data_adapter(node)
   {
   }
-
+  ~message_data_adapter() override = default;
   auto data(int column) const -> QVariant override
   {
     switch (column) {

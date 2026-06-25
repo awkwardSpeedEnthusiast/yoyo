@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 using std::string_literals::operator""s;
-namespace
+namespace detail
 {
 std::shared_ptr<yoyo::node_base> findChild(QString const& path,
                                            std::shared_ptr<yoyo::node_base> parent)
@@ -277,7 +277,7 @@ auto single_connection_tracker::on_connection_changed() -> void
 
     if (!connection._auto.isEmpty()) {
       if (auto data = std::dynamic_pointer_cast<yoyo::data_node>(
-            ::findChild(connection._auto, _data_root.lock()))) {
+            detail::findChild(connection._auto, _data_root.lock()))) {
         if (data->canConnect() && connection._supports(data->valueType())
             && (data != _connected_data_in.lock()) && (data != _connected_data_out.lock())) {
           connectInput(data, connection);
@@ -294,7 +294,7 @@ auto single_connection_tracker::on_connection_changed() -> void
     } else {
       if (!connection._in.isEmpty()) {
         if (auto data = std::dynamic_pointer_cast<yoyo::data_node>(
-              ::findChild(connection._in, _data_root.lock()))) {
+              detail::findChild(connection._in, _data_root.lock()))) {
           if (data->canConnect() && connection._supports(data->valueType())
               && (data != _connected_data_in.lock())) {
             connectInput(data, connection);
@@ -307,7 +307,7 @@ auto single_connection_tracker::on_connection_changed() -> void
 
       if (!connection._out.isEmpty()) {
         if (auto data = std::dynamic_pointer_cast<yoyo::data_node>(
-              ::findChild(connection._out, _data_root.lock()))) {
+              detail::findChild(connection._out, _data_root.lock()))) {
           if (data->canConnect() && connection._supports(data->valueType())
               && (data != _connected_data_out.lock())) {
             connectOutput(data, connection);
@@ -325,7 +325,7 @@ auto single_connection_tracker::on_connection_changed() -> void
 
     if (!connection._in.isEmpty()) {
       if (auto data = std::dynamic_pointer_cast<yoyo::data_node>(
-            ::findChild(connection._in, _data_root.lock()))) {
+            detail::findChild(connection._in, _data_root.lock()))) {
         if (data->canConnect() && connection._supports(data->valueType())
             && (data != _connected_data_in.lock())) {
           connectInput(data, connection);
@@ -344,7 +344,7 @@ auto single_connection_tracker::on_connection_changed() -> void
 
     if (!connection._out.isEmpty()) {
       if (auto data = std::dynamic_pointer_cast<yoyo::data_node>(
-            ::findChild(connection._out, _data_root.lock()))) {
+            detail::findChild(connection._out, _data_root.lock()))) {
         if (data->canConnect() && connection._supports(data->valueType())
             && (data != _connected_data_out.lock())) {
           connectOutput(data, connection);
@@ -360,7 +360,7 @@ auto single_connection_tracker::on_connection_changed() -> void
 }
 
 single_connection_tracker::~single_connection_tracker() {}
-} // namespace
+} // namespace detail
 namespace yoyo
 {
 class connectivity_manager::impl
@@ -399,7 +399,7 @@ public:
   auto reevaluate_connections() -> void;
 
 private:
-  std::map<node_base*, std::vector<std::shared_ptr<single_connection_tracker>>> _nodes;
+  std::map<node_base*, std::vector<std::shared_ptr<detail::single_connection_tracker>>> _nodes;
   std::map<node_base*, QMetaObject::Connection> _reference_nodes;
   std::weak_ptr<node_base> _data_root;
 };
@@ -421,11 +421,12 @@ auto connectivity_manager::impl::on_node_add(std::weak_ptr<node_base> node) -> v
       static QStringList const connection_types { "yoyo::properties::connection_t",
                                                   "yoyo::properties::in_connection_t",
                                                   "yoyo::properties::out_connection_t" };
-      std::vector<std::shared_ptr<single_connection_tracker>> connections;
+      std::vector<std::shared_ptr<detail::single_connection_tracker>> connections;
 
       for (int i = node_base::staticMetaObject.propertyCount(); i < meta->propertyCount(); i++) {
         if (connection_types.contains(meta->property(i).typeName())) {
-          connections.push_back(std::make_shared<single_connection_tracker>(n, i, _data_root));
+          connections.push_back(
+            std::make_shared<detail::single_connection_tracker>(n, i, _data_root));
         }
       }
 

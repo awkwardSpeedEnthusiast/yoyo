@@ -74,7 +74,7 @@ combo_box::combo_box(boost::uuids::uuid identifier)
                                    });
 
             if (it != _p->_enum_values._values.end()) {
-              _p->_signal(it->first);
+              _p->_signal(QVariant::fromValue(it->first));
             }
           });
 }

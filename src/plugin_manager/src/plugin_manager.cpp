@@ -21,8 +21,15 @@ public:
   {
   }
 
-  auto load_plugin(boost::uuids::uuid id) -> bool;
-  auto unload_plugin(boost::uuids::uuid id) -> bool;
+  ~impl()
+  {
+    while (!_loaded_plugins.empty()) {
+      unload_the_plugin(_loaded_plugins.begin()->first);
+    }
+  }
+
+  auto load_the_plugin(boost::uuids::uuid id) -> bool;
+  auto unload_the_plugin(boost::uuids::uuid id) -> bool;
   std::shared_ptr<node_factory> _data;
   std::shared_ptr<node_factory> _gui;
   std::shared_ptr<node_factory> _protocol;
@@ -46,18 +53,13 @@ plugin_manager::plugin_manager(std::shared_ptr<node_factory> data,
       _p->_known_plugins.insert({ description->id(), description });
 
       if (path.second) {
-        _p->load_plugin(description->id());
+        _p->load_the_plugin(description->id());
       }
     }
   });
 }
 
-plugin_manager::~plugin_manager()
-{
-  while (!_p->_loaded_plugins.empty()) {
-    _p->unload_plugin(_p->_loaded_plugins.begin()->first);
-  }
-}
+plugin_manager::~plugin_manager() = default;
 
 auto plugin_manager::known_plugins() const
   -> std::map<boost::uuids::uuid, std::shared_ptr<plugin_data>>
@@ -88,7 +90,7 @@ auto plugin_manager::load_plugin(boost::uuids::uuid id) -> bool
     return false;
   }
 
-  if (_p->load_plugin(id)) {
+  if (_p->load_the_plugin(id)) {
     auto pit =
       std::find_if(_p->paths.begin(), _p->paths.end(),
                    [f = it->second->description_location()](auto p) { return p.first == f; });
@@ -112,7 +114,7 @@ auto plugin_manager::unload_plugin(boost::uuids::uuid id) -> bool
     return false;
   }
 
-  if (_p->unload_plugin(id)) {
+  if (_p->unload_the_plugin(id)) {
     auto pit =
       std::find_if(_p->paths.begin(), _p->paths.end(),
                    [f = it->second->description_location()](auto p) { return p.first == f; });
@@ -163,7 +165,7 @@ auto plugin_manager::remove_plugin(boost::uuids::uuid id) -> bool
   return true;
 }
 
-auto plugin_manager::impl::load_plugin(boost::uuids::uuid id) -> bool
+auto plugin_manager::impl::load_the_plugin(boost::uuids::uuid id) -> bool
 {
   auto it = _known_plugins.find(id);
   auto loader = std::make_shared<QPluginLoader>(
@@ -188,7 +190,7 @@ auto plugin_manager::impl::load_plugin(boost::uuids::uuid id) -> bool
   return false;
 }
 
-auto plugin_manager::impl::unload_plugin(boost::uuids::uuid id) -> bool
+auto plugin_manager::impl::unload_the_plugin(boost::uuids::uuid id) -> bool
 {
   auto it = _loaded_plugins.find(id);
 

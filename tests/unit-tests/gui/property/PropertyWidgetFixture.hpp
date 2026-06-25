@@ -1,3 +1,4 @@
+#pragma once
 #include "property_widget.h"
 
 #include "guiFixture.hpp"

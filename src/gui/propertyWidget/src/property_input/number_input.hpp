@@ -63,6 +63,9 @@ private:
   template <typename T>
   auto setup(std::shared_ptr<node_base> node, std::string propertyName, int method_index,
              properties::limited_value_t<T> value) -> void;
+  template <typename T>
+  void do_setup(std::shared_ptr<node_base> node, std::string const& property_name,
+                int method_index);
 
 private:
   std::unique_ptr<QLineEdit> _input;

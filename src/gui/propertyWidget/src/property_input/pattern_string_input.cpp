@@ -6,7 +6,7 @@
 #include <QLineEdit>
 #include <QMetaObject>
 #include <QMetaProperty>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 namespace yoyo::gui
 {
@@ -27,7 +27,7 @@ pattern_string_input::pattern_string_input(std::shared_ptr<node_base> node,
   });
 
   onPropertyChanged(node->property(propertyName.c_str()).value<properties::patterned_string_t>());
-  _input->setValidator(new QRegExpValidator(_buffer._pattern, _input.get()));
+  _input->setValidator(new QRegularExpressionValidator(_buffer._pattern, _input.get()));
 }
 
 pattern_string_input::~pattern_string_input() = default;

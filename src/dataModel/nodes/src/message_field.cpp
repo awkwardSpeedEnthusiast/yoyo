@@ -35,7 +35,7 @@ auto message_field::incommingData(QByteArray const& v) -> void
     _signal(v);
   } else {
     auto pos = _bitPos._value;
-    if (v.count() * 8 < pos + _bufferLength) {
+    if (v.size() * 8 < pos + _bufferLength) {
       return;
     }
     QByteArray out_data;

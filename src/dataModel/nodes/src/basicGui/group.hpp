@@ -1,13 +1,13 @@
 #pragma once
 
-#include "export_on_test.hpp"
+#include "nodes_export.h"
 #include "yoyo/gui_node.h"
 
 #include <memory>
 
 namespace yoyo
 {
-class YOYO_TESTING_EXPORT group final : public gui_node
+class YOYO_NODES_SHARED_EXPORT group final : public gui_node
 {
   Q_OBJECT
 

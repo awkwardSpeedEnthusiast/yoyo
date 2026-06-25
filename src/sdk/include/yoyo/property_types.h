@@ -3,7 +3,7 @@
 #include "yoyo/yoyo_sdk_global.h"
 
 #include <QMetaType>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 
 #include <boost/signals2.hpp>
@@ -43,33 +43,33 @@ namespace types
 ///
 enum class value_t {
   /// Boolean
-  BIT,
+  BIT = 0,
   /// Variable length object
-  BITFIELD,
+  BITFIELD = 1,
   /// String
-  STRING,
+  STRING = 2,
   /// Floating point value in single precision
-  FLOAT,
+  FLOAT = 3,
   /// 8-bit unsigned integer
-  UINT8,
+  UINT8 = 4,
   /// 16-bit unsigned integer
-  UINT16,
+  UINT16 = 5,
   /// 32-bit unsigned integer
-  UINT32,
+  UINT32 = 6,
   /// 64-bit unsigned integer
-  UINT64,
+  UINT64 = 7,
   /// 8-bit signed integer
-  INT8,
+  INT8 = 8,
   /// 16-bit signed integer
-  INT16,
+  INT16 = 9,
   /// 32-bit signed integer
-  INT32,
+  INT32 = 10,
   /// 64-bit signed integer
-  INT64,
+  INT64 = 11,
   ///
-  REGISTER,
+  REGISTER = 12,
   ///
-  DEVICE,
+  DEVICE = 13,
   /// Other values
   CUSTOM,
 };
@@ -266,7 +266,13 @@ struct patterned_string_t {
   ///
   /// The pattern, that the value must match.
   ///
-  QRegExp _pattern;
+  QRegularExpression _pattern;
+  patterned_string_t(QString s, QRegularExpression pattern)
+    : _s { s }
+    , _pattern { pattern }
+  {
+  }
+
   patterned_string_t() = default;
   ///
   /// \brief Assignment constructor
@@ -443,6 +449,18 @@ struct connection_t {
   ///
   QString _auto;
 
+  connection_t(std::function<boost::signals2::connection(std::function<void(QVariant)>)> connector,
+               std::function<void(QVariant)> setter, std::function<bool(types::value_t t)> supports,
+               QString in, QString out, QString auto_p)
+    : _connector { connector }
+    , _setter { setter }
+    , _supports { supports }
+    , _in { in }
+    , _out { out }
+    , _auto { auto_p }
+  {
+  }
+
   connection_t() = default;
   ~connection_t() = default;
   ///
@@ -534,6 +552,13 @@ struct in_connection_t {
   ///
   QString _in;
 
+  in_connection_t(std::function<void(QVariant)> setter,
+                  std::function<bool(types::value_t t)> supports, QString in)
+    : _setter { setter }
+    , _supports { supports }
+    , _in { in }
+  {
+  }
   in_connection_t() = default;
   ~in_connection_t() = default;
   ///
@@ -622,6 +647,15 @@ struct out_connection_t {
   /// The path to the node to connect for outgoing data
   ///
   QString _out;
+
+  out_connection_t(
+    std::function<boost::signals2::connection(std::function<void(QVariant)>)> connector,
+    std::function<bool(types::value_t t)> supports, QString out)
+    : _connector { connector }
+    , _supports { supports }
+    , _out { out }
+  {
+  }
 
   out_connection_t() = default;
   ~out_connection_t() = default;
@@ -763,6 +797,11 @@ struct enum_t {
     return _enabled == other._enabled && _values == other._values;
   }
 
+  enum_t(bool enabled, std::map<uint64_t, std::tuple<QString, QString, script_t>> values)
+    : _enabled { enabled }
+    , _values { values }
+  {
+  }
   enum_t() = default;
   enum_t(enum_t const&) = default;
   enum_t(enum_t&&) = default;
@@ -802,7 +841,7 @@ struct limited_value_t {
   ///
   /// \brief default constructor
   ///
-  limited_value_t<T>() = default;
+  limited_value_t() = default;
   ///
   /// \brief Constructor
   ///
@@ -812,21 +851,21 @@ struct limited_value_t {
   /// \param min the minimum for the value,
   /// \param max the maximum for the value.
   ///
-  limited_value_t<T>(T value, T min, T max)
+  limited_value_t(T value, T min, T max)
     : _value { value }
     , _min { min }
     , _max { max }
   {
   }
-  ~limited_value_t<T>() = default;
+  ~limited_value_t() = default;
   ///
   /// \brief Copy constructor
   ///
-  limited_value_t<T>(limited_value_t<T> const&) = default;
+  limited_value_t(limited_value_t<T> const&) = default;
   ///
   /// \brief Move constructor
   ///
-  limited_value_t<T>(limited_value_t<T>&&) = default;
+  limited_value_t(limited_value_t<T>&&) = default;
   ///
   /// \brief Comparison operator
   ///

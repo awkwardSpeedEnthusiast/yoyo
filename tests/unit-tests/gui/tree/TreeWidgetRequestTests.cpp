@@ -13,6 +13,7 @@ class TreeWidgetRequestTest : public TreeWidgetTest
 public:
   auto setupTree() -> void
   {
+    TreeWidgetTest::SetUp();
     createWidget();
     retrieveListView();
     ASSERT_NE(view, nullptr);
@@ -98,11 +99,11 @@ TEST_F(TreeWidgetRequestTest, exchange)
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "line_edit");
 
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, -1,
+  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, 1,
                                     CO::PRE_ADD))
     .InSequence(seq);
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, -1,
-                                    CO::ADDED))
+  EXPECT_CALL(receiver,
+              treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, 1, CO::ADDED))
     .InSequence(seq);
   EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
                                     requestingItem->weak_from_this(), _, CO::PRE_REMOVE))
@@ -115,17 +116,16 @@ TEST_F(TreeWidgetRequestTest, exchange)
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 2);
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
   EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "button");
-
   auto handler = yoyo::command::commandhandler();
   {
     EXPECT_TRUE(handler->hasCommandToUndo());
     EXPECT_EQ(handler->nextUndo().toStdString(), "Change item type from line_edit to button");
 
     EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
-                                      requestingItem->weak_from_this(), -1, CO::PRE_ADD))
+                                      requestingItem->weak_from_this(), 1, CO::PRE_ADD))
       .InSequence(seq);
     EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
-                                      requestingItem->weak_from_this(), -1, CO::ADDED))
+                                      requestingItem->weak_from_this(), 1, CO::ADDED))
       .InSequence(seq);
     EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
                                       CO::PRE_REMOVE))
@@ -146,11 +146,11 @@ TEST_F(TreeWidgetRequestTest, exchange)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Change item type from line_edit to button");
 
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
-                                      -1, CO::PRE_ADD))
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, 1,
+                                      CO::PRE_ADD))
       .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
-                                      -1, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, 1,
+                                      CO::ADDED))
       .InSequence(seq);
     EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(),
                                       requestingItem->weak_from_this(), _, CO::PRE_REMOVE))
@@ -192,7 +192,7 @@ TEST_F(TreeWidgetRequestTest, add)
     auto requestingItem = configuration->childAt(1)->childAt(1)->childAt(0);
     EXPECT_FALSE(requestingItem->acceptsChildren());
 
-    EXPECT_CALL(receiver, treeChanged(_, _, -1, CO::ADDED)).Times(0);
+    EXPECT_CALL(receiver, treeChanged(_, _, 1, CO::ADDED)).Times(0);
     requestingItem->addRequested(requestingItem, buttonId, 1);
   }
   {
@@ -200,8 +200,8 @@ TEST_F(TreeWidgetRequestTest, add)
 
     EXPECT_EQ(requestingItem->childCount(), 2);
 
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD));
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED));
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 1, CO::PRE_ADD));
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 1, CO::ADDED));
     requestingItem->addRequested(requestingItem, buttonId, 1);
 
     EXPECT_EQ(requestingItem->childCount(), 3);
@@ -232,10 +232,10 @@ TEST_F(TreeWidgetRequestTest, add)
     EXPECT_TRUE(handler->hasCommandToRedo());
     EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
 
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
-                                      -1, CO::PRE_ADD));
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
-                                      -1, CO::ADDED));
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, 1,
+                                      CO::PRE_ADD));
+    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, 1,
+                                      CO::ADDED));
     handler->redo();
 
     EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 3);
@@ -266,6 +266,7 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_CALL(receiver, treeChanged(_, _, _, _)).Times(0).InSequence(seq);
     ASSERT_NE(requestingItem, nullptr);
     requestingItem->defaultForDataRequested(path, requestingItem, 0, false, false, true);
+    testing::Mock::VerifyAndClearExpectations(&receiver);
   }
 
   // integer
@@ -274,9 +275,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(0));
     ASSERT_NE(requestingItem, nullptr);
     EXPECT_EQ(requestingItem->childCount(), 2);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 0, CO::PRE_ADD))
       .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 0, CO::ADDED))
       .InSequence(seq);
     requestingItem->defaultForDataRequested(path, requestingItem, 0, false, false, true);
     ASSERT_EQ(requestingItem->childCount(), 3);
@@ -290,7 +291,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_EQ(c._in, "");
     EXPECT_EQ(c._out, "");
     EXPECT_EQ(c._auto, path);
+    testing::Mock::VerifyAndClearExpectations(&receiver);
   }
+
   path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
     configuration->childAt(0)->childAt(0)->childAt(0));
   // bit
@@ -298,9 +301,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
     auto requestingItem =
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(1));
     ASSERT_NE(requestingItem, nullptr);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 2, CO::PRE_ADD))
       .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 2, CO::ADDED))
       .InSequence(seq);
     requestingItem->defaultForDataRequested(path, requestingItem, -1, false, true, false);
     EXPECT_EQ(requestingItem->childCount(), 3);
@@ -315,7 +318,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_EQ(c._in.toStdString(), "");
     EXPECT_EQ(c._out.toStdString(), path.toStdString());
     EXPECT_EQ(c._auto.toStdString(), "");
+    testing::Mock::VerifyAndClearExpectations(&receiver);
   }
+
   path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
     configuration->childAt(0)->childAt(1)->childAt(1));
   // uint
@@ -323,9 +328,9 @@ TEST_F(TreeWidgetRequestTest, addForData)
     auto requestingItem =
       std::dynamic_pointer_cast<yoyo::gui_node>(configuration->childAt(1)->childAt(1));
     ASSERT_NE(requestingItem, nullptr);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::PRE_ADD))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 3, CO::PRE_ADD))
       .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, -1, CO::ADDED))
+    EXPECT_CALL(receiver, treeChanged(requestingItem->weak_from_this(), _, 3, CO::ADDED))
       .InSequence(seq);
     requestingItem->defaultForDataRequested(path, requestingItem, -1, true, false, false);
     EXPECT_EQ(requestingItem->childCount(), 4);
@@ -341,149 +346,176 @@ TEST_F(TreeWidgetRequestTest, addForData)
     EXPECT_EQ(c._in.toStdString(), path.toStdString());
     EXPECT_EQ(c._out.toStdString(), "");
     EXPECT_EQ(c._auto.toStdString(), "");
+    testing::Mock::VerifyAndClearExpectations(&receiver);
   }
 
   auto handler = yoyo::command::commandhandler();
-  { { EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
-
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
-                                    CO::PRE_REMOVE))
-    .InSequence(seq);
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
-                                    CO::REMOVED))
-    .InSequence(seq);
-  handler->undo();
-
-  EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 3);
-  EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
-  EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "line_edit");
-  EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->type().toStdString(), "check_box");
-}
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
-
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
-                                    CO::PRE_REMOVE))
-    .InSequence(seq);
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
-                                    CO::REMOVED))
-    .InSequence(seq);
-  handler->undo();
-
-  ASSERT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 2);
-  EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
-  EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "line_edit");
-}
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
-
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
-                                    CO::PRE_REMOVE))
-    .InSequence(seq);
-  EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
-                                    CO::REMOVED))
-    .InSequence(seq);
-  handler->undo();
-
-  EXPECT_EQ(configuration->childAt(1)->childAt(0)->childCount(), 2);
-  EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(0)->type().toStdString(), "button");
-  EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(1)->type().toStdString(), "check_box");
-}
-}
-
-{
   {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
 
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
-                                      CO::PRE_ADD))
-      .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _, _,
-                                      CO::ADDED))
-      .InSequence(seq);
-    handler->redo();
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        _, CO::PRE_REMOVE))
+        .InSequence(seq);
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        _, CO::REMOVED))
+        .InSequence(seq);
+      handler->undo();
 
-    path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
-      configuration->childAt(0)->childAt(1)->childAt(0));
-    ASSERT_EQ(configuration->childAt(1)->childAt(0)->childCount(), 3);
-    EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(0)->type().toStdString(), "line_edit");
-    EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(1)->type().toStdString(), "button");
-    EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(2)->type().toStdString(), "check_box");
-    EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(0)->property("connection").typeName(),
-              "yoyo::properties::connection_t"s);
-    auto c = configuration->childAt(1)
-               ->childAt(0)
-               ->childAt(0)
-               ->property("connection")
-               .value<yoyo::properties::connection_t>();
-    EXPECT_EQ(c._in, "");
-    EXPECT_EQ(c._out, "");
-    EXPECT_EQ(c._auto, path);
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 3);
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(),
+                "combo_box");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(),
+                "line_edit");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->type().toStdString(),
+                "check_box");
+      testing::Mock::VerifyAndClearExpectations(&receiver);
+    }
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
+
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        _, CO::PRE_REMOVE))
+        .InSequence(seq);
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        _, CO::REMOVED))
+        .InSequence(seq);
+      handler->undo();
+
+      ASSERT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 2);
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(),
+                "combo_box");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(),
+                "line_edit");
+      testing::Mock::VerifyAndClearExpectations(&receiver);
+    }
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group for signal");
+
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _,
+                                        _, CO::PRE_REMOVE))
+        .InSequence(seq);
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _,
+                                        _, CO::REMOVED))
+        .InSequence(seq);
+      handler->undo();
+
+      EXPECT_EQ(configuration->childAt(1)->childAt(0)->childCount(), 2);
+      EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(0)->type().toStdString(), "button");
+      EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(1)->type().toStdString(),
+                "check_box");
+      testing::Mock::VerifyAndClearExpectations(&receiver);
+    }
   }
+
   {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
 
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
-                                      CO::PRE_ADD))
-      .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _, _,
-                                      CO::ADDED))
-      .InSequence(seq);
-    handler->redo();
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _,
+                                        _, CO::PRE_ADD))
+        .InSequence(seq);
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(0)->weak_from_this(), _,
+                                        _, CO::ADDED))
+        .InSequence(seq);
+      handler->redo();
 
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 3);
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "line_edit");
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->type().toStdString(), "check_box");
+      path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
+        configuration->childAt(0)->childAt(1)->childAt(0));
+      ASSERT_EQ(configuration->childAt(1)->childAt(0)->childCount(), 3);
+      EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(0)->type().toStdString(),
+                "line_edit");
+      EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(1)->type().toStdString(), "button");
+      EXPECT_EQ(configuration->childAt(1)->childAt(0)->childAt(2)->type().toStdString(),
+                "check_box");
+      EXPECT_EQ(
+        configuration->childAt(1)->childAt(0)->childAt(0)->property("connection").typeName(),
+        "yoyo::properties::connection_t"s);
+      auto c = configuration->childAt(1)
+                 ->childAt(0)
+                 ->childAt(0)
+                 ->property("connection")
+                 .value<yoyo::properties::connection_t>();
+      EXPECT_EQ(c._in, "");
+      EXPECT_EQ(c._out, "");
+      EXPECT_EQ(c._auto, path);
+      testing::Mock::VerifyAndClearExpectations(&receiver);
+    }
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
 
-    path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
-      configuration->childAt(0)->childAt(0)->childAt(0));
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->property("connection").typeName(),
-              "yoyo::properties::connection_t"s);
-    auto c = configuration->childAt(1)
-               ->childAt(1)
-               ->childAt(2)
-               ->property("connection")
-               .value<yoyo::properties::connection_t>();
-    EXPECT_EQ(c._in.toStdString(), "");
-    EXPECT_EQ(c._out.toStdString(), path.toStdString());
-    EXPECT_EQ(c._auto.toStdString(), "");
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        _, CO::PRE_ADD))
+        .InSequence(seq);
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        _, CO::ADDED))
+        .InSequence(seq);
+      handler->redo();
+
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 3);
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(),
+                "combo_box");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(),
+                "line_edit");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->type().toStdString(),
+                "check_box");
+
+      path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
+        configuration->childAt(0)->childAt(0)->childAt(0));
+      EXPECT_EQ(
+        configuration->childAt(1)->childAt(1)->childAt(2)->property("connection").typeName(),
+        "yoyo::properties::connection_t"s);
+      auto c = configuration->childAt(1)
+                 ->childAt(1)
+                 ->childAt(2)
+                 ->property("connection")
+                 .value<yoyo::properties::connection_t>();
+      EXPECT_EQ(c._in.toStdString(), "");
+      EXPECT_EQ(c._out.toStdString(), path.toStdString());
+      EXPECT_EQ(c._auto.toStdString(), "");
+      testing::Mock::VerifyAndClearExpectations(&receiver);
+    }
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
+
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        3, CO::PRE_ADD))
+        .InSequence(seq);
+      EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
+                                        3, CO::ADDED))
+        .InSequence(seq);
+      handler->redo();
+
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 4);
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(),
+                "combo_box");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(),
+                "line_edit");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->type().toStdString(),
+                "check_box");
+      EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(3)->type().toStdString(),
+                "combo_box");
+
+      path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
+        configuration->childAt(0)->childAt(1)->childAt(1));
+      EXPECT_EQ(
+        configuration->childAt(1)->childAt(1)->childAt(3)->property("connection").typeName(),
+        "yoyo::properties::connection_t"s);
+      auto c = configuration->childAt(1)
+                 ->childAt(1)
+                 ->childAt(3)
+                 ->property("connection")
+                 .value<yoyo::properties::connection_t>();
+      EXPECT_EQ(c._in.toStdString(), path.toStdString());
+      EXPECT_EQ(c._out.toStdString(), "");
+      EXPECT_EQ(c._auto.toStdString(), "");
+      testing::Mock::VerifyAndClearExpectations(&receiver);
+    }
   }
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group for signal");
-
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
-                                      -1, CO::PRE_ADD))
-      .InSequence(seq);
-    EXPECT_CALL(receiver, treeChanged(configuration->childAt(1)->childAt(1)->weak_from_this(), _,
-                                      -1, CO::ADDED))
-      .InSequence(seq);
-    handler->redo();
-
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childCount(), 4);
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(0)->type().toStdString(), "combo_box");
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(1)->type().toStdString(), "line_edit");
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(2)->type().toStdString(), "check_box");
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(3)->type().toStdString(), "combo_box");
-
-    path = yoyo::utilities::calculatePath<yoyo::utilities::path_strategy_t::INDEX>(
-      configuration->childAt(0)->childAt(1)->childAt(1));
-    EXPECT_EQ(configuration->childAt(1)->childAt(1)->childAt(3)->property("connection").typeName(),
-              "yoyo::properties::connection_t"s);
-    auto c = configuration->childAt(1)
-               ->childAt(1)
-               ->childAt(3)
-               ->property("connection")
-               .value<yoyo::properties::connection_t>();
-    EXPECT_EQ(c._in.toStdString(), path.toStdString());
-    EXPECT_EQ(c._out.toStdString(), "");
-    EXPECT_EQ(c._auto.toStdString(), "");
-  }
-}
 }

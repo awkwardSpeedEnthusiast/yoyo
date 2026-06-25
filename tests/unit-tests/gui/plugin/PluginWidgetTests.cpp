@@ -26,13 +26,6 @@ public:
   static auto SetUpTestSuite() -> void
   {
     testing::Test::SetUpTestSuite();
-
-    if (!qApp) {
-      strcpy(arg0, "blabla\0");
-      char* args[1] = { arg0 };
-      app = std::make_unique<QApplication>(argc, args);
-    }
-
     QApplication::setOrganizationName("PluginWidgetTest");
     QApplication::setOrganizationDomain("PluginWidgetTest");
     QApplication::setApplicationName("PluginWidgetTest");
@@ -41,6 +34,7 @@ public:
 
   auto SetUp() -> void override
   {
+    yoyo::test::guiFixture::SetUp();
     QSettings settings { QSettings::IniFormat, QSettings::UserScope,
                          QApplication::organizationName(), QApplication::applicationName() };
     auto setting_file_name = settings.fileName().toStdString();
@@ -84,7 +78,8 @@ public:
   auto indexPoint(QWidget* to, QModelIndex index) -> QPoint
   {
     auto r = _listView->visualRect(index);
-    return _listView->viewport()->mapTo(to, { r.x() + r.width() / 2, r.y() + r.height() / 2 });
+    return _listView->viewport()->mapTo(to,
+                                        QPoint { r.x() + r.width() / 2, r.y() + r.height() / 2 });
   }
 
   std::shared_ptr<yoyo::plugin::plugin_manager> _manager;
@@ -94,10 +89,10 @@ public:
   QAbstractItemModel* _model;
   QMenu* _menu;
 
-  boost::uuids::uuid _plugin_a_id { 0x27, 0x30, 0xbf, 0x79, 0x06, 0x30, 0x4a, 0x0b,
-                                    0x80, 0x11, 0x27, 0xd6, 0xde, 0xa0, 0xc3, 0x63 };
-  boost::uuids::uuid _plugin_b_id { 0xc3, 0x89, 0x66, 0xac, 0xbd, 0xe6, 0x4c, 0x83,
-                                    0x8a, 0x6f, 0xdf, 0x7a, 0xf9, 0x57, 0x96, 0x2b };
+  boost::uuids::uuid _plugin_a_id { { 0x27, 0x30, 0xbf, 0x79, 0x06, 0x30, 0x4a, 0x0b, 0x80, 0x11,
+                                      0x27, 0xd6, 0xde, 0xa0, 0xc3, 0x63 } };
+  boost::uuids::uuid _plugin_b_id { { 0xc3, 0x89, 0x66, 0xac, 0xbd, 0xe6, 0x4c, 0x83, 0x8a, 0x6f,
+                                      0xdf, 0x7a, 0xf9, 0x57, 0x96, 0x2b } };
   boost::filesystem::path _test_plugin_path { boost::filesystem::current_path() };
 
   static char* arg0;

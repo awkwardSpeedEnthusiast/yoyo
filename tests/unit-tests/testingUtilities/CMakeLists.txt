@@ -1,22 +1,27 @@
-ifx_add_library(yoyo-testing-utilities
+my_add_library(yoyo-testing-utilities
+    STATIC
+    AUTOMOC
     NOCOVERAGE
-    HEADERS
+    HEADER
         guiFixture.hpp
         gui_node_mock.h
         contextmenu_operator.hpp
         gui_simulator.hpp
         dialog_operator.hpp
-    SOURCES
+        qt_core_fixture.hpp
+    SOURCE
         guiFixture.cpp
         contextmenu_operator.cpp
         gui_simulator.cpp
         dialog_operator.cpp
-    PUBLIC_INCLUDES
+        qt_core_fixture.cpp
+    INCLUDES
+      PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS
         PUBLIC yoyo::Sdk
-        PUBLIC Qt5::Test
-        PUBLIC Qt5::Widgets
+        PUBLIC Qt6::Test
+        PUBLIC Qt6::Widgets
         PUBLIC gtest
         PUBLIC gmock
     ALIAS yoyo::Test::Utilities

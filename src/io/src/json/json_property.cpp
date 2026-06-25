@@ -5,6 +5,7 @@
 
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QMetaType>
 
 #include <iostream>
 
@@ -42,119 +43,139 @@ auto writeLimited(QVariant const& v) -> QJsonValue
 }
 
 std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> const property::io {
-  { "QString", std::make_pair([](QVariant v) -> QJsonValue { return v.toString(); },
-                              [](QJsonValue v) -> QVariant { return v.toString(); }) },
-  { "bool", std::make_pair([](QVariant v) -> QJsonValue { return v.toBool(); },
-                           [](QJsonValue v) -> QVariant { return v.toBool(); }) },
-  { "char", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                           [](QJsonValue v) -> QVariant {
-                             return QVariant::fromValue(static_cast<char>(v.toInt()));
-                           }) },
-  { "int", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                          [](QJsonValue v) -> QVariant { return v.toInt(); }) },
-  { "long", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                           [](QJsonValue v) -> QVariant {
-                             return QVariant::fromValue(static_cast<long>(v.toInt()));
-                           }) },
-  { "uint8_t", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                              [](QJsonValue v) -> QVariant {
-                                return QVariant::fromValue(static_cast<uint8_t>(v.toInt()));
-                              }) },
-  { "uchar", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                            [](QJsonValue v) -> QVariant {
-                              return QVariant::fromValue(static_cast<uint8_t>(v.toInt()));
-                            }) },
-  { "uint16_t", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                               [](QJsonValue v) -> QVariant {
-                                 return QVariant::fromValue(static_cast<uint16_t>(v.toInt()));
-                               }) },
-  { "ushort", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                             [](QJsonValue v) -> QVariant {
-                               return QVariant::fromValue(static_cast<uint16_t>(v.toInt()));
-                             }) },
-  { "uint32_t", std::make_pair(
-                  [](QVariant v) -> QJsonValue {
-                    return QString::fromStdString(std::to_string(v.value<uint32_t>()));
-                  },
-                  [](QJsonValue v) -> QVariant {
-                    return QVariant::fromValue(static_cast<uint32_t>(
-                      std::strtoul(v.toString().toStdString().data(), nullptr, 10)));
-                  }) },
-  { "uint", std::make_pair(
-              [](QVariant v) -> QJsonValue {
-                return QString::fromStdString(std::to_string(v.value<uint32_t>()));
-              },
-              [](QJsonValue v) -> QVariant {
-                return QVariant::fromValue(static_cast<uint32_t>(
-                  std::strtoul(v.toString().toStdString().data(), nullptr, 10)));
-              }) },
-  { "uint64_t", std::make_pair(
-                  [](QVariant v) -> QJsonValue {
-                    return QString::fromStdString(std::to_string(v.value<uint64_t>()));
-                  },
-                  [](QJsonValue v) -> QVariant {
-                    return QVariant::fromValue(static_cast<uint64_t>(
-                      std::strtoull(v.toString().toStdString().data(), nullptr, 10)));
-                  }) },
-  { "qulonglong", std::make_pair(
-                    [](QVariant v) -> QJsonValue {
-                      return QString::fromStdString(std::to_string(v.value<uint64_t>()));
-                    },
-                    [](QJsonValue v) -> QVariant {
-                      return QVariant::fromValue(static_cast<uint64_t>(
-                        std::strtoull(v.toString().toStdString().data(), nullptr, 10)));
-                    }) },
-  { "int8_t", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                             [](QJsonValue v) -> QVariant {
-                               return QVariant::fromValue(static_cast<int8_t>(v.toInt()));
-                             }) },
-  { "signed char", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                                  [](QJsonValue v) -> QVariant {
-                                    return QVariant::fromValue(static_cast<int8_t>(v.toInt()));
-                                  }) },
-  { "int16_t", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                              [](QJsonValue v) -> QVariant {
-                                return QVariant::fromValue(static_cast<int16_t>(v.toInt()));
-                              }) },
-  { "short", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                            [](QJsonValue v) -> QVariant {
-                              return QVariant::fromValue(static_cast<int16_t>(v.toInt()));
-                            }) },
-  { "int32_t", std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
-                              [](QJsonValue v) -> QVariant {
-                                return QVariant::fromValue(static_cast<int32_t>(v.toInt()));
-                              }) },
-  { "int64_t", std::make_pair(
-                 [](QVariant v) -> QJsonValue {
-                   return QString::fromStdString(std::to_string(v.value<int64_t>()));
-                 },
-                 [](QJsonValue v) -> QVariant {
-                   return QVariant::fromValue(static_cast<int64_t>(
-                     std::strtoll(v.toString().toStdString().data(), nullptr, 10)));
-                 }) },
-  { "qlonglong", std::make_pair(
-                   [](QVariant v) -> QJsonValue {
-                     return QString::fromStdString(std::to_string(v.value<int64_t>()));
-                   },
+  { QMetaType::fromType<QString>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toString(); },
+                   [](QJsonValue v) -> QVariant { return v.toString(); }) },
+  { QMetaType::fromType<bool>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toBool(); },
+                   [](QJsonValue v) -> QVariant { return v.toBool(); }) },
+  { QMetaType::fromType<char>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue { return v.toInt(); },
+      [](QJsonValue v) -> QVariant { return QVariant::fromValue(static_cast<char>(v.toInt())); }) },
+  { QMetaType::fromType<int>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant { return v.toInt(); }) },
+  { QMetaType::fromType<long>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue { return v.toInt(); },
+      [](QJsonValue v) -> QVariant { return QVariant::fromValue(static_cast<long>(v.toInt())); }) },
+  { QMetaType::fromType<uint8_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
                    [](QJsonValue v) -> QVariant {
-                     return QVariant::fromValue(static_cast<int64_t>(
-                       std::strtoll(v.toString().toStdString().data(), nullptr, 10)));
+                     return QVariant::fromValue(static_cast<uint8_t>(v.toInt()));
                    }) },
-  { "float", std::make_pair([](QVariant v) -> QJsonValue { return v.toFloat(); },
-                            [](QJsonValue v) -> QVariant {
-                              return QVariant::fromValue(static_cast<float>(v.toDouble()));
-                            }) },
-  { "double", std::make_pair([](QVariant v) -> QJsonValue { return v.toDouble(); },
-                             [](QJsonValue v) -> QVariant { return v.toDouble(); }) },
-  { "yoyo::types::value_t", std::make_pair(
-                              [](QVariant v) -> QJsonValue {
-                                return static_cast<uint8_t>(v.value<yoyo::types::value_t>());
-                              },
-                              [](QJsonValue v) -> QVariant {
-                                return QVariant::fromValue(
-                                  static_cast<yoyo::types::value_t>(v.toInt()));
-                              }) },
-  { "yoyo::properties::integer_format_t",
+  { QMetaType::fromType<uint8_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<uint8_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<uint16_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<uint16_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<uint16_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<uint16_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<uint32_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return QString::fromStdString(std::to_string(v.value<uint32_t>()));
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<uint32_t>(std::strtoul(v.toString().toStdString().data(), nullptr, 10)));
+      }) },
+  { QMetaType::fromType<uint32_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return QString::fromStdString(std::to_string(v.value<uint32_t>()));
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<uint32_t>(std::strtoul(v.toString().toStdString().data(), nullptr, 10)));
+      }) },
+  { QMetaType::fromType<uint64_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return QString::fromStdString(std::to_string(v.value<uint64_t>()));
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<uint64_t>(std::strtoull(v.toString().toStdString().data(), nullptr, 10)));
+      }) },
+  { QMetaType::fromType<uint64_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return QString::fromStdString(std::to_string(v.value<uint64_t>()));
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<uint64_t>(std::strtoull(v.toString().toStdString().data(), nullptr, 10)));
+      }) },
+  { QMetaType::fromType<int8_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<int8_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<signed char>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<int8_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<int16_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<int16_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<short>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<int16_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<int32_t>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toInt(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<int32_t>(v.toInt()));
+                   }) },
+  { QMetaType::fromType<int64_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return QString::fromStdString(std::to_string(v.value<int64_t>()));
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<int64_t>(std::strtoll(v.toString().toStdString().data(), nullptr, 10)));
+      }) },
+  { QMetaType::fromType<int64_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return QString::fromStdString(std::to_string(v.value<int64_t>()));
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(
+          static_cast<int64_t>(std::strtoll(v.toString().toStdString().data(), nullptr, 10)));
+      }) },
+  { QMetaType::fromType<float>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toFloat(); },
+                   [](QJsonValue v) -> QVariant {
+                     return QVariant::fromValue(static_cast<float>(v.toDouble()));
+                   }) },
+  { QMetaType::fromType<double>().name(),
+    std::make_pair([](QVariant v) -> QJsonValue { return v.toDouble(); },
+                   [](QJsonValue v) -> QVariant { return v.toDouble(); }) },
+  { QMetaType::fromType<yoyo::types::value_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return static_cast<uint8_t>(v.value<yoyo::types::value_t>());
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(static_cast<yoyo::types::value_t>(v.toInt()));
+      }) },
+  { QMetaType::fromType<yoyo::properties::integer_format_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         return static_cast<uint8_t>(v.value<yoyo::properties::integer_format_t>());
@@ -162,15 +183,15 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
       [](QJsonValue v) -> QVariant {
         return QVariant::fromValue(static_cast<yoyo::properties::integer_format_t>(v.toInt()));
       }) },
-  { "yoyo::types::access_t", std::make_pair(
-                               [](QVariant v) -> QJsonValue {
-                                 return static_cast<uint8_t>(v.value<yoyo::types::access_t>());
-                               },
-                               [](QJsonValue v) -> QVariant {
-                                 return QVariant::fromValue(
-                                   static_cast<yoyo::types::access_t>(v.toInt()));
-                               }) },
-  { "yoyo::types::layout_direction_t",
+  { QMetaType::fromType<yoyo::types::access_t>().name(),
+    std::make_pair(
+      [](QVariant v) -> QJsonValue {
+        return static_cast<uint8_t>(v.value<yoyo::types::access_t>());
+      },
+      [](QJsonValue v) -> QVariant {
+        return QVariant::fromValue(static_cast<yoyo::types::access_t>(v.toInt()));
+      }) },
+  { QMetaType::fromType<yoyo::types::layout_direction_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         return static_cast<uint8_t>(v.value<yoyo::types::layout_direction_t>());
@@ -178,16 +199,16 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
       [](QJsonValue v) -> QVariant {
         return QVariant::fromValue(static_cast<yoyo::types::layout_direction_t>(v.toInt()));
       }) },
-  { "yoyo::properties::string_t",
+  { QMetaType::fromType<yoyo::properties::string_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return v.toString(); },
       [](QJsonValue v) -> QVariant { return yoyo::properties::string_t(v.toString()); }) },
-  { "yoyo::properties::text_t",
+  { QMetaType::fromType<yoyo::properties::text_t>().name(),
     std::make_pair([](QVariant v) -> QJsonValue { return v.value<yoyo::properties::text_t>()._s; },
                    [](QJsonValue v) -> QVariant {
                      return QVariant::fromValue(yoyo::properties::text_t { v.toString() });
                    }) },
-  { "yoyo::properties::invisible_string_t",
+  { QMetaType::fromType<yoyo::properties::invisible_string_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::invisible_string_t>();
@@ -210,7 +231,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
         return QVariant::fromValue(yoyo::properties::invisible_string_t {
           o[yoyo::io::json::key_value].toString(), o[yoyo::io::json::key_visible].toBool() });
       }) },
-  { "yoyo::properties::invisible_layout_direction_t",
+  { QMetaType::fromType<yoyo::properties::invisible_layout_direction_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::invisible_layout_direction_t>();
@@ -234,7 +255,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           static_cast<yoyo::types::layout_direction_t>(o[yoyo::io::json::key_value].toInt()),
           o[yoyo::io::json::key_visible].toBool() });
       }) },
-  { "yoyo::properties::connected_string_t",
+  { QMetaType::fromType<yoyo::properties::connected_string_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         return v.value<yoyo::properties::connected_string_t>()._own_value;
@@ -242,7 +263,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
       [](QJsonValue v) -> QVariant {
         return QVariant::fromValue(yoyo::properties::connected_string_t { {}, v.toString() });
       }) },
-  { "yoyo::properties::connected_boolean_t",
+  { QMetaType::fromType<yoyo::properties::connected_boolean_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         return static_cast<uint8_t>(v.value<yoyo::properties::connected_boolean_t>()._type);
@@ -251,7 +272,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
         return QVariant::fromValue(yoyo::properties::connected_boolean_t {
           static_cast<yoyo::properties::connected_boolean_t::boolean_t>(v.toInt()), false });
       }) },
-  { "yoyo::properties::connection_t",
+  { QMetaType::fromType<yoyo::properties::connection_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::connection_t>();
@@ -281,7 +302,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
                                            o[yoyo::io::json::key_out].toString(),
                                            o[yoyo::io::json::key_auto].toString() });
       }) },
-  { "yoyo::properties::in_connection_t",
+  { QMetaType::fromType<yoyo::properties::in_connection_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::in_connection_t>();
@@ -303,7 +324,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
         return QVariant::fromValue(
           yoyo::properties::in_connection_t { {}, {}, o[yoyo::io::json::key_in].toString() });
       }) },
-  { "yoyo::properties::out_connection_t",
+  { QMetaType::fromType<yoyo::properties::out_connection_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::out_connection_t>();
@@ -325,16 +346,17 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
         return QVariant::fromValue(
           yoyo::properties::out_connection_t { {}, {}, o[yoyo::io::json::key_out].toString() });
       }) },
-  { "yoyo::properties::enum_t",
+  { QMetaType::fromType<yoyo::properties::enum_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::enum_t>();
         QJsonObject object;
         object.insert(yoyo::io::json::key_enum_active, val._enabled);
         QJsonArray items;
-        std::for_each(val._values.begin(), val._values.end(), [&items](auto i) {
+        std::ranges::for_each(val._values, [&items](auto i) {
           QJsonObject o;
-          o.insert(yoyo::io::json::key_enum_data, QJsonValue::fromVariant(QVariant { i.first }));
+          o.insert(yoyo::io::json::key_enum_data,
+                   QJsonValue::fromVariant(QVariant::fromValue(i.first)));
           o.insert(yoyo::io::json::key_enum_value, std::get<0>(i.second));
           o.insert(yoyo::io::json::key_enum_title, std::get<1>(i.second));
           o.insert(yoyo::io::json::key_enum_match_text, std::get<2>(i.second)._text);
@@ -379,21 +401,21 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
         return QVariant::fromValue(
           yoyo::properties::enum_t { object[yoyo::io::json::key_enum_active].toBool(), elements });
       }) },
-  { "yoyo::properties::patterned_string_t",
+  { QMetaType::fromType<yoyo::properties::patterned_string_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return v.value<yoyo::properties::patterned_string_t>()._s; },
       [](QJsonValue v) -> QVariant {
         return QVariant::fromValue(yoyo::properties::patterned_string_t { v.toString(), {} });
       }) },
-  { "yoyo::properties::limited_uint8_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint8_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return writeLimited<yoyo::properties::limited_uint8_t>(v); },
       [](QJsonValue v) -> QVariant { return readLimited<uint8_t>(v); }) },
-  { "yoyo::properties::limited_uint16_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint16_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return writeLimited<yoyo::properties::limited_uint16_t>(v); },
       [](QJsonValue v) -> QVariant { return readLimited<uint16_t>(v); }) },
-  { "yoyo::properties::limited_uint32_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint32_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::limited_uint32_t>();
@@ -426,7 +448,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           static_cast<uint32_t>(std::strtoull(
             o[yoyo::io::json::key_maximum].toString().toStdString().data(), nullptr, 10)) });
       }) },
-  { "yoyo::properties::limited_uint64_t",
+  { QMetaType::fromType<yoyo::properties::limited_uint64_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::limited_uint64_t>();
@@ -459,19 +481,19 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           static_cast<uint64_t>(std::strtoull(
             o[yoyo::io::json::key_maximum].toString().toStdString().data(), nullptr, 10)) });
       }) },
-  { "yoyo::properties::limited_int8_t",
+  { QMetaType::fromType<yoyo::properties::limited_int8_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return writeLimited<yoyo::properties::limited_int8_t>(v); },
       [](QJsonValue v) -> QVariant { return readLimited<int8_t>(v); }) },
-  { "yoyo::properties::limited_int16_t",
+  { QMetaType::fromType<yoyo::properties::limited_int16_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return writeLimited<yoyo::properties::limited_int16_t>(v); },
       [](QJsonValue v) -> QVariant { return readLimited<int16_t>(v); }) },
-  { "yoyo::properties::limited_int32_t",
+  { QMetaType::fromType<yoyo::properties::limited_int32_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue { return writeLimited<yoyo::properties::limited_int32_t>(v); },
       [](QJsonValue v) -> QVariant { return readLimited<int32_t>(v); }) },
-  { "yoyo::properties::limited_int64_t",
+  { QMetaType::fromType<yoyo::properties::limited_int64_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::limited_int64_t>();
@@ -504,7 +526,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           static_cast<int64_t>(std::strtoll(
             o[yoyo::io::json::key_maximum].toString().toStdString().data(), nullptr, 10)) });
       }) },
-  { "yoyo::properties::limited_float_t",
+  { QMetaType::fromType<yoyo::properties::limited_float_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::limited_float_t>();
@@ -531,7 +553,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           static_cast<float>(o[yoyo::io::json::key_minimum].toDouble()),
           static_cast<float>(o[yoyo::io::json::key_maximum].toDouble()) });
       }) },
-  { "yoyo::properties::script_t",
+  { QMetaType::fromType<yoyo::properties::script_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         auto val = v.value<yoyo::properties::script_t>();
@@ -555,7 +577,7 @@ std::map<QString, std::pair<property::serialize_f, property::deserialize_f>> con
           o[yoyo::io::json::key_text].toString(),
           static_cast<yoyo::properties::script_t::type>(o[yoyo::io::json::key_type].toInt()) });
       }) },
-  { "yoyo::properties::transmission_direction_t",
+  { QMetaType::fromType<yoyo::properties::transmission_direction_t>().name(),
     std::make_pair(
       [](QVariant v) -> QJsonValue {
         return static_cast<uint8_t>(v.value<yoyo::properties::transmission_direction_t>());

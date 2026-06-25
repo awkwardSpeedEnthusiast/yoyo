@@ -1,6 +1,6 @@
-ifx_add_test(command_tests
+my_add_test(command_tests
     MOCK
-    SOURCES
+    SOURCE
         CommandTests.cpp
         CommandHandlerTests.cpp
     DEPENDS

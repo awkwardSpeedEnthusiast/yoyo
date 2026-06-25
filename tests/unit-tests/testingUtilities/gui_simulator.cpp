@@ -12,8 +12,9 @@ auto mousePress(QWidget* widget, Qt::MouseButton button, Qt::KeyboardModifiers m
                 std::chrono::milliseconds delay) -> void
 {
   auto event = [widget, pos, button, modifier] {
-    QApplication::postEvent(
-      widget, new QMouseEvent(QEvent::MouseButtonPress, pos, button, { button }, modifier));
+    QApplication::postEvent(widget,
+                            new QMouseEvent(QEvent::MouseButtonPress, pos, widget->mapToGlobal(pos),
+                                            button, { button }, modifier));
     QApplication::processEvents();
   };
 
@@ -28,8 +29,9 @@ auto mouseRelease(QWidget* widget, Qt::MouseButton button, Qt::KeyboardModifiers
                   QPoint pos, std::chrono::milliseconds delay) -> void
 {
   auto event = [widget, pos, button, modifier] {
-    QApplication::postEvent(
-      widget, new QMouseEvent(QEvent::MouseButtonRelease, pos, button, { button }, modifier));
+    QApplication::postEvent(widget, new QMouseEvent(QEvent::MouseButtonRelease, pos,
+                                                    widget->mapToGlobal(pos), button, { button },
+                                                    modifier));
     QApplication::processEvents();
   };
 
@@ -44,11 +46,13 @@ auto mouseClick(QWidget* widget, Qt::MouseButton button, Qt::KeyboardModifiers m
                 std::chrono::milliseconds delay) -> void
 {
   auto event = [widget, pos, button, modifier] {
-    QApplication::postEvent(
-      widget, new QMouseEvent(QEvent::MouseButtonPress, pos, button, { button }, modifier));
+    QApplication::postEvent(widget,
+                            new QMouseEvent(QEvent::MouseButtonPress, pos, widget->mapToGlobal(pos),
+                                            button, { button }, modifier));
     QApplication::processEvents();
-    QApplication::postEvent(
-      widget, new QMouseEvent(QEvent::MouseButtonRelease, pos, button, { button }, modifier));
+    QApplication::postEvent(widget, new QMouseEvent(QEvent::MouseButtonRelease, pos,
+                                                    widget->mapToGlobal(pos), button, { button },
+                                                    modifier));
     QApplication::processEvents();
   };
 
@@ -63,8 +67,9 @@ auto mouseDClick(QWidget* widget, Qt::MouseButton button, Qt::KeyboardModifiers 
                  QPoint pos, std::chrono::milliseconds delay) -> void
 {
   auto event = [widget, pos, button, modifier] {
-    QApplication::postEvent(
-      widget, new QMouseEvent(QEvent::MouseButtonDblClick, pos, button, { button }, modifier));
+    QApplication::postEvent(widget, new QMouseEvent(QEvent::MouseButtonDblClick, pos,
+                                                    widget->mapToGlobal(pos), button, { button },
+                                                    modifier));
     QApplication::processEvents();
   };
 
@@ -78,7 +83,8 @@ auto mouseDClick(QWidget* widget, Qt::MouseButton button, Qt::KeyboardModifiers 
 auto mouseMove(QWidget* widget, QPoint pos, std::chrono::milliseconds delay) -> void
 {
   auto event = [widget, pos] {
-    QApplication::postEvent(widget, new QMouseEvent(QEvent::MouseMove, pos, {}, {}, {}));
+    QApplication::postEvent(
+      widget, new QMouseEvent(QEvent::MouseMove, pos, widget->mapToGlobal(pos), {}, {}, {}));
     QApplication::processEvents();
   };
 

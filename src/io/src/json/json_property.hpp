@@ -1,5 +1,5 @@
 #pragma once
-#include "export_on_test.hpp"
+#include "io_export.h"
 
 #include <QJsonValue>
 #include <QString>
@@ -10,7 +10,7 @@
 
 namespace yoyo::io::json
 {
-struct YOYO_TESTING_EXPORT property {
+struct YOYO_IO_SHARED_EXPORT property {
   using serialize_f = std::function<QJsonValue(QVariant)>;
   using deserialize_f = std::function<QVariant(QJsonValue)>;
 

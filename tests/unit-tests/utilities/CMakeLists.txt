@@ -1,12 +1,12 @@
-ifx_add_test(utilities_tests
-    MOCK QT
-    SOURCES
+my_add_test(utilities_tests
+    AUTOMOC
+    SOURCE
         treeUtilititesTests.cpp
     DEPENDS
         PUBLIC yoyo::Nodes
         PUBLIC yoyo::Utilities
-        PUBLIC Qt5::Widgets
-        PUBLIC Qt5::Test
+        PUBLIC Qt6::Widgets
+        PUBLIC Qt6::Test
         PUBLIC yoyo::Test::Utilities
 )
 

@@ -37,7 +37,7 @@ public:
   /// \param dialogTypeName
   ///
   single_dialog_interaction(std::string const& dialogTypeName);
-  ~single_dialog_interaction();
+  virtual ~single_dialog_interaction();
   single_dialog_interaction(single_dialog_interaction const&);
   single_dialog_interaction(single_dialog_interaction&&) = default;
   single_dialog_interaction& operator=(single_dialog_interaction const&);
@@ -132,7 +132,7 @@ public:
   /// \param w the widget to post the event on, which will trigger the dialog.
   ///
   explicit dialog_operator(QWidget* w);
-  ~dialog_operator();
+  virtual ~dialog_operator();
 
   ///
   /// \{

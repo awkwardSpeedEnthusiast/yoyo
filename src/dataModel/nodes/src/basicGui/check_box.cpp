@@ -18,7 +18,7 @@ struct check_box::Impl {
                      return _signal.connect(subscriber);
                    },
                     [this](QVariant value) {
-                      if (static_cast<QMetaType::Type>(value.type()) == QMetaType::Bool) {
+                      if (value.metaType() == QMetaType::fromType<bool>()) {
                         _box->setChecked(value.toBool());
                       }
                     },

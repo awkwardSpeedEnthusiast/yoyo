@@ -1,10 +1,9 @@
 #pragma once
-#include "export_on_test.hpp"
 #include "node_deserializer.h"
 
 namespace yoyo::io
 {
-class YOYO_TESTING_EXPORT node_deserializer_json final : public node_deserializer
+class YOYO_IO_SHARED_EXPORT node_deserializer_json final : public node_deserializer
 {
 public:
   using node_deserializer::node_deserializer;

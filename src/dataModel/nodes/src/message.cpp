@@ -3,6 +3,7 @@
 
 #include "factory_provider.hpp"
 
+#include <QRegularExpression>
 #include <QTimer>
 
 namespace yoyo
@@ -10,7 +11,7 @@ namespace yoyo
 boost::uuids::uuid const message::_typeId = fundamental::message_id;
 
 struct message::impl {
-  yoyo::properties::patterned_string_t _id { {}, QRegExp { "0[xX][0-9a-fA-F]+" } };
+  yoyo::properties::patterned_string_t _id { {}, QRegularExpression { "0[xX][0-9a-fA-F]+" } };
   yoyo::properties::limited_float_t _interval { 0, -1, 1000 };
   bool _sendOnNewData { false };
   yoyo::properties::transmission_direction_t _direction {

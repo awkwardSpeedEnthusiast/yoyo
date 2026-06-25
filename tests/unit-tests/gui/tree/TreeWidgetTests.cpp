@@ -102,8 +102,9 @@ TEST_F(TreeWidgetTest, addRemove)
 
   // add data
   {
-    configuration->childAt(0)->addChild(
-      _data_factory->createNode(std::get<0>(_data_factory->installed_nodes()[0]), {}));
+    auto n = _data_factory->createNode(std::get<0>(_data_factory->installed_nodes()[0]), {});
+    ASSERT_NE(configuration->childAt(0), nullptr);
+    configuration->childAt(0)->addChild(n);
     configuration->childAt(0)->childAt(0)->setName({ "myGroup", true });
 
     QApplication::processEvents();
@@ -297,155 +298,156 @@ TEST_F(TreeWidgetTest, contextMenuData)
 
   auto handler = yoyo::command::commandhandler();
   { // remove group
-    { EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from Signals");
-  handler->undo();
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from Signals");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 0);
-}
+      EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 0);
+    }
 
-// remove all children of group
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Remove all children from group");
-  handler->undo();
+    // remove all children of group
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Remove all children from group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
-  EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "int8");
-  EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "bit");
-}
-// remove string item
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "int8");
+      EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+    }
+    // remove string item
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 3);
-  EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "int8");
-  EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "bit");
-  EXPECT_EQ(model->data(model->index(2, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "string");
-}
-// add a float item as sibling before bit item
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 3);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "int8");
+      EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+      EXPECT_EQ(model->data(model->index(2, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "string");
+    }
+    // add a float item as sibling before bit item
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
-  EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "bit");
-  EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "string");
-}
-// add a string item as sibling after bit item
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+      EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "string");
+    }
+    // add a string item as sibling after bit item
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 1);
-  EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-            "bit");
-}
-// add a bit item to data-group
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 1);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+    }
+    // add a bit item to data-group
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
-  EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0))).toString(), "group");
-}
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to Signals");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0))).toString(), "group");
+    }
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to Signals");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0)), 0);
-}
-}
-
-{
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to Signals");
-    handler->redo();
-
-    EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
-    EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0))).toString(), "group");
+      EXPECT_EQ(model->rowCount(model->index(0, 0)), 0);
+    }
   }
-  // add a bit item to data-group
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
-    handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 1);
-    EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "bit");
-  }
-  // add a string item as sibling after bit item
   {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
-    handler->redo();
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to Signals");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
-    EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "bit");
-    EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "string");
-  }
-  // add a float item as sibling before bit item
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0))).toString(), "group");
+    }
+    // add a bit item to data-group
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 3);
-    EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "int8");
-    EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "bit");
-    EXPECT_EQ(model->data(model->index(2, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "string");
-  }
-  // remove string item
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from group");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 1);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+    }
+    // add a string item as sibling after bit item
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
-    EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "int8");
-    EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
-              "bit");
-  }
-  // remove all children of group
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Remove all children from group");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+      EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "string");
+    }
+    // add a float item as sibling before bit item
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 0);
-  }
-  // remove group
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from Signals");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 3);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "int8");
+      EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+      EXPECT_EQ(model->data(model->index(2, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "string");
+    }
+    // remove string item
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0)), 0);
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "int8");
+      EXPECT_EQ(model->data(model->index(1, 1, model->index(0, 0, model->index(0, 0)))).toString(),
+                "bit");
+    }
+    // remove all children of group
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Remove all children from group");
+      handler->redo();
+
+      EXPECT_EQ(model->rowCount(model->index(0, 0)), 1);
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(0, 0))), 0);
+    }
+    // remove group
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from Signals");
+      handler->redo();
+
+      EXPECT_EQ(model->rowCount(model->index(0, 0)), 0);
+    }
   }
-}
 }
 
 TEST_F(TreeWidgetTest, contextMenuGui)
@@ -574,155 +576,156 @@ TEST_F(TreeWidgetTest, contextMenuGui)
 
   auto handler = yoyo::command::commandhandler();
   { // remove group
-    { EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from Layout");
-  handler->undo();
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from Layout");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 0);
-}
+      EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 0);
+    }
 
-// remove all children of group
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Remove all children from group");
-  handler->undo();
+    // remove all children of group
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Remove all children from group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
-  EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "combo_box");
-  EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "check_box");
-}
-// remove button
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "combo_box");
+      EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "check_box");
+    }
+    // remove button
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Remove item from group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 3);
-  EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "combo_box");
-  EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "button");
-  EXPECT_EQ(model->data(model->index(2, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "check_box");
-}
-// add a combobox as sibling before button
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 3);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "combo_box");
+      EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "button");
+      EXPECT_EQ(model->data(model->index(2, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "check_box");
+    }
+    // add a combobox as sibling before button
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
-  EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "button");
-  EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "check_box");
-}
-// add a checkbox as sibling after button
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "button");
+      EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "check_box");
+    }
+    // add a checkbox as sibling after button
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 1);
-  EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-            "button");
-}
-// add a button to group
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 1);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "button");
+    }
+    // add a button to group
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to group");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
-  EXPECT_EQ(model->data(model->index(0, 0, model->index(1, 0))).toString(), "group");
-}
-// add a gui-group top level
-{
-  EXPECT_TRUE(handler->hasCommandToUndo());
-  EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to Layout");
-  handler->undo();
+      EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(1, 0))).toString(), "group");
+    }
+    // add a gui-group top level
+    {
+      EXPECT_TRUE(handler->hasCommandToUndo());
+      EXPECT_EQ(handler->nextUndo().toStdString(), "Add new item to Layout");
+      handler->undo();
 
-  EXPECT_EQ(model->rowCount(model->index(1, 0)), 0);
-}
-}
-
-{
-  // add a gui-group top level
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to Layout");
-    handler->redo();
-
-    EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
-    EXPECT_EQ(model->data(model->index(0, 0, model->index(1, 0))).toString(), "group");
+      EXPECT_EQ(model->rowCount(model->index(1, 0)), 0);
+    }
   }
-  // add a button to group
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
-    handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 1);
-    EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "button");
-  }
-  // add a checkbox as sibling after button
   {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
-    handler->redo();
+    // add a gui-group top level
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to Layout");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
-    EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "button");
-    EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "check_box");
-  }
-  // add a combobox as sibling before button
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(1, 0))).toString(), "group");
+    }
+    // add a button to group
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 3);
-    EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "combo_box");
-    EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "button");
-    EXPECT_EQ(model->data(model->index(2, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "check_box");
-  }
-  // remove button
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from group");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 1);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "button");
+    }
+    // add a checkbox as sibling after button
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
-    EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "combo_box");
-    EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
-              "check_box");
-  }
-  // remove all children of group
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Remove all children from group");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "button");
+      EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "check_box");
+    }
+    // add a combobox as sibling before button
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Add new item to group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
-    EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 0);
-  }
-  // remove group
-  {
-    EXPECT_TRUE(handler->hasCommandToRedo());
-    EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from Layout");
-    handler->redo();
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 3);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "combo_box");
+      EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "button");
+      EXPECT_EQ(model->data(model->index(2, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "check_box");
+    }
+    // remove button
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from group");
+      handler->redo();
 
-    EXPECT_EQ(model->rowCount(model->index(1, 0)), 0);
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 2);
+      EXPECT_EQ(model->data(model->index(0, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "combo_box");
+      EXPECT_EQ(model->data(model->index(1, 0, model->index(0, 0, model->index(1, 0)))).toString(),
+                "check_box");
+    }
+    // remove all children of group
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Remove all children from group");
+      handler->redo();
+
+      EXPECT_EQ(model->rowCount(model->index(1, 0)), 1);
+      EXPECT_EQ(model->rowCount(model->index(0, 0, model->index(1, 0))), 0);
+    }
+    // remove group
+    {
+      EXPECT_TRUE(handler->hasCommandToRedo());
+      EXPECT_EQ(handler->nextRedo().toStdString(), "Remove item from Layout");
+      handler->redo();
+
+      EXPECT_EQ(model->rowCount(model->index(1, 0)), 0);
+    }
   }
-}
 }

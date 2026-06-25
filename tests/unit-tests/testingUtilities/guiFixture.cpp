@@ -1,26 +1,37 @@
 #include "guiFixture.hpp"
 #include "gui_node_mock.h"
 
+#include <QApplication>
+
+namespace
+{
+std::unique_ptr<QApplication> app;
+char* arg0 = new char[8];
+char** args = []() {
+  auto c = new char*[1];
+  c[0] = arg0;
+  return c;
+}();
+int argc = 1;
+} // namespace
+
 namespace yoyo::test
 {
-char* guiFixture::arg0 = new char[7];
-int guiFixture::argc = 1;
-std::unique_ptr<QApplication> guiFixture::app;
 
-auto guiFixture::SetUpTestSuite() -> void
+auto guiFixture::SetUp() -> void
 {
-  testing::Test::SetUpTestSuite();
+  testing::Test::SetUp();
 
   if (!qApp) {
     strcpy(arg0, "blabla\0");
-    char* args[1] = { arg0 };
     app = std::make_unique<QApplication>(argc, args);
   }
 }
 
-auto guiFixture::TearDownTestSuite() -> void
+auto guiFixture::TearDown() -> void
 {
-  testing::Test::TearDownTestSuite();
+  app.reset();
+  testing::Test::TearDown();
 }
 
 auto guiFixture::createGuiNode(QString const& type_name, QWidget* container,

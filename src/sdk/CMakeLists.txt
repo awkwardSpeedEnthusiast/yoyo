@@ -1,6 +1,7 @@
 
-ifx_add_library(Sdk SHARED
-    HEADERS
+my_add_library(Sdk SHARED
+    AUTOMOC
+    HEADER
         include/yoyo/property_types.h
         include/yoyo/documentation.h
         include/yoyo/node_base.h
@@ -14,7 +15,7 @@ ifx_add_library(Sdk SHARED
         include/yoyo/yoyo_plugin.h
         include/yoyo/documentation_utilities.h
         src/gui_node_widget.hpp
-    SOURCES
+    SOURCE
         src/node_base.cpp
         src/documentation.cpp
         src/node_factory.cpp
@@ -26,13 +27,14 @@ ifx_add_library(Sdk SHARED
         src/gui_node_widget.cpp
         src/documentation_utilities.cpp
     DEPENDS
-        PUBLIC Qt5::Core
-        PRIVATE Qt5::Widgets
+        PUBLIC Qt6::Core
+        PRIVATE Qt6::Widgets
         PUBLIC Boost::headers
-    PUBLIC_INCLUDES
+    INCLUDES
+      PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_BINARY_DIR}
-    INTERFACE_INCLUDES
+    INSTALL_INCLUDES
         include
     ALIAS yoyo::Sdk
 )
@@ -68,26 +70,26 @@ set(ConfigPackageLocation ${YOYO_LIB_INSTALL_PATH}/cmake/yoyo)
 set(Yoyo_PREFIX  ${CMAKE_BINARY_DIR}/install)
 
 write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/Yoyo-version.cmake"
-  VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
-  COMPATIBILITY SameMajorVersion
+ VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+ COMPATIBILITY SameMajorVersion
 )
 install(
-  FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/Yoyo-version.cmake
-  DESTINATION
-    ${ConfigPackageLocation}
-  COMPONENT
-    Devel
+ FILES
+   ${CMAKE_CURRENT_BINARY_DIR}/Yoyo-version.cmake
+ DESTINATION
+   ${ConfigPackageLocation}
+ COMPONENT
+   Devel
 )
 
 export(TARGETS Sdk NAMESPACE Yoyo::
-  FILE ${CMAKE_CURRENT_BINARY_DIR}/YoyoSdkConfig.cmake
+ FILE ${CMAKE_CURRENT_BINARY_DIR}/YoyoSdkConfig.cmake
 )
 install(EXPORT YoyoSdkConfig
-  FILE
-    YoyoSdkConfig.cmake
-  NAMESPACE
-    Yoyo::
-  DESTINATION
-    ${ConfigPackageLocation}
+ FILE
+   YoyoSdkConfig.cmake
+ NAMESPACE
+   Yoyo::
+ DESTINATION
+   ${ConfigPackageLocation}
 )

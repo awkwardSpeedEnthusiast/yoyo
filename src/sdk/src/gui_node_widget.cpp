@@ -58,7 +58,7 @@ gui_node_widget::gui_node_widget(std::weak_ptr<gui_node> parent, QWidget* contai
   if (_container) {
     _container->setParent(this);
     setLayout(new QBoxLayout(QBoxLayout::TopToBottom));
-    layout()->setMargin(0);
+    layout()->setContentsMargins(0, 0, 0, 0);
     layout()->setSpacing(0);
     layout()->addWidget(_container.get());
   }
@@ -98,7 +98,7 @@ auto gui_node_widget::setLayoutDirection(types::layout_direction_t direction) ->
                                                                          : QBoxLayout::TopToBottom),
                      w);
     l->setSpacing(1);
-    l->setMargin(1);
+    l->setContentsMargins(1, 1, 1, 1);
     w->setLayout(l);
 
     for (auto child : _children) {
@@ -297,22 +297,23 @@ auto gui_node_widget::checkDragEvent_other(QMimeData const* /*data*/, Qt::MouseB
 
 auto gui_node_widget::dragEnterEvent(QDragEnterEvent* event) -> void
 {
-  if (!((fromWidget(childAt(event->pos())) == this) || ((childAt(event->pos()) == nullptr)))) {
+  if (!((fromWidget(childAt(event->position())) == this)
+        || ((childAt(event->position()) == nullptr)))) {
     return;
   }
 
   if (event->mimeData()->hasFormat(mimetype_gui_new)
-      && checkDragEvent_new(event->mimeData(), event->mouseButtons())) {
+      && checkDragEvent_new(event->mimeData(), event->buttons())) {
     event->acceptProposedAction();
     event->accept();
   } else if (event->mimeData()->hasFormat(mimetype_data_element)
-             && checkDragEvent_data(event->mimeData(), event->mouseButtons())) {
+             && checkDragEvent_data(event->mimeData(), event->buttons())) {
     event->acceptProposedAction();
     event->accept();
   } else if (event->mimeData()->hasFormat(mimetype_gui_element)) {
     auto* src = dynamic_cast<node_base*>(event->source());
 
-    if (checkDragEvent_other(event->mimeData(), event->mouseButtons(), src)) {
+    if (checkDragEvent_other(event->mimeData(), event->buttons(), src)) {
       event->acceptProposedAction();
       event->accept();
     }
@@ -323,22 +324,23 @@ auto gui_node_widget::dragEnterEvent(QDragEnterEvent* event) -> void
 
 auto gui_node_widget::dragMoveEvent(QDragMoveEvent* event) -> void
 {
-  if (!((fromWidget(childAt(event->pos())) == this) || ((childAt(event->pos()) == nullptr)))) {
+  if (!((fromWidget(childAt(event->position())) == this)
+        || ((childAt(event->position()) == nullptr)))) {
     return;
   }
 
   if (event->mimeData()->hasFormat(mimetype_gui_new)
-      && checkDragEvent_new(event->mimeData(), event->mouseButtons())) {
+      && checkDragEvent_new(event->mimeData(), event->buttons())) {
     event->acceptProposedAction();
     event->accept();
   } else if (event->mimeData()->hasFormat(mimetype_data_element)
-             && checkDragEvent_data(event->mimeData(), event->mouseButtons())) {
+             && checkDragEvent_data(event->mimeData(), event->buttons())) {
     event->acceptProposedAction();
     event->accept();
   } else if (event->mimeData()->hasFormat(mimetype_gui_element)) {
     auto* src = dynamic_cast<node_base*>(event->source());
 
-    if (checkDragEvent_other(event->mimeData(), event->mouseButtons(), src)) {
+    if (checkDragEvent_other(event->mimeData(), event->buttons(), src)) {
       event->acceptProposedAction();
       event->accept();
     }
@@ -349,7 +351,8 @@ auto gui_node_widget::dragMoveEvent(QDragMoveEvent* event) -> void
 
 auto gui_node_widget::dropEvent(QDropEvent* event) -> void
 {
-  if (!((fromWidget(childAt(event->pos())) == this) || ((childAt(event->pos()) == nullptr)))) {
+  if (!((fromWidget(childAt(event->position())) == this)
+        || ((childAt(event->position()) == nullptr)))) {
     return;
   }
 
@@ -377,11 +380,11 @@ auto gui_node_widget::dropEvent(QDropEvent* event) -> void
   auto index = pp->childIndex(parent) + 1;
 
   if (event->mimeData()->hasFormat(mimetype_gui_new)
-      && checkDragEvent_new(event->mimeData(), event->mouseButtons())) {
+      && checkDragEvent_new(event->mimeData(), event->buttons())) {
     auto data = event->mimeData()->data(mimetype_gui_new);
     auto id = boost::uuids::string_generator {}(data.toStdString());
 
-    if (event->mouseButtons() == Qt::RightButton) {
+    if (event->buttons() == Qt::RightButton) {
       Q_EMIT pp->exchangeRequested(parent, id);
     } else if (parent->acceptsChildren()) {
       Q_EMIT pp->addRequested(parent, id, -1);
@@ -391,7 +394,7 @@ auto gui_node_widget::dropEvent(QDropEvent* event) -> void
 
     b = true;
   } else if (event->mimeData()->hasFormat(mimetype_data_element)
-             && checkDragEvent_data(event->mimeData(), event->mouseButtons())) {
+             && checkDragEvent_data(event->mimeData(), event->buttons())) {
     QByteArray itemData = event->mimeData()->data(mimetype_data_element);
     QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
@@ -399,11 +402,11 @@ auto gui_node_widget::dropEvent(QDropEvent* event) -> void
     int type;
     dataStream >> type >> data_element_path;
 
-    bool doInput = (event->keyboardModifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) > 0;
-    bool doOutput = (event->keyboardModifiers() & (Qt::AltModifier | Qt::ShiftModifier)) > 0;
-    bool doAuto = event->keyboardModifiers() == Qt::NoModifier;
+    bool doInput = (event->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) > 0;
+    bool doOutput = (event->modifiers() & (Qt::AltModifier | Qt::ShiftModifier)) > 0;
+    bool doAuto = event->modifiers() == Qt::NoModifier;
 
-    if (event->mouseButtons() == Qt::RightButton) {
+    if (event->buttons() == Qt::RightButton) {
       auto meta = parent->metaObject();
 
       for (auto i = 0; i < meta->propertyCount(); i++) {
@@ -429,7 +432,7 @@ auto gui_node_widget::dropEvent(QDropEvent* event) -> void
   } else if (event->mimeData()->hasFormat(mimetype_gui_element)) {
     auto* source = dynamic_cast<node_base*>(event->source());
 
-    if (!checkDragEvent_other(event->mimeData(), event->mouseButtons(), source)) {
+    if (!checkDragEvent_other(event->mimeData(), event->buttons(), source)) {
       return;
     }
 

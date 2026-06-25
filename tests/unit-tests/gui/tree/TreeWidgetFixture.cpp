@@ -9,6 +9,7 @@ using std::string_literals::operator""s;
 
 auto TreeWidgetTest::SetUp() -> void
 {
+  yoyo::test::guiFixture::SetUp();
   if (!yoyo::command::commandhandler()) {
     yoyo::command::initialize_commandhandler(new yoyo::command::command_handler(100));
   }
@@ -50,6 +51,7 @@ auto TreeWidgetTest::TearDown() -> void
   EXPECT_EQ(_gui_factory.use_count(), 1);
   EXPECT_EQ(_protocol_factory.use_count(), 1);
   EXPECT_EQ(_communication_factory.use_count(), 1);
+  yoyo::test::guiFixture::TearDown();
 }
 
 auto TreeWidgetTest::createWidget() -> void
@@ -102,7 +104,7 @@ auto TreeWidgetTest::retrieveListView() -> void
 auto TreeWidgetTest::indexPoint(QWidget* to, QModelIndex index) -> QPoint
 {
   auto r = view->visualRect(index);
-  return view->viewport()->mapTo(to, { r.x() + r.width() / 2, r.y() + r.height() / 2 });
+  return view->viewport()->mapTo(to, QPoint { r.x() + r.width() / 2, r.y() + r.height() / 2 });
 }
 
 auto TreeWidgetTest::addChild(std::shared_ptr<yoyo::node_base> parent, size_t index,

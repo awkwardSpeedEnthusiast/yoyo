@@ -10,6 +10,7 @@ using std::string_literals::operator""s;
 
 auto PropertyWidgetTest::SetUp() -> void
 {
+  yoyo::test::guiFixture::SetUp();
   yoyo::command::initialize_commandhandler(new yoyo::command::command_handler(100));
   yoyo::command::commandhandler()->setEditMode(true);
 }

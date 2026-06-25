@@ -1,5 +1,5 @@
 #pragma once
-#include "export_on_test.hpp"
+#include "pluginmanager_export.h"
 
 #include <boost/filesystem.hpp>
 
@@ -8,7 +8,8 @@
 
 namespace yoyo::plugin
 {
-auto YOYO_TESTING_EXPORT read_settings() -> std::vector<std::pair<boost::filesystem::path, bool>>;
-auto YOYO_TESTING_EXPORT
+auto YOYO_PLUGIN_MANAGER_SHARED_EXPORT read_settings()
+  -> std::vector<std::pair<boost::filesystem::path, bool>>;
+auto YOYO_PLUGIN_MANAGER_SHARED_EXPORT
 update_settings(std::vector<std::pair<boost::filesystem::path, bool>> paths) -> void;
 } // namespace yoyo::plugin

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "export_on_test.hpp"
 #include "leaf_node.hpp"
+#include "nodes_export.h"
 
 #include <memory>
 
 namespace yoyo
 {
-class YOYO_TESTING_EXPORT combo_box final : public leaf_node
+class YOYO_NODES_SHARED_EXPORT combo_box final : public leaf_node
 {
   Q_OBJECT
 

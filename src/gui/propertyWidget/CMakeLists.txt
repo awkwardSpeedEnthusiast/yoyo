@@ -1,5 +1,6 @@
-ifx_add_library(propertyWidget SHARED
-    HEADERS
+my_add_library(propertyWidget SHARED
+    AUTOMOC AUTOUIC
+    HEADER
         include/property_widget.h
         src/property_input/property_input.hpp
         src/property_input/number_input.hpp
@@ -18,9 +19,8 @@ ifx_add_library(propertyWidget SHARED
         src/property_input/script_input.hpp
         src/property_input/enum_input.hpp
         src/property_input/property_input_factory.hpp
-    SOURCES
+    SOURCE
         src/property_widget.cpp
-        src/property_widget.ui
         src/property_input/property_input.cpp
         src/property_input/number_input.cpp
         src/property_input/qstring_input.cpp
@@ -30,9 +30,7 @@ ifx_add_library(propertyWidget SHARED
         src/property_input/connection_in_input.cpp
         src/property_input/connection_out_input.cpp
         src/property_input/connection_input.cpp
-        src/property_input/connection_input.ui
         src/property_input/text_input.cpp
-        src/property_input/text_input.ui
         src/property_input/bool_input.cpp
         src/property_input/enumeration_input.cpp
         src/property_input/layout_input.cpp
@@ -40,15 +38,20 @@ ifx_add_library(propertyWidget SHARED
         src/property_input/script_input.cpp
         src/property_input/enum_input.cpp
         src/property_input/property_input_factory.cpp
+    FORMS
+        src/property_input/text_input.ui
+        src/property_input/connection_input.ui
+        src/property_widget.ui
     DEPENDS
         PUBLIC yoyo::Sdk
-        PUBLIC Qt5::Widgets
+        PUBLIC Qt6::Widgets
         PRIVATE yoyo::Utilities
         PRIVATE yoyo::Command
-    PUBLIC_INCLUDES
+    INCLUDES
+      PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_BINARY_DIR}
-    PRIVATE_INCLUDES
+      PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
     ALIAS yoyo::PropertyWidget
     EXPORT_MACRO YOYO_GUI_PROPERTY_SHARED_EXPORT

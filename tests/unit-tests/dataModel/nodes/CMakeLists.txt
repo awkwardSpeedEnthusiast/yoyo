@@ -1,6 +1,6 @@
-ifx_add_test(dataModel_nodes_tests
-    MOCK QT
-    SOURCES
+my_add_test(dataModel_nodes_tests
+    AUTOMOC
+    SOURCE
         bitTest.cpp
         buttonTest.cpp
         leafNodeTest.cpp
@@ -9,10 +9,13 @@ ifx_add_test(dataModel_nodes_tests
         comboBoxTest.cpp
         groupTest.cpp
         factoryTests.cpp
+    INCLUDES
+        PRIVATE ${CMAKE_SOURCE_DIR}/src/dataModel/nodes/src/basicGui
+        PRIVATE ${CMAKE_SOURCE_DIR}/src/dataModel/nodes/src/dataNodes
     DEPENDS
-        PUBLIC yoyo::Nodes::Test
-        PUBLIC Qt5::Widgets
-        PUBLIC Qt5::Test
+        PUBLIC yoyo::Nodes
+        PUBLIC Qt6::Widgets
+        PUBLIC Qt6::Test
         PUBLIC yoyo::Test::Utilities
 )
 

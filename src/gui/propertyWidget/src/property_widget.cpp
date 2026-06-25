@@ -68,25 +68,32 @@ auto property_widget::itemSelected(std::shared_ptr<node_base> item,
         label->setToolTip(tooltip);
         input->setToolTip(tooltip);
 
-        connect(input.get(), &property_input::propertyChanged, this, [item](auto p, auto value) {
-          auto exec = [item, value, p]() { item->setProperty(p.c_str(), value); };
+        connect(input.get(), &property_input::propertyChanged, this,
+                [store = std::weak_ptr(item)](auto p, auto value) {
+                  auto exec = [store, value, p]() {
+                    if (auto item = store.lock(); item != nullptr) {
+                      item->setProperty(p.c_str(), value);
+                    }
+                  };
 
-          if (auto handler = command::commandhandler()) {
-            auto id = utilities::calculatePath<utilities::path_strategy_t::INDEX>(item);
-            auto root = utilities::get_root(item);
-            auto undo = [id, value = item->property(p.c_str()), p, root]() {
-              auto item = utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
-              item->setProperty(p.c_str(), value);
-            };
-            auto redo = [id, value, p, root]() {
-              auto item = utilities::retrieveFromPath<utilities::path_strategy_t::INDEX>(id, root);
-              item->setProperty(p.c_str(), value);
-            };
-            handler->execute({ tr("Set property %1").arg(p.c_str()), exec, undo, redo });
-          } else {
-            exec();
-          }
-        });
+                  if (auto handler = command::commandhandler()) {
+                    if (auto item = store.lock(); item != nullptr) {
+                      auto undo = [value = item->property(p.c_str()), p, store]() {
+                        if (auto item = store.lock(); item != nullptr) {
+                          item->setProperty(p.c_str(), value);
+                        }
+                      };
+                      auto redo = [value, p, store]() {
+                        if (auto item = store.lock(); item != nullptr) {
+                          item->setProperty(p.c_str(), value);
+                        }
+                      };
+                      handler->execute({ tr("Set property %1").arg(p.c_str()), exec, undo, redo });
+                    }
+                  } else {
+                    exec();
+                  }
+                });
         connect(input.get(), &property_input::visibilityChanged, label.get(), [label](auto v) {
           label->setVisible(v);
 

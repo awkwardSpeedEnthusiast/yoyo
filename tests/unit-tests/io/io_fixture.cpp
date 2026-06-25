@@ -585,7 +585,7 @@ auto IoFixture::compareNodes(std::shared_ptr<yoyo::node_base> actual,
     auto prop = meta->property(i);
 
     EXPECT_EQ(actual->metaObject()->property(i).name(), prop.name());
-    EXPECT_EQ(actual->metaObject()->property(i).type(), prop.type());
+    EXPECT_EQ(actual->metaObject()->property(i).metaType(), prop.metaType());
     EXPECT_EQ(actual->metaObject()->property(i).typeName(), prop.typeName());
     EXPECT_EQ(actual->metaObject()->property(i).isReadable(), prop.isReadable());
     EXPECT_EQ(actual->metaObject()->property(i).isWritable(), prop.isWritable());

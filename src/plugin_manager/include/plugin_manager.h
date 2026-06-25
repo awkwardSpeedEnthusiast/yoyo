@@ -1,6 +1,7 @@
 #pragma once
 
 #include "plugin_data.h"
+#include "pluginmanager_export.h"
 
 #include <QObject>
 

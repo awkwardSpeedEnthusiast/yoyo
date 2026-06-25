@@ -62,11 +62,11 @@ TEST_F(ToolWidgetTest, nodesListed)
   EXPECT_EQ(m->data(m->index(3, 0)).toString().toStdString(), "ComboBox");
   EXPECT_EQ(m->data(m->index(4, 0)).toString().toStdString(), "LineEdit");
 
-  EXPECT_EQ(m->data(m->index(0, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(1, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(2, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(3, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(4, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
+  EXPECT_EQ(m->data(m->index(0, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(1, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(2, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(3, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(4, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
 
   EXPECT_FALSE(m->data(m->index(5, 0)).isValid());
   EXPECT_FALSE(m->data(m->index(-1, 0)).isValid());
@@ -92,11 +92,11 @@ TEST_F(ToolWidgetTest, update)
   EXPECT_EQ(m->data(m->index(3, 0)).toString().toStdString(), "ComboBox");
   EXPECT_EQ(m->data(m->index(4, 0)).toString().toStdString(), "LineEdit");
 
-  EXPECT_EQ(m->data(m->index(0, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(1, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(2, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(3, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
-  EXPECT_EQ(m->data(m->index(4, 0), Qt::DecorationRole).type(), QVariant::Type::Icon);
+  EXPECT_EQ(m->data(m->index(0, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(1, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(2, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(3, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
+  EXPECT_EQ(m->data(m->index(4, 0), Qt::DecorationRole).metaType(), QMetaType::fromType<QIcon>());
 }
 
 TEST_F(ToolWidgetTest, drag)

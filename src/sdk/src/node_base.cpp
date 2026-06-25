@@ -93,7 +93,11 @@ auto node_base::addChild(const std::shared_ptr<node_base>& child, int index) -> 
   }
 
   childAboutToBeAdded(child);
-  Q_EMIT treeChanged(weak_from_this(), child, -1, ChangeOperation::PRE_ADD);
+  auto actual_index = index;
+  if ((index < 0) || (static_cast<size_t>(index) >= _p->_children.size())) {
+    actual_index = _p->_children.size();
+  }
+  Q_EMIT treeChanged(weak_from_this(), child, actual_index, ChangeOperation::PRE_ADD);
 
   child->_p->_parent = weak_from_this();
   connect(child.get(), &node_base::treeChanged, this, &node_base::treeChanged);
@@ -109,7 +113,7 @@ auto node_base::addChild(const std::shared_ptr<node_base>& child, int index) -> 
   }
 
   childAdded(child);
-  Q_EMIT treeChanged(weak_from_this(), child, -1, ChangeOperation::ADDED);
+  Q_EMIT treeChanged(weak_from_this(), child, actual_index, ChangeOperation::ADDED);
 }
 
 auto node_base::removeChild(std::shared_ptr<node_base> const& child) -> void

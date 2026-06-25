@@ -46,7 +46,7 @@ std::shared_ptr<yoyo::node_base> findChildOfName(QString const& path,
     it = std::find_if(parent->begin(), parent->end(),
                       [&path](auto child) { return child->name()._s == path; });
   } else if constexpr (T == path_strategy_t::INDEX) {
-    it = parent->begin() + path.rightRef(path.length() - 5).toUInt();
+    it = parent->begin() + path.right(path.length() - 5).toUInt();
   }
   if (it != parent->end()) {
     return *it;

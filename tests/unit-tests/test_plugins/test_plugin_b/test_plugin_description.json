@@ -2,6 +2,6 @@
   "id": "c38966ac-bde6-4c83-8a6f-df7af957962b",
   "name": "test plugin B",
   "description": "This is a B plugin for testing purposes.",
-  "path": "test-plugin-b.dll",
+  "path": "@LIB_PREFIX@test-plugin-b@PLUGIN_EXTENSION@",
   "dependencies": []
 }

@@ -10,6 +10,7 @@ namespace gui
 class data_adapter
 {
 public:
+  virtual ~data_adapter() = default;
   virtual auto data(int column) const -> QVariant = 0;
   virtual auto mimedata() const -> QMimeData* = 0;
   virtual auto deserialize(QByteArray data, std::shared_ptr<node_base> root) const

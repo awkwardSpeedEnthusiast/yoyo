@@ -47,11 +47,7 @@ auto getChild(std::string const& name, QObject* parent, std::chrono::millisecond
 
 } // namespace
 
-namespace yoyo
-{
-namespace gui
-{
-namespace test
+namespace yoyo::gui::test
 {
 using interaction_t = std::variant<QPoint, Qt::Key, std::vector<Qt::Key>>;
 enum class i_t { CLICK, DCLICK, KEY, KEYS };
@@ -219,6 +215,7 @@ private:
   class impl_interface
   {
   public:
+    virtual ~impl_interface() = default;
     virtual auto interact(QWidget* parent) -> bool = 0;
     virtual auto clone() -> std::unique_ptr<impl_interface> = 0;
   };
@@ -235,6 +232,7 @@ private:
     impl_impl(impl_impl&&) = default;
     impl_impl& operator=(impl_impl const&) = default;
     impl_impl& operator=(impl_impl&&) = default;
+    ~impl_impl() override = default;
     auto clone() -> std::unique_ptr<impl_interface> override
     {
       return std::make_unique<impl_impl<T>>(_inst);
@@ -405,7 +403,5 @@ auto dialog_operator::operate(std::function<void()> trigger) -> void
   }
 }
 
-} // namespace test
-} // namespace gui
-} // namespace yoyo
+} // namespace yoyo::gui::test
 #include "dialog_operator.moc"

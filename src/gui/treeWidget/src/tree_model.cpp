@@ -419,8 +419,7 @@ auto tree_model::setRootNode(std::shared_ptr<node_base> root) -> void
                 return;
               }
               case node_base::ChangeOperation::PRE_ADD: {
-                auto start = node->childIndex(child);
-                beginInsertRows(node_index, start, start);
+                beginInsertRows(node_index, old_index, old_index);
                 break;
               }
               case node_base::ChangeOperation::ADDED: {

@@ -5,6 +5,7 @@ class TreeWidgetSelectionTest : public TreeWidgetTest
 public:
   auto setupDataTree() -> void
   {
+    TreeWidgetTest::SetUp();
     createWidget();
     retrieveListView();
     ASSERT_NE(view, nullptr);

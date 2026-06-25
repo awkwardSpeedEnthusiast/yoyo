@@ -1,11 +1,11 @@
 #pragma once
 
-#include "export_on_test.hpp"
+#include "nodes_export.h"
 #include "yoyo/data_value_node.h"
 
 namespace yoyo
 {
-class YOYO_TESTING_EXPORT string_node final : public data_value_node
+class YOYO_NODES_SHARED_EXPORT string_node final : public data_value_node
 {
   Q_OBJECT
 
