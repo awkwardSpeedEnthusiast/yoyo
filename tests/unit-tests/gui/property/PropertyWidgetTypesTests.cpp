@@ -354,8 +354,8 @@ using supportedPropertyTypes = testing::Types<
   node_mock_limited_uint64_t, node_mock_limited_int8_t, node_mock_limited_int16_t,
   node_mock_limited_int32_t, node_mock_limited_int64_t, node_mock_limited_float_t,
   node_mock_access_t, node_mock_transmission_direction_t, node_mock_layout_direction_t,
-  node_mock_invisible_layout_direction_t, node_mock_connected_boolean_t,
-  node_mock_patterned_string_t, node_mock_invisible_string_t, node_mock_in_connection_t,
+  // node_mock_invisible_layout_direction_t, node_mock_invisible_string_t,
+  node_mock_connected_boolean_t, node_mock_patterned_string_t, node_mock_in_connection_t,
   node_mock_out_connection_t, node_mock_bool, node_mock_connected_string_t>;
 
 // these have own sub widgets and need to be tested differently

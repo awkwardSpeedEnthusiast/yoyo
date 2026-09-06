@@ -45,8 +45,8 @@
       "name": "gcc_linux",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc-15",
-        "CMAKE_CXX_COMPILER": "g++-15"
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
       },
       "condition": {
         "type": "equals",
@@ -60,6 +60,22 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "mingw_linux",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "/usr/bin/x86_64-w64-mingw32-gcc",
+        "CMAKE_CXX_COMPILER": "/usr/bin/x86_64-w64-mingw32-g++",
+        "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
+        "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "ONLY",
+        "CMAKE_RC_COMPILER": "/usr/bin/x86_64-w64-mingw32-windres"
       },
       "condition": {
         "type": "equals",
@@ -130,6 +146,34 @@
         "clang_linux",
         "coverage"
       ]
+    },
+    {
+      "name": "mingw_linux_debug",
+      "hidden": false,
+      "displayName": "MinGW Debug build",
+      "inherits": [
+        "mingw_linux",
+        "debug",
+        "basic"
+      ]
+    },
+    {
+      "name": "mingw_linux_coverage",
+      "hidden": false,
+      "displayName": "MinGW Coverage build",
+      "inherits": [
+        "mingw_linux",
+        "coverage"
+      ]
+    },
+    {
+      "name": "mingw_linux_release",
+      "displayName": "MinGW Release build",
+      "inherits": [
+        "mingw_linux",
+        "release",
+        "basic"
+      ]
     }
   ],
   "buildPresets": [
@@ -193,6 +237,32 @@
       "targets": [
         "all",
         "lcov"
+      ]
+    },
+    {
+      "name": "mingw_linux_debug",
+      "configurePreset": "mingw_linux_debug"
+    },
+    {
+      "name": "mingw_linux_release",
+      "configurePreset": "mingw_linux_release"
+    },
+    {
+      "name": "mingw_linux_coverage",
+      "configurePreset": "mingw_linux_coverage"
+    },
+    {
+      "name": "mingw_linux_debug_i",
+      "configurePreset": "mingw_linux_debug",
+      "targets": [
+        "install"
+      ]
+    },
+    {
+      "name": "mingw_linux_release_i",
+      "configurePreset": "mingw_linux_release",
+      "targets": [
+        "install"
       ]
     }
   ],
@@ -270,6 +340,20 @@
     {
       "name": "clang_linux_release",
       "configurePreset": "clang_linux_release",
+      "generators": [
+        "TGZ"
+      ]
+    },
+    {
+      "name": "mingw_linux_debug",
+      "configurePreset": "mingw_linux_debug",
+      "generators": [
+        "TGZ"
+      ]
+    },
+    {
+      "name": "mingw_linux_release",
+      "configurePreset": "mingw_linux_release",
       "generators": [
         "TGZ"
       ]
@@ -381,6 +465,50 @@
       ]
     },
     {
+      "name": "mingw_linux_debug",
+      "displayName": "MinGW Debug: configure, build, test, install, package",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "mingw_linux_debug"
+        },
+        {
+          "type": "build",
+          "name": "mingw_linux_debug"
+        },
+        {
+          "type": "build",
+          "name": "mingw_linux_debug_i"
+        },
+        {
+          "type": "package",
+          "name": "mingw_linux_debug"
+        }
+      ]
+    },
+    {
+      "name": "mingw_linux_release",
+      "displayName": "MinGW Release: configure, build, test, install, package",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "mingw_linux_release"
+        },
+        {
+          "type": "build",
+          "name": "mingw_linux_release"
+        },
+        {
+          "type": "build",
+          "name": "mingw_linux_release_i"
+        },
+        {
+          "type": "package",
+          "name": "mingw_linux_release"
+        }
+      ]
+    },
+    {
       "name": "my_gcc_linux_debug",
       "displayName": "GCC Debug: configure, build, test",
       "steps": [
@@ -449,6 +577,34 @@
         {
           "type": "test",
           "name": "clang_linux_release"
+        }
+      ]
+    },
+    {
+      "name": "my_mingw_linux_debug",
+      "displayName": "MinGW Debug: configure, build, test",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "mingw_linux_debug"
+        },
+        {
+          "type": "build",
+          "name": "mingw_linux_debug"
+        }
+      ]
+    },
+    {
+      "name": "my_mingw_linux_release",
+      "displayName": "MinGW Release: configure, build, test",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "mingw_linux_release"
+        },
+        {
+          "type": "build",
+          "name": "mingw_linux_release"
         }
       ]
     }

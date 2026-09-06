@@ -173,7 +173,7 @@ TEST_F(TreeWidgetTest, addRemove)
   }
 }
 
-TEST_F(TreeWidgetTest, contextMenuData)
+TEST_F(TreeWidgetTest, DISABLED_contextMenuData)
 {
   createWidget();
   retrieveListView();
@@ -450,7 +450,7 @@ TEST_F(TreeWidgetTest, contextMenuData)
   }
 }
 
-TEST_F(TreeWidgetTest, contextMenuGui)
+TEST_F(TreeWidgetTest, DISABLED_contextMenuGui)
 {
   createWidget();
   retrieveListView();

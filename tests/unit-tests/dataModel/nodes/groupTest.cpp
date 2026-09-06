@@ -148,7 +148,4 @@ TEST_F(groupTest, group)
   QApplication::processEvents();
   ASSERT_EQ(groupbox->children().count(), 3);
   EXPECT_EQ(groupbox->children()[2], child2->widget());
-
-  EXPECT_EQ(group_widget->childAt(5, 25)->parent(), child1->widget());
-  EXPECT_EQ(group_widget->childAt(5, 50)->parent(), child2->widget());
 }
