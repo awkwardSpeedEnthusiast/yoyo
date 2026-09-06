@@ -1,0 +1,446 @@
+/**
+\page nodes Nodes
+
+At first you need to decide which type of node you want to add to Yoyo. There are four big
+categories:
+- Data
+- Gui
+- Protocol
+- Communication
+
+The set of data nodes should be complete as provided by Yoyo, but at least there is the possibility
+to add new data nodes to Yoyo if necessary.
+
+\section nodes_gui Creation of Gui nodes
+To define a new type of Gui nodes, you need to create a class, which is derived from yoyo::gui_node,
+which is in turn derived from yoyo::node_base.
+
+A lot of functionality is already provided by these two classes and doesn't need to be implemented
+by derived classes. One example is tree management. Handling addition and removal of children from
+a general perspective is already implemented in yoyo::node_base and must not be done by derived
+classes.
+
+\subsection nodes_gui_properties Properties
+There are already some properties present in yoyo::gui_node. They are accessible through the
+respective getters and setters. If you need to set them do not use the constructor to do so, but
+override the yoyo::gui_node::init() method (don't forget to call the base class's init method
+first).
+
+yoyo::gui_node::init() creates the widget and will be called by the factory directly after creation.
+
+New properties do not fall under this restriction and may be modified at any time.
+
+Use the Q_PROPERTY macro to define your new properties as in
+
+\code{.cpp}
+  Q_PROPERTY(yoyo::properties::script_t myScript READ myScript WRITE setMyScript NOTIFY myScriptChanged)
+\endcode
+
+\see https://doc.qt.io/qt-5/properties.html for more information on the Qt property system
+
+If you want the property to be persisted or modifiable in the Property Widget, you need to define
+READ, WRITE and NOTIFY attributes.
+
+\subsection nodes_gui_childwidgets Adding child widgets
+When creating a widget to add it to the gui_node, do not create it providing the widget as parent to
+the constructor. Use something like this instead:
+\code{.cpp}
+void myGuiNode::init()
+{
+  yoyo::gui_node::init();
+  _myButton = new QPushButton;
+  addWidget(_myButton);
+}
+\endcode
+
+Again, as mentioned with the yoyo::gui_node properties, adding or removing widgets must be done
+after init has been called.
+
+Use yoyo::gui_node::removeWidget() to remove the widget again if necessary or have the destructor
+cleanup automatically for you.
+
+\subsection nodes_gui_container Using a container widget
+The widget inside yoyo::gui_node defines already a layout (thus the layout direction property), and
+widgets added there are already added to and managed by the layout.
+
+In some cases, it might be suitable to have an other widget used as a container for widgets to add.
+This could be a separate frame or a button-group. Again an additional layout is not necessary,
+yoyo::gui_node handles this already according to the current value of the layout direction property.
+
+The only thing to do is to actually provide the container widget.
+
+\subsection nodes_gui_childnodes Reacting on tree management
+As already mentioned child management is done in yoyo::node_base, and adding child widgets to the
+widget is done in yoyo::gui_node. What remains is the dedicated features necessary for your
+individual node.
+
+\warning Do not store shared_ptr to children in your implementation. It might screw up the deletion
+process. Use weak_ptr if you really must.
+
+There are five private purely virtual methods defined in yoyo::gui_node. You will need to implement
+them all, even if only empty.
+
+\subsection nodes_gui_example Example code
+\subsubsection nodes_gui_example_header Header
+Let's create a gui node with a single button on it. The button shall have a title and when the
+button is clicked, a script shall be invoked. This makes two properties, one for the title and one
+for the script to be invoked:
+
+\code{.cpp}
+  Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
+  Q_PROPERTY(yoyo::properties::script_t onClick READ onClick WRITE setOnClick NOTIFY onClickChanged)
+\endcode
+For the properties three methods are necessary each: a getter (READ), a setter (WRITE) and a signal
+(NOTIFY):
+\code{.cpp}
+public:
+  auto title() const->QString;
+  auto setTitle(QString const&t)->void;
+
+  auto onClick() const->properties::script_t;
+  auto setOnClick(properties::script_t s)->void;
+
+Q_SIGNALS:
+  void titleChanged(QString t);
+  void onClickChanged(properties::script_t s);
+\endcode
+Then we need to implement the purely virtual methods from the base classes:
+\code{.cpp}
+public:
+  auto staticTypeId() const->boost::uuids::uuid final;
+  auto supportsValueType(types::value_t valueType) const->bool final;
+  auto acceptsChildren() const->bool final;
+  auto acceptsChild(std::shared_ptr<node_base> const&child) const->bool final;
+  auto acceptsParent(std::shared_ptr<node_base> const&parent) const->bool final;
+private:
+  auto beforeChildAdd(std::shared_ptr<node_base> const&child)->bool final;
+  auto afterChildAdd(std::shared_ptr<node_base> const&child)->bool final;
+  auto beforeChildRemove(std::shared_ptr<node_base> const&child)->bool final;
+  auto afterChildRemove(std::shared_ptr<node_base> const&child)->bool final;
+  auto afterChildMoved(std::shared_ptr<node_base> const&child, size_t from_index, size_t to_index)->void final;
+\endcode
+As you can see, I added the final keyword to the method declarations. It is not necessary, strictly
+speaking, to do so, because the whole class is going to be declared final, but this enables the
+compiler to tell us if we made a mistake with the method signature.
+
+Since we want to add a widget to the node (the button), we need to override the yoyo::gui_node::init()
+method as well, where we can add the button to the widget after it is initialized:
+\code{.cpp}
+public:
+  auto init()->void final;
+\endcode
+
+Last but not least, we add in a constructor and a destructor. The destructor cannot be default
+implemented, because we have a member with a type, that is only forward declared (QPushButton) and
+the destructor if generated in the header won't be able to delete the object.
+
+Complete header:
+\code{.cpp}
+#pragma once
+#include <yoyo/node_gui.h>
+
+class QPushButton;
+
+class my_gui_node final: public yoyo::gui_node
+{
+  Q_OBJECT
+
+  Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
+  Q_PROPERTY(yoyo::properties::script_t onClick READ onClick WRITE setOnClick NOTIFY onClickChanged)
+public:
+  explicit my_gui_node(boost::uuids::uuid identifier = boost::uuids::uuid {});
+  ~my_gui_node() override;
+  auto init()->void final;
+
+  auto staticTypeId() const->boost::uuids::uuid final;
+  auto supportsValueType(types::value_t valueType) const->bool final;
+
+  auto title() const->QString;
+  auto setTitle(QString const&t)->void;
+
+  auto onClick() const->properties::script_t;
+  auto setOnClick(properties::script_t s)->void;
+
+  static auto typeId()->boost::uuids::uuid;
+
+  auto acceptsChildren() const->bool final;
+  auto acceptsChild(std::shared_ptr<node_base> const&child) const->bool final;
+  auto acceptsParent(std::shared_ptr<node_base> const&parent) const->bool final;
+
+Q_SIGNALS:
+  void titleChanged(QString t);
+  void onClickChanged(properties::script_t s);
+
+private:
+  auto beforeChildAdd(std::shared_ptr<node_base> const&child)->bool final;
+  auto afterChildAdd(std::shared_ptr<node_base> const&child)->bool final;
+  auto beforeChildRemove(std::shared_ptr<node_base> const&child)->bool final;
+  auto afterChildRemove(std::shared_ptr<node_base> const&child)->bool final;
+  auto afterChildMoved(std::shared_ptr<node_base> const&child, size_t from_index, size_t to_index)->void final;
+private:
+  static boost::uuids::uuid const _typeId;
+  std::unique_ptr<QPush_button> _button;
+  QString _title;
+  properties::script_t _script;
+};
+\endcode
+
+\subsubsection nodes_gui_example_source Implementation
+The implementation of the tree management methods is rather unspectacular:
+\code{.cpp}
+auto my_gui_node::acceptsChildren() const->bool { return false; }
+auto my_gui_node::acceptsChild(std::shared_ptr<node_base> const&) const->bool { return false; }
+auto my_gui_node::acceptsParent(std::shared_ptr<node_base> const&) const->bool { return true; }
+auto my_gui_node::beforeChildAdd(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::afterChildAdd(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::beforeChildRemove(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::afterChildRemove(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::afterChildMoved(std::shared_ptr<node_base> const&, size_t, size_t)->void {}
+\endcode
+As well as the implementation of the yoyo::gui_node methods:
+\code{.cpp}
+boost::uuids::uuid const button::_typeId = boost::uuids::string_generator{} ("9d3dfb69-62f6-4a15-97b6-cf32726d69e2");
+auto my_gui_node::typeId()->boost::uuids::uuid { return _typeId; }
+auto my_gui_node::staticTypeId() const->boost::uuids::uuid { return _typeId; }
+
+auto my_gui_node::supportsValueType(types::value_t) const->bool { return false; }
+\endcode
+And implementing the property methods might look like this:
+
+\code{.cpp}
+auto my_gui_node::title() const->QString { return _p->_title; }
+auto my_gui_node::setTitle(QString const&t)->void
+{
+  if (_title == t){
+    return;
+  }
+  _title = t;
+  _button->setText(_title);
+  Q_EMIT titleChanged(_title);
+}
+
+auto my_gui_node::onClick() const->properties::script_t { return _p->_script; }
+auto my_gui_node::setOnClick(properties::script_t s)->void
+{
+  if (_script == s) {
+    return;
+  }
+  _script = s;
+  Q_EMIT onClickChanged(_script);
+}
+\endcode
+This leaves us with construction and destruction:
+\code{.cpp}
+my_gui_node::my_gui_node(boost::uuids::uuid identifier)
+    : yoyo::gui_node{"my_gui_node", nullptr, identifier}
+    , _button{std::make_unique<QPushButton>()}
+{
+    _button->setObjectName("__pushButton");
+    connect(_button.get(), &QPushButton::clicked, this,
+      [this]() {
+        if (!_script._text.isEmpty()) {
+          Q_EMIT scriptExecutionRequested(_script);
+        }
+    });
+}
+my_gui_node::~my_gui_node() = default;
+
+void my_gui_node::init()
+{
+    yoyo::gui_node::init();
+    addWidget(_button);
+}
+\endcode
+
+This could be the source file as a whole:
+\code{.cpp}
+#include "my_gui_node.hpp"
+
+#include <QPushButton>
+
+my_gui_node::my_gui_node(boost::uuids::uuid identifier)
+    : yoyo::gui_node{"my_gui_node", nullptr, identifier}
+    , _button{std::make_unique<QPushButton>()}
+{
+    _button->setObjectName("__pushButton");
+    connect(_button.get(), &QPushButton::clicked, this,
+      [this]() {
+        if (!_script._text.isEmpty()) {
+          Q_EMIT scriptExecutionRequested(_script);
+        }
+    });
+}
+my_gui_node::~my_gui_node() = default;
+
+void my_gui_node::init()
+{
+    yoyo::gui_node::init();
+    addWidget(_button);
+}
+
+auto my_gui_node::title() const->QString { return _p->_title; }
+auto my_gui_node::setTitle(QString const&t)->void
+{
+  if (_title == t){
+    return;
+  }
+  _title = t;
+  _button->setText(_title);
+  Q_EMIT titleChanged(_title);
+}
+
+auto my_gui_node::onClick() const->properties::script_t { return _p->_script; }
+auto my_gui_node::setOnClick(properties::script_t s)->void
+{
+  if (_script == s) {
+    return;
+  }
+  _script = s;
+  Q_EMIT onClickChanged(_script);
+}
+
+boost::uuids::uuid const button::_typeId = boost::uuids::string_generator{} ("9d3dfb69-62f6-4a15-97b6-cf32726d69e2");
+auto my_gui_node::typeId()->boost::uuids::uuid { return _typeId; }
+auto my_gui_node::staticTypeId() const->boost::uuids::uuid { return _typeId; }
+auto my_gui_node::supportsValueType(types::value_t) const->bool { return false; }
+auto my_gui_node::acceptsChildren() const->bool { return false; }
+auto my_gui_node::acceptsChild(std::shared_ptr<node_base> const&) const->bool { return false; }
+auto my_gui_node::acceptsParent(std::shared_ptr<node_base> const&) const->bool { return true; }
+auto my_gui_node::beforeChildAdd(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::afterChildAdd(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::beforeChildRemove(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::afterChildRemove(std::shared_ptr<node_base> const&)->bool { return false; }
+auto my_gui_node::afterChildMoved(std::shared_ptr<node_base> const&, size_t, size_t)->void {}
+\endcode
+\section nodes_protocol Creation of Protocol nodes
+\subsection nodes_protocol_properties Properties
+\subsection nodes_protocol_children Child management
+
+\section nodes_communication Creation of Communication nodes
+\subsection nodes_communication_properties Properties
+\subsection nodes_communication_children Child management
+
+\section nodes_data Creation of Data nodes
+Creating data nodes should not be necessary from a functionality point of view, since yoyo should
+cover the necessary types already. However it is still supported to design own data nodes within
+a plugin.
+
+For data nodes there are three possible base classes available:
+- yoyo::data_node: the general any purpose data-node
+- yoyo::data_value_node: a leaf node specialization for the data node. Might be interesting, because
+  tree management methods don't need to be overridden anymore.
+- yoyo::data_container_node: an inner node specialization for the data node. Might be interesting
+  for inner nodes accepting all kinds of children.
+
+\subsection nodes_data_types Data variants
+Each data node has a specific value type, which specifies the type of the data it can hold. Please
+consult the enumeration yoyo::types::value_t for a list of supported value types.
+
+\subsection nodes_data_properties Properties
+As the previous nodes, your specialization of a data node might need additional configurable
+properties to ensure wanted functionality.
+
+There are already some properties present in yoyo::data_node or the provided convenience classes.
+They are accessible through the respective getters and setters. Unlike yoyo::gui_node, you can
+modify the properties already during construction.
+
+Use the Q_PROPERTY macro to define your new properties as in
+
+\code{.cpp}
+  Q_PROPERTY(yoyo::properties::script_t myScript READ myScript WRITE setMyScript NOTIFY myScriptChanged)
+\endcode
+
+\see https://doc.qt.io/qt-5/properties.html for more information on the Qt property system
+
+If you want the property to be persisted or modifiable in the Property Widget, you need to define
+READ, WRITE and NOTIFY attributes.
+
+Some property types are not meant for the use in data nodes. These are mainly the \ref
+properties_supported_types_connectivity. They will work in the sense, that they are persisted and
+displayed in the Property Widget. But the connectivity engine will not perform a connection, since
+connections between data nodes are not allowed.
+
+\subsection nodes_data_children Child management
+As already mentioned child management is done in yoyo::node_base. What remains is the dedicated
+features necessary for your individual node.
+
+\warning Do not store shared_ptr to children in your implementation. It might screw up the deletion
+process. Use weak_ptr if you really must.
+
+There are five private purely virtual methods defined in yoyo::node_base. You will need to implement
+them all, even if only empty. In the convenience classes, you don't even need to do this.
+
+\note When you add Qt connections to children in one of the add-methods, please make sure, the
+connections are released again in the corresponding remove-method.
+
+\subsection nodes_data_example Example
+Let's see how a leaf node containing a simple boolean might be implemented.
+
+As base class we choose yoyo::data_value_node, which already implements the tree management as we'd
+like it and it also provides some properties, which we could make use of.
+\subsubsection nodes_data_example_header Header
+
+\code{.cpp}
+#pragma once
+
+#include "yoyo/data_value_node.h"
+
+class my_data_node final: public data_value_node
+{
+  Q_OBJECT
+
+public:
+  explicit my_data_node(boost::uuids::uuid identifier = boost::uuids::uuid {});
+  ~my_data_node() override = default;
+
+  auto staticTypeId() const->boost::uuids::uuid final;
+  auto value() const->types::variant_t final;
+  auto setValue(QVariant const&value)->void final;
+  static auto typeId()->boost::uuids::uuid;
+
+private:
+  static boost::uuids::uuid const _typeId;
+  bool _bufferedValue{ false };
+};
+\endcode
+Even though not necessary, it was chosen to add the final keyword to the overridden methods, to
+provide compiler checks whether the signature matches the one in the base class.
+
+Since yoyo::data_value_node alread defines properties like title, unit, access-control and an
+onChange script, there is nothing left for us to add. What is left is overriding the getter and
+setter for the propagated value.
+
+\subsubsection nodes_data_example_source Implementation
+This could be a possible implementation:
+\code{.cpp}
+#include "my_data_node.hpp"
+
+#include <QVariant>
+
+#include <boost/uuid/string_generator.hpp>
+
+boost::uuids::uuid const my_data_node::_typeId = boost::uuids::string_generator{} ("2f39d8d4-1da6-4e9f-81d1-e22c48c1bd8f");
+auto my_data_node::typeId()->boost::uuids::uuid { return _typeId; }
+auto my_data_node::staticTypeId() const->boost::uuids::uuid { return _typeId; }
+
+my_data_node::my_data_node(boost::uuids::uuid identifier)
+    : data_value_node("my_data_node", identifier, types::value_t::BIT)
+{
+    setUnit({ "", false });
+}
+
+auto my_data_node::value() const->types::variant_t { return _bufferedValue; }
+auto my_data_node::setValue(QVariant const&value)->void
+{
+  if (static_cast<QMetaType::Type>(value.type()) != QMetaType::Bool) {
+      return;
+  }
+  if (_bufferedValue == value.toBool()) {
+      return;
+  }
+
+  _bufferedValue = value.toBool();
+  doValueChanged(value);
+}
+\endcode
+*/

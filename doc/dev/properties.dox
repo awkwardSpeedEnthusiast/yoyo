@@ -1,0 +1,110 @@
+/**
+\page properties Properties
+
+For its \ref nodes Yoyo uses properties to manage bits of information necessary for the operation of
+the respective node. This can be a name or some value to display. It can also be a connection to a
+data node.
+
+If a bit of data is defined as property, it is displayed in the Property Widget and can be modified
+there. And all writable properties are persisted.
+
+Yoyo is using the Qt property system (https://doc.qt.io/qt-5/properties.html), so when defining a
+new node, any additional properties need to be defined as Qt-properties.
+
+Please note, that any property you define needs to be supported by Yoyo to display and perisit, so
+you'll need to stick with the list of \ref properties_supported_types.
+
+\section properties_readonly Read-only properties
+In some cases you might want to display some information in the Property Widget, but this
+information should not be modified or persisted.
+
+This is the point, where you can use read-only properties.
+
+\section properties_readwrite Read writable properties
+This kind of properties should be the most abundant kind of properties. They can be read and written
+by the Property Widget and they will be persisted, when the configuration is stored to file.
+
+When defining the Qt-property, make sure you use the "READ", the "WRITE" and the "NOTIFY" tags to
+specify the respective methods and signals.
+
+\section properties_supported_types Supported property types
+Each type has to be handled separately, when it comes to serialization/deserialization or editing in
+Property Widget. So using newly defined types won't work. They won't be displayed and they won't be
+persisted.
+
+If you intend to use this functionality, you will need to use one of the defined property types:
+
+\subsection properties_supported_types_numeric Numeric types
+|Type|Description|
+|:--|:----------------|
+|char| a signed character (presumably 8-bit)|
+|short| a signed short integer (presumably 16-bit)|
+|int| a signed integer (presumably 32-bit)|
+|long| a signed long integer (presumably 64-bit)|
+|long long| a signed long long integer (presumably 64-bit)|
+|unsigned char| an unsigned character (presumably 8-bit)|
+|unsigned short| an unsigned short integer (presumably 16-bit)|
+|unsigned int| an unsigned integer (presumably 32-bit)|
+|unsigned long| an unsigned long integer (presumably 64-bit)|
+|unsigned long long| an unsigned long long integer (presumably 64-bit)|
+|int8_t| fixed size signed integer 8-bit |
+|int16_t| fixed size signed integer 16-bit |
+|int32_t| fixed size signed integer 32-bit |
+|int64_t| fixed size signed integer 64-bit |
+|uint8_t| fixed size unsigned integer 8-bit |
+|uint16_t| fixed size unsigned integer 16-bit |
+|uint32_t| fixed size unsigned integer 32-bit |
+|uint64_t| fixed size unsigned integer 64-bit |
+|float| a floating point value, single precision|
+|double| a floating point value, double precision|
+
+\subsection properties_supported_types_enum Enumeration types
+|Type|Description|
+|:--|:----------------|
+| yoyo::types::value_t| The allowed values data nodes may propagate |
+| yoyo::types::access_t | Accessability of an object. Can be READ, WRITE, READ_WRITE or NONE|
+| yoyo::types::layout_direction_t | Direction of the layout used by gui nodes. Can be FREE, HORIZONTAL or VERTICAL|
+| yoyo::types::integer_format_t | The format in which integers shall be displayed by a gui node. This can be BINARY, OCTAL, DECIMAL or HEXAL|
+
+\subsection properties_supported_types_string String types
+|Type|Description|
+|:--|:----------------|
+|QString| a single lined string, may contain line-breaks, but is displayed in a single line|
+|yoyo::properties::patterned_string_t| a single lined string, which has to fulfill a regular expression|
+|yoyo::properties::text_t| a multi-line string, which will be displayed|
+
+\subsection properties_supported_types_connectivity Connectivity related types
+These properties only make sense in nodes of the type gui, protocol or communication. These nodes
+types connect to data nodes (not the other way round) and the connection engine will use these
+properties and use them when connecting nodes.
+
+|Type|Description|
+|:--|:----------------|
+|yoyo::properties::connection_t| Defines an in-/out- connection. |
+|yoyo::properties::in_connection_t| Defines a read-only connection. |
+|yoyo::properties::out_connection_t| Defines a write-only connection. |
+|yoyo::properties::connected_string_t| Defines a string to be displayed. If empty on this node, and if the connected node does have a string property of the same name, this property will be used instead.|
+|yoyo::properties::connected_boolean_t| Defines a boolean. If DEFINED_BY_CONNECTION, and if the connected node does have a boolean property of the same name, this property will be used.|
+
+\subsection properties_supported_types_yoyo Yoyo functional types
+|Type|Description|
+|:--|:----------------|
+|yoyo::properties::enum_t| Useful for nodes to connect to data nodes which define enumerations as well. Actions in both nodes can be aligned this way |
+|yoyo::properties::script_t| A script to execute on some trigger|
+|yoyo::properties::limited_int8_t| a signed fixed length integer (8-bit) with boundaries|
+|yoyo::properties::limited_int16_t| a signed fixed length integer (16-bit) with boundaries|
+|yoyo::properties::limited_int32_t| a signed fixed length integer (32-bit) with boundaries|
+|yoyo::properties::limited_int64_t| a signed fixed length integer (64-bit) with boundaries|
+|yoyo::properties::limited_uint8_t| an unsigned fixed length integer (8-bit) with boundaries|
+|yoyo::properties::limited_uint16_t| an unsigned fixed length integer (16-bit) with boundaries|
+|yoyo::properties::limited_uint32_t| an unsigned fixed length integer (32-bit) with boundaries|
+|yoyo::properties::limited_uint64_t| an unsigned fixed length integer (64-bit) with boundaries|
+|yoyo::properties::invisible_string_t| A string property, which can be invisible in the Property Widget|
+|yoyo::properties::invisible_layout_direction_t| A layout direction property, which can be invisible in the Property Widget|
+
+\subsection properties_supported_types_other Other types
+|Type|Description|
+|:--|:----------------|
+|bool| A boolean number |
+
+*/

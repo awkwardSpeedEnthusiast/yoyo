@@ -1,0 +1,47 @@
+#define releaseVersion "${CMAKE_PROJECT_VERSION}"
+#define source_dir = "${CMAKE_SOURCE_DIR}"
+#define buildPath = "${CMAKE_BINARY_DIR}"
+
+#define status=0
+
+  [Setup]
+  AppName=Yoyo
+  AppVersion={#releaseVersion}
+
+  WizardStyle=modern
+
+  DefaultDirName={userdocs}\Yoyo\Yoyo-{#releaseVersion}
+  UsePreviousAppDir=yes
+  DefaultGroupName=Yoyo
+  Compression=lzma2
+  SolidCompression=yes
+  PrivilegesRequired=none
+
+  LicenseFile={#source_dir}\doc\legal\License-Yoyo.txt
+
+  OutputDir=${CMAKE_CURRENT_BINARY_DIR}
+  OutputBaseFilename=Yoyo-{#releaseVersion}
+
+  Uninstallable=no
+  AllowNoIcons=yes
+
+  OutputManifestFile=Yoyo-{#releaseVersion}-innosetup.log
+
+  [Icons]
+  Name: "{group}\Yoyo\Yoyo"; Filename: "{app}\bin\yoyo.exe"
+
+  [Languages]
+  Name: en; MessagesFile: "compiler:Default.isl"
+
+  [Files]
+  Source: "{#buildPath}\install\*"; DestDir: "{app}"; Flags: recursesubdirs uninsneveruninstall
+
+#if status != 0
+  #error Error occured
+#endif
+
+[Run]
+  Filename: "{app}\bin\Yoyo.exe"; Description: "{cm:LaunchProgram,Run Yoyo}"; Flags: shellexec postinstall skipifsilent
+
+
+#expr SaveToFile("Yoyo-"+releaseVersion+"-preprocessed.iss")

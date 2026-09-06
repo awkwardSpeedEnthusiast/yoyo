@@ -1,0 +1,8 @@
+add_subdirectory(command)
+add_subdirectory(sdk)
+add_subdirectory(io)
+add_subdirectory(utilities)
+add_subdirectory(plugin_manager)
+add_subdirectory(dataModel)
+add_subdirectory(gui)
+add_subdirectory(yoyo)

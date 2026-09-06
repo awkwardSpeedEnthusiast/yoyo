@@ -1,0 +1,380 @@
+/**
+\page properties Node Properties in yoyo
+
+\ref nodes make up the Yoyo data-model. They are organized in a tree structure (thus the name). Each
+node has a set of properties, that define its behavior and/or the behavior of its neighboring nodes.
+
+There are some properties all nodes have in common, like the name (identifier) or the read-only
+property type. But mostly they are defined for the individual node type.
+
+All properties will be displayed and can be modified by the user with the \ref modules_gui_property,
+though some properties may be hidden, depending on their type and value.
+
+All non read-only properties are (to be) persisted and set, when the node is deserialized. (Some
+persistency implementations may choose not to persist properties with default values.)
+
+\section properties_concept Concept
+
+Yoyo uses the Qt property system to define a property for a node class. A read-writable property is
+defined like this:
+
+\code{.cpp}
+Q_PROPERTY(type propertyName READ propertyGetter WRITE propertySetter NOTIFY changedSignal)
+\endcode
+
+For read-only properties, only the READ attribute is necessary, which requires you to specify the
+getter for the property, which in Qt usually has the name of the property with a signature like
+this:
+
+\code{.cpp}
+auto propertyName() const -> type;
+\endcode
+
+For writable properties, in addition to the READ attribute also the WRITE attribute is necessary,
+specifying the setter for the property. In Qt this is usually of this signature:
+
+\code{.cpp}
+auto setPropertyName(type value) void;
+\endcode
+
+In previous Qt versions, this method needed to be declared as Q_SLOT. Fortunately, this is no more
+necessary.
+
+Even though not strictly necessary a notifier signal should be specified as well using the NOTIFY
+attribute (Exception: constant properties). This allows you to notify other components of Yoyo
+(\ref modules_model_connection engine or \ref modules_gui_property), that the value of the property
+changed.
+
+\code{.cpp}
+Q_SIGNALS:
+  void propertyNameChanged(type value);
+\endcode
+
+\note In case of signal definition, the use of trailing return types, which is predominant in Yoyo,
+    has been omitted, to prevent hickups from the Qt meta object compiler.
+
+In each of the code snipplets, "type" has to be exchanged with the actual type of the property and
+"propertyName" with the respective name.
+
+\warning In a Q_PROPERTY declaration, the type must always contain the complete type, includin
+    namespace specifiers independent of the namespace the class is declared in (Example:
+    yoyo::types::access_t instead of types::access_t even if declared in yoyo namespace).
+
+\section properties_defined Defined property types
+
+Each property has a type. For Yoyo, the allowed property types are restricted due to several
+factors:
+
+- First, the used type needs to be available to the Qt type system
+    (https://doc.qt.io/qt-5/qmetatype.html) to be able to be transported via the Qt property system.
+- Second, Yoyo has to support the display/edit of the type in the \ref modules_gui_property and it
+    has to support the serialization and deserialization of the type in \b all defined io-formats.
+
+This is the list of currently supported property types:
+
+\subsection properties_supported_types_numeric Numeric types
+|Type|Description|
+|:--|:----------------|
+|char| a signed character (presumably 8-bit)|
+|short| a signed short integer (presumably 16-bit)|
+|int| a signed integer (presumably 32-bit)|
+|long| a signed long integer (presumably 64-bit)|
+|long long| a signed long long integer (presumably 64-bit)|
+|unsigned char| an unsigned character (presumably 8-bit)|
+|unsigned short| an unsigned short integer (presumably 16-bit)|
+|unsigned int| an unsigned integer (presumably 32-bit)|
+|unsigned long| an unsigned long integer (presumably 64-bit)|
+|unsigned long long| an unsigned long long integer (presumably 64-bit)|
+|int8_t| fixed size signed integer 8-bit |
+|int16_t| fixed size signed integer 16-bit |
+|int32_t| fixed size signed integer 32-bit |
+|int64_t| fixed size signed integer 64-bit |
+|uint8_t| fixed size unsigned integer 8-bit |
+|uint16_t| fixed size unsigned integer 16-bit |
+|uint32_t| fixed size unsigned integer 32-bit |
+|uint64_t| fixed size unsigned integer 64-bit |
+|float| a floating point value, single precision|
+|double| a floating point value, double precision|
+
+\subsection properties_supported_types_enum Enumeration types
+|Type|Description|
+|:--|:----------------|
+| yoyo::types::value_t| The allowed values data nodes may propagate |
+| yoyo::types::access_t | Accessability of an object. Can be READ, WRITE, READ_WRITE or NONE|
+| yoyo::types::layout_direction_t | Direction of the layout used by gui nodes. Can be FREE, HORIZONTAL or VERTICAL|
+| yoyo::types::integer_format_t | The format in which integers shall be displayed by a gui node. This can be BINARY, OCTAL, DECIMAL or HEXAL|
+
+\subsection properties_supported_types_string String types
+|Type|Description|
+|:--|:----------------|
+|QString| a single lined string, may contain line-breaks, but is displayed in a single line|
+|yoyo::properties::patterned_string_t| a single lined string, which has to fulfill a regular expression|
+|yoyo::properties::text_t| a multi-line string, which will be displayed|
+
+\subsection properties_supported_types_connectivity Connectivity related types
+These properties only make sense in nodes of the type gui, protocol or communication. These nodes
+types connect to data nodes (not the other way round) and the connection engine will use these
+properties and use them when connecting nodes.
+
+|Type|Description|
+|:--|:----------------|
+|yoyo::properties::connection_t| Defines an in-/out- connection. |
+|yoyo::properties::in_connection_t| Defines a read-only connection. |
+|yoyo::properties::out_connection_t| Defines a write-only connection. |
+|yoyo::properties::connected_string_t| Defines a string to be displayed. If empty on this node, and if the connected node does have a string property of the same name, this property will be used instead.|
+|yoyo::properties::connected_boolean_t| Defines a boolean. If DEFINED_BY_CONNECTION, and if the connected node does have a boolean property of the same name, this property will be used.|
+
+\subsection properties_supported_types_yoyo Yoyo functional types
+|Type|Description|
+|:--|:----------------|
+|yoyo::properties::enum_t| Useful for nodes to connect to data nodes which define enumerations as well. Actions in both nodes can be aligned this way |
+|yoyo::properties::script_t| A script to execute on some trigger|
+|yoyo::properties::limited_int8_t| a signed fixed length integer (8-bit) with boundaries|
+|yoyo::properties::limited_int16_t| a signed fixed length integer (16-bit) with boundaries|
+|yoyo::properties::limited_int32_t| a signed fixed length integer (32-bit) with boundaries|
+|yoyo::properties::limited_int64_t| a signed fixed length integer (64-bit) with boundaries|
+|yoyo::properties::limited_uint8_t| an unsigned fixed length integer (8-bit) with boundaries|
+|yoyo::properties::limited_uint16_t| an unsigned fixed length integer (16-bit) with boundaries|
+|yoyo::properties::limited_uint32_t| an unsigned fixed length integer (32-bit) with boundaries|
+|yoyo::properties::limited_uint64_t| an unsigned fixed length integer (64-bit) with boundaries|
+|yoyo::properties::invisible_string_t| A string property, which can be invisible in the Property Widget|
+|yoyo::properties::invisible_layout_direction_t| A layout direction property, which can be invisible in the Property Widget|
+
+\subsection properties_supported_types_other Other types
+|Type|Description|
+|:--|:----------------|
+|bool| A boolean number |
+
+\section properties_extend How to extend the list of property types
+
+As already mentioned in the previous section, there are some adjustments needed, when adding new
+types to the Yoyo property system.
+
+For the sake of simplicity, let's assume the new type my::own::type_t is to be added to Yoyo.
+
+\subsection properties_extend_header Declare type
+
+First of all, you'll have to declare the type. If you want it to be a privately used type, you can
+choose to declare it outside the \ref modules_sdk module. If you want it to be published with the
+next version of Yoyo, the file src/sdk/include/yoyo/property_types.h is a good place for it.
+
+\subsection properties_extend_qt Add to Qt meta type system
+
+At the bottom of the file src/sdk/include/yoyo/property_types.h you can see a list already, where
+the Yoyo defined types are added to the Qt meta type system, at least part one of two.
+
+\code{.cpp}
+Q_DECLARE_METATYPE(my::own::type_t)
+\endcode
+
+This must be declared once and only once close to the declaration of the new type itself. It must
+use the complete type, including all namespaces. No semicolon is necessary at the end of the
+statement.
+
+The next step should be done in a source file, in a function, which is invoked once at startup
+(preferably also for tests). The published types do their call in registerAllPropertyTypes, which is
+implemented in src/sdk/src/node_base.cpp. Add this line:
+
+\code{.cpp}
+qRegisterMetaType<my::own::type_t>();
+\endcode
+
+In contrast to the macro call above, you can omit the yoyo namespace specifier, if applicable. Or
+the respective one, if you choose to declare it in an other function in an other namespace.
+
+And while you're on it, append the type in the function value_equals in src/sdk/src/node_base.cpp to
+allow equality checks (mostly used in tests).
+
+\subsection properties_extend_io Add to Serialization/Deserialization
+
+In the current version, there is only one IO format supported: json, so you only have to modify one
+set.
+
+According to the principles of \ref guidelines_coverage, we should first create a test, then add the
+production code. For the json format, there is already a pretty convenient test, where the new type
+can be easily added. There is two locations:
+
+- tests/unit-tests/io/io_fixture.cpp
+- tests/unit-tests/io/json_properties_I_tests.cpp
+
+\subsubsection properties_extend_io_general General
+
+In file io_fixture.cpp, starting from line 141, there are several simplified node classes declared
+containing read-writable (but not notifying) properties. Select one node class and add a property
+with the new property type here (don't forget the member, if you follow the used pattern).
+
+You can also define a template specialization to the random value generation functions on top for
+the new property type. This makes it easy to set some non default values in
+IoFixture::setNodeValues; append your code here:
+\code{.cpp}
+{ std::string { "my::own::type_t" },
+  []() -> QVariant {
+    return QVariant::fromValue(generateRandomValue<my:own::type_t>(...));
+  } },
+\endcode
+
+If you decided to create a new test node class, don't forget to install it into the factory in
+IoFixture::installNodes().
+
+Comparison also works, if the method IoFixture::expectValuesEqual is not explicitly handling the new
+property type, but the output on failure is much easier to read.
+
+This fixture is used by tests/unit-tests/io/json_tests.cpp and will most probably be used by other
+formats as well, so adding the handling of the new type here makes it reusable.
+
+\subsubsection properties_extend_io_json Json specific
+
+In the file json_properties_I_tests.cpp, there are two tests verifying, that the json format is able
+to handle the all defined property types:
+
+- JsonTest.property: checks, whether the type is added to the serializer/deserializer map. Add a
+    line here
+    \code{.cpp}
+  EXPECT_NE(prop::io.find("my::own::type_t"), prop::io.end());
+    \endcode
+- JsonTestValues.properties: this is a parametrized test, serializing a value, deserializing it
+    again and checking whether the value is still the same. In the instantiation list for this test
+    add a line or more like:
+    \code{.cpp}
+  test_data { QString { "my::own::type_t" }, QVariant::fromValue(my::own::type_t{someInitializer}) },
+    \endcode
+
+\subsubsection properties_extend_io_prod Adjust Production Code
+
+When you've read the test modifications closely, you already know, where to add the changes for
+production code.
+
+\subsection properties_extend_gui Property Widget
+
+The Property Widget uses for each property an own child widget. To be precise, the actual
+implementation of property_widget is less than 100 LOC, and no code is to be added here. The
+handling of the individual types is done in classes derived from property_input (see property_input
+sub folder).
+
+If you investigate this folder, you will notice, that there is a significant number of classes
+(widgets) handling different property types, some widgets handling several related types. This will
+be the place, where to add a custom input widget for the new property type. Don't forget to add a
+line to property_input_factory.cpp in the same directory:
+\code{.cpp}
+{ "my::own::type_t", [](auto n, auto p, auto parent) { return std::make_shared<my::own::type_input>(n, p, parent); } },
+\endcode
+
+\subsubsection properties_extend_gui_test Tests
+But, before changing the production directories, let's again start with the tests.
+
+In directory tests/unit-tests/gui/property/ there are already some tests defined for simplified test
+nodes (similar to \ref properties_extend_io_general Tests).
+
+Leaving the file header aside, the test code should contain a testing node definition:
+\code{.cpp}
+class my_own_node_mock : public mock_node
+{
+  Q_OBJECT
+
+  Q_PROPERTY(my::own::type_t prop1 READ prop1 WRITE set_prop1 NOTIFY prop1Changed)
+public:
+  using mock_node::mock_node;
+
+  DECLARE_PROPERTY(my::own::type_t, prop1);
+};
+\endcode
+
+The tests performed in this test suite are white-box tests, which is possible thanks to the Qt
+public parent child relationships. We only need to make some assumptions on how the widget is
+organized internally.
+And this coudl add a test similar to:
+\code{.cpp}
+TEST_F(PropertyWidgetTest, numberProperty)
+{
+  createWidget();
+  auto object = std::make_shared<number_node_mock>("my_own_node_mock", boost::uuids::uuid {});
+  auto docu = yoyo::documentation::builder { "Mock own" }
+                .property("name", "Name", "", "Name-tooltip", QVariant {})
+                .property("prop1", "Property 1", "", "p1-tooltip", QVariant {})
+                .build();
+  ASSERT_EQ(_widget->children().size(), 5);
+  auto content = _widget->children()[4];
+  EXPECT_EQ(content->children().size(), 3);
+
+  my::own::type_t prop1;
+  EXPECT_CALL(*object, prop1()).WillOnce(Return(prop1));
+  object->setName("mockObject1");
+
+  _widget->itemSelected(object, docu);
+
+  EXPECT_EQ(content->children().size(), 5 + 2 * 1); // one additional property
+  auto item_count = 1;
+  // first row: type
+  {
+    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    ASSERT_NE(label, nullptr);
+    EXPECT_EQ(label->text().toStdString(), "Type");
+    label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    ASSERT_NE(label, nullptr);
+    EXPECT_EQ(label->text().toStdString(), "number_mock");
+  }
+  // second row: name
+  {
+    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    ASSERT_NE(label, nullptr);
+    EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("name")).toStdString());
+    EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("name")).toStdString());
+    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
+              "yoyo::gui::qstring_input"s);
+    ASSERT_EQ(content->children()[item_count]->children().size(), 2);
+    auto input = dynamic_cast<QLineEdit*>(content->children()[item_count++]->children()[1]);
+    ASSERT_NE(input, nullptr);
+    EXPECT_EQ(input->text().toStdString(), "mockObject1");
+    EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
+              std::get<2>(docu->property("name")).toStdString());
+
+    object->setName("anOtherName");
+    EXPECT_EQ(input->text().toStdString(), "anOtherName");
+
+    input->setText("changedName");
+    QTest::keyClick(input, Qt::Key_Return);
+
+    EXPECT_EQ(object->name(), "changedName");
+    EXPECT_EQ(input->text().toStdString(), "changedName");
+  }
+  // prop1: my::own::type_t
+  {
+    auto label = dynamic_cast<QLabel*>(content->children()[item_count++]);
+    ASSERT_NE(label, nullptr);
+    EXPECT_EQ(label->text().toStdString(), std::get<0>(docu->property("prop1")).toStdString());
+    EXPECT_EQ(label->toolTip().toStdString(), std::get<2>(docu->property("prop1")).toStdString());
+    ASSERT_EQ(content->children()[item_count]->metaObject()->className(),
+              "my::own::type_input"s);
+
+    // Add checks about the internal composition of the input widget and extract the child or
+    // children, which will hold the valuesof my::own::type_t
+    ASSERT_EQ(content->children()[item_count]->children().size(), numberOfChildrenInTypeInput);
+    auto input = dynamic_cast<WidgetType*>(content->children()[item_count++]->children()[IndexOfInput]);
+    ASSERT_NE(input, nullptr);
+    EXPECT_EQ(input->text(), expectedDisplay);
+    EXPECT_EQ(input->parentWidget()->toolTip().toStdString(),
+              std::get<2>(docu->property("prop1")).toStdString());
+
+    // Verifying that the input widget reacts on value changed signal.
+    prop1 = {newValue};
+    object->prop1Changed(prop1);
+    EXPECT_EQ(input->text(), changedDisplay);
+
+    // Verifying that the input widget can set the value for my::own::type_t properly.
+    input->setText(nextValue);
+    EXPECT_CALL(*object, set_prop1(nextValue));
+    QTest::keyClick(input, Qt::Key_Return);
+    EXPECT_EQ(input->text(), nextValue);
+  }
+}
+\endcode
+\note This is just a simplified example, which doesn't compile. But it is a good starting point for
+    the implementation of the actual test.
+
+And, last but not least, since a class deriving from QObject is declared in this source file, the
+generated moc file needs to be included (don't worry if the IDE shows it as not found; CMake should
+definitely find it). The file-name's stem should be the same as for the test file; extension "moc".
+\code{.cpp}
+#include "PropertyWidgetOwnTypeTests.moc"
+\endcode
+*/

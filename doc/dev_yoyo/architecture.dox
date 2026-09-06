@@ -1,0 +1,54 @@
+/**
+\page architecture Yoyo Architecture
+
+The architecture for the Yoyo application is meant to be simple and obeying the rule of "high
+cohesion - low coupling". This means, that between modules there must be a minimal amount of
+relationships.
+
+This was achieved by defining a very slim and basic base module - the SDK - which is also published
+to the customer for plugin creation. Almost all other modules depend on it.
+
+\section architecture_responsibility One module - one responsibility
+
+Using the Single Responsibility Principle (S in SOLID), one module is only responsible for one part
+of the software. It must cover everything, that is concerned by this part (high cohesion), but not
+more.
+
+Communication between modules is minimized (low coupling) and in most cases routed through the
+module, that \b must depend on all: the Yoyo application.
+
+
+\image html architecture_modules.svg "Dependencies of Yoyo modules"
+
+\section archtiecture_sdk Yoyo SDK
+
+Here is an architectureal model for the Yoyo SDK:
+
+\image html architecture_sdk.svg "Class diagram for Yoyo SDK"
+
+\section architecture_datamodel Data model
+
+The Yoyo data model follows some fixed rules.
+
+First of all: the Yoyo data model is a tree structure.
+
+The root node of the tree is always an object of type yoyo::configuration.
+
+The root node always has the three child nodes: yoyo::configuration_info, yoyo::data_root and
+yoyo::gui_node. It can have other child nodes of type yoyo::protocol or yoyo::communication. Other
+types of child nodes are not allowed.
+
+All mentioned nodes are created by the fundamental node factory, which is not exposed to the Yoyo
+plugin framework. These node classes are declared in the datamodel-nodes module.
+
+\image html architecture_datamodel.svg "Data model for a Yoyo configuration"
+
+Except for the yoyo::configuration_info node, all of the child nodes of the root node may have
+any number of children, depending on the type of node, different factories are used for node
+creation:
+
+- For creating child nodes for yoyo::data_root, the data factory is used.
+- For creating child nodes for yoyo::gui_root, the gui factory is used.
+- For creating child nodes for yoyo::protocol, the protocol factory is used.
+- For creating child nodes for yoyo::communication, the communication factory is used.
+*/

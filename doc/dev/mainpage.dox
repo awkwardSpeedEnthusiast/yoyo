@@ -1,0 +1,66 @@
+/**
+\mainpage Yoyo Plugin development
+
+Welcome to the Yoyo guide for plugin development!
+
+Yoyo offers a plugin interface to allow the creation of new types of display- or Gui elements, new
+types of data serialization objects and new types of communication.
+
+\section main_concepts Concepts
+\subsection main_concepts_naming Nomenclature
+Yoyo uses a certain naming conventions, which are going to be clarified in this section.
+
+The basic data structure for Yoyo's data model is the node \see \ref main_concepts_structure.
+
+The nodes are classified according to the realm of functionality they belong to. The following
+realms are defined:
+- Data: data nodes (or signals as they are called in the Yoyo display, but we stick here to data to
+  avoid conflicts with the used Qt signal and slot mechanism) can be viewed as similar to variables.
+  They hold and propagate values to connected nodes. Data nodes can be connected to any other node
+  type, but not to data nodes themselves.
+  Even though it is supported to provide new types of data, it is most probably not necesary since
+  Yoyo provides a variety of value types already.
+- Gui: gui nodes represent an item in the central display. The gui nodes Yoyo already provides
+  include buttons, check-boxes and line-edits. These are simple items, but a gui node can become
+  more complex as well, not only providing title and unit labels as the line-edits do.
+- Communication: communication nodes provide an interface to external data sources. One example
+  would be a TCP-connection or CAN-connection. Communication nodes only offer the communication
+  itself, sending and receiving data. They do not serialize or deserialize data themselves, but
+  write the raw data to a connected data node.
+- Protocol: protocol nodes are responsible for encoding and decoding (serialize/deserialize) data
+  provided from/to a communication node.
+
+\subsection main_concepts_structure Structure
+In Yoyo all these objects are organized in a tree structure, which you will be familiar with. The
+items making up the tree are called "nodes" and each node corresponds to some functionality. This
+functionality can be grouping of other objects, so the grouping nodes will be inner nodes. The leaf
+nodes, which have no children or cannot have children, carry in many cases most of the
+functionality, but this doesn't always need to be the case.
+
+When you start implementing new functionality for Yoyo, you will be implementing new nodes. For
+these nodes, you will need to decide:
+- is it a leaf node or an inner node: does it accept children or not
+- for an inner node:
+    - which kind of children will it accept
+    - are there things to be done, when children are added or removed
+- are there restrictions to the kind of parents, the node accepts
+
+For each of these questions, there is a purely virtual method to be implemented in the class you
+will be deriving from (or it's base class).
+
+\note You don't need to implement parent-child management. This is done by the base class of all
+nodes: \a node_base.
+\see Please consult the page about \ref nodes for more information.
+
+\subsection main_concepts_properties Properties
+Any data of a node, which needs to be configured or persisted, needs to be represented by a
+property. Yoyo depends heavily on the Qt-libraries and in praticular the Qt property system; all
+configurable data must be represented by a Qt-property.
+
+Please consult the page about \ref properties for more information.
+
+\subsection main_concepts_factories Factories
+Yoyo uses factories for managing the creation of nodes. There are several factories used throughout
+Yoyo specializing in a certain type of nodes each. As a plugin developer you will find factories
+for data nodes, gui nodes, protocol nodes and communication nodes.
+*/

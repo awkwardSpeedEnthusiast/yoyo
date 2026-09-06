@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>plugin_widget</class>
+ <widget class="QWidget" name="plugin_widget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QListView" name="listView">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="load_button">
+     <property name="text">
+      <string>Load plugin description</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="load_plugin_action">
+   <property name="text">
+    <string>Load plugin</string>
+   </property>
+  </action>
+  <action name="unload_plugin_action">
+   <property name="text">
+    <string>Unload plugin</string>
+   </property>
+  </action>
+  <action name="remove_plugin_action">
+   <property name="text">
+    <string>Remove plugin</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

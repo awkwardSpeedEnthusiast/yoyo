@@ -1,0 +1,134 @@
+/**
+\page nodes Nodes
+
+The data model of the Yoyo application consists of nodes organized in a tree structure (thus the
+name).
+
+There are a variety of nodes defined already in Yoyo. You can find them in src/dataModel/basicNodes.
+
+\section nodes_fundamental Fundamental nodes
+Fundamental nodes are for the biggest part directly derived from the node_base class and some of
+them are expected to be in the hierarchy once and once only.
+
+They have one thing in common: they are not meant to be specialized. They are available from the
+fundamental node factory, which is not exposed to the plugin framework.
+
+The following types of fundamental nodes are defined:
+
+|node|multiplexity|   |
+|:---|:--:|:--|
+|configuration     |1   |The configuration is the root node of the complete data-model.|
+|data_root         |1   |This node acts as root for all data nodes and always is the first child of the configuration node. Only data nodes are allowed as children, whether direct or indirect.|
+|gui_root          |1   |This node acts as root for all gui nodes and always is the second child of the configuration node. Only gui nodes are allowed as children, whether direct or indirect.|
+|configuration_data|1   |This leaf node contains some properties for the configuration, which are user manageable. It is always the third child of the configuration node.|
+|protocol_root     |0..*|The user can add protocols to the configuration. This node acts as root node for all nodes belonging to one protocol, so each protocol has one protocol_root node.|
+|communication_root|0..*|The user can add communication interfaces to the configuration. This node acts as root node for all nodes belonging to one communication interface.|
+|message_handler   |0..*|This node needs to be present as a child of a communication_root node for the communication to work. It is an inner node; the children are of type message.|
+|message           |0..*|This node defines a message to be processed by the communication interface. It is an inner node hosting message_field children.|
+|message_field     |0..*|The message_field node is a leaf node connecting the message to a data node which can act as a source or a sink for the communication.|
+
+\section nodes_data Data nodes
+The data nodes are somewhat special: they have a type and they can be connected to other node types.
+Connections between other node types (gui with gui or gui with protocol etc) are not allowed, as
+well as connections between data nodes. Connected nodes can transfer data to data nodes, which then
+distribute the data to all other connected nodes.
+
+Even though offered to the plugin framework, it should not be necessary to add new data nodes; the
+set of nodes provided by Yoyo is meant to be complete:
+
+|node|type|   |
+|:---|:--:|:--|
+|bit_node|BIT|Leaf-node, contains one bit (a boolean)|
+|bitfield_node|BITFIELD|Leaf-node, contains variable length data; must be a child of a register_node.|
+|string_node|STRING|Leaf-node, contains a string|
+|float_node|FLOAT|Leaf-node, contains a floating point value|
+|uint8node|UINT8|Leaf-node, contains an 8 bit unsigned integer|
+|uint16node|UINT16|Leaf-node, contains an 16 bit unsigned integer|
+|uint32node|UINT32|Leaf-node, contains an 32 bit unsigned integer|
+|uint64node|UINT64|Leaf-node, contains an 64 bit unsigned integer|
+|int8node|INT8|Leaf-node, contains an 8 bit signed integer|
+|int16node|INT16|Leaf-node, contains an 16 bit signed integer|
+|int32node|INT32|Leaf-node, contains an 32 bit signed integer|
+|int64node|INT64|Leaf-node, contains an 64 bit signed integer|
+|register_node|REGISTER|Inner node, can host bit-fields. register_nodes and their bitfield_node children share the same memory|
+|data_group|CUSTOM|Inner node, can host any data node except bitfield_node|
+
+Data nodes are available through the data node factory.
+
+\section nodes_gui Gui nodes
+Gui nodes are available through the gui node factory.
+
+Some basic gui nodes are defined already without using a plugin. This includes:
+- Basic groups
+- PushButton
+- CheckBox
+- ComboBox
+- LineEdit
+- Spacer
+- TabWidget
+- Label
+- Image
+- SpinBox
+- TextEdit
+- LCD Number
+- Sliders
+
+\section nodes_protocol Protocol nodes
+Protocol nodes are available through the protocol node factory.
+\section nodes_communication Communication nodes
+Communication nodes are available through the communication node factory.
+\section nodes_user User defined nodes
+User defined nodes are leaf nodes, which contain a node tree. They can be installed to any of the
+previously discussed node factories (apart from the fundamental node factory, which is not open for
+extension).
+The UDN is in principle a single class of node, representing a sub-tree previously defined by the
+user.
+\warning The UDNs are in concept phase. There is no implementation yet!
+\subsection nodes_user_create Type creation
+In the Browser Widget, a right click on any group-like node (data_group or register_node for data
+nodes, group for gui nodes) will show in the context menu an option to create an UDN from the sub
+tree, starting at that node.
+
+On activating this option, a dialog will pop up. This dialog shows all node in the sub-tree with
+their respective properties (no changes possible, just a list). The user can then decide, which of
+these properties to expose as property of the UDN. For each property, the user needs to specify a
+documentation (default is the documentation of the forwarded property).
+\note All connectivity related properties must be exposed.
+
+The user may choose to define the UDN globally or locally (configuration specific).
+
+The UDN definition consists then of the serialization of the subtree and the list of forwarded
+properties. A type identifier is generated at this point.
+
+The UDN creation function is then added to the respective factory.
+
+\subsection nodes_user_instatiate Type instantiation
+As all other nodes, the UDN is created by the respective node factory using the provided creation
+function.
+
+For each node category there is one UDN base node, which derives from the base node for the
+respective node factory to be accepted. UDN itself is not derived from node_base (or QObject for
+this matter), but is a template class to be used for multiple inheritance as an add-on for the
+respective node class. \see https://en.cppreference.com/w/cpp/memory/enable_shared_from_this
+
+The UDN itself is a leaf node, so it doesn't have direct children using the interface provided by
+node_base. Instead it contains an instance of the sub-tree it was generated from, which is not
+part of the configuration tree. All exposed properties are added to the UDN using dynamic
+properties (https://doc.qt.io/qt-5/properties.html#dynamic-properties).
+\warning Dynamic properties don't come with a change notifier, so the connectivity manager must
+connect to the propertyChanged signal of the UDN to be able to perform connections between data
+nodes and other nodes.
+
+For gui nodes, the widget of the root of the sub-tree is added to the UDN's widget as only child.
+
+\subsection nodes_user_storage Storing UDN in configuration file
+UDNs can be stored locally in a configuration file. This way, they are part of the configuration
+node, defined as a private property.
+
+When loading a configuration file, they are added to the respective node factories and removed at
+closing a configuration.
+
+\subsection nodes_user_load Loading UDN types
+Globally stored UDNs are stored in dedicated files and can be loaded or unloaded using the Plugin
+Manager.
+*/

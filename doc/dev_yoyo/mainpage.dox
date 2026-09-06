@@ -1,0 +1,139 @@
+/**
+\mainpage Yoyo development
+
+Yoyo is a highly versatile graphical user interface to create dynamic user interfaces to calculate,
+display and communicate values.
+
+The yoyo data model is a tree structure with subtrees dedicated to different tasks. There is a
+subtree dedicated to data objects, one which represents the widgets to display. There are optional
+subtrees for the purpose of communication and serialization/deserialization.
+
+The data model can be enriched at run-time using the yoyo-sdk - a plugin interface.
+
+\section main_build How to build Yoyo
+
+First step is to satisfy the dependencies:
+
+- CMake 3.21 or greater
+- Qt 5.15
+- Boost 1.78 or greater
+- Doxygen (optional)
+
+You can download and install GoogleTest, if you want, but it is not necessary, since CMake will take
+care of that, if you didn't.
+
+It is recommended to use ninja-build to schedule the compilation steps, because it is much faster
+than make.
+
+On Linux systems install the necessary dependencies using the system's package manager.
+
+\subsection main_build_creator Build from Qt Creator
+
+When opening the project for the first time, Qt Creator will ask you to configure the project.
+
+- Choose one of the following compilers (if applicable): gcc, minGW, clang (not tested with MSVS)
+- Select 32-bit or 64-bit (both supported)
+- Verify, that ninja is known to Qt
+- Verify Qt version and CMake version
+- Modify the CMake initial parameters to enable the use of ninja and to help CMake find Boost (Win
+    only)
+  - CMAKE_MAKE_PROGRAM:STRING=C:/path/to/ninja/ninja.exe
+  - CMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX};C:/path/to/install/of/boost/boost_1_78
+
+Configuration should be successful at that point. Click on build to start compiling.
+
+\subsubsection main_build_creator_test Run tests
+
+After the project is configured successfully, a list of executables (including test executables)
+is available when selecting the build configuration (monitor-like icon on the lower left pane). Here
+you can select an individual test to be executed. The play buttons (shortcuts: CTRL-R or F5) will
+start the selected executable.
+
+If you want to run all tests at once, you'll need to add a "custom executable" item in the "Run"
+configuration on the "Project" page of the creator:
+- binary: path to ctest.exe (next to cmake.exe)
+- working directory: the build directory
+
+Select this custom executable in the configuration selection and run it.
+
+\subsection main_build_cl Build from command line
+
+For the sake of simplicity, let's assume the Yoyo source code is located in \c SOURCE and the build
+artefacts should go to folder \c BUILD.
+
+\warning Do not perform in-source-builds (\c BUILD equals \c SOURCE). This can lead to unwanted
+    effects on the source control management.
+
+\subsubsection main_build_cl_win Windows version
+
+We need some more definitions for Windows systems here:
+
+- \c QT_DIR : path to your installation of Qt (not Qt 5.15, but the parent directory)
+- \c CC : holds the path to the C-compiler binary; usually something like \c %QT_DIR%/Tools/mingw810_32/bin/gcc.exe
+- \c CXX : holds the path to the C++-compiler binary; usually something like \c %QT_DIR%/Tools/mingw810_32/bin/gcc.exe
+- \c NINJA_EXECUTABLE : holds the path to the ninja executable. If installed with Qt, this could be
+    \c %QT_DIR%/Tools/Ninja/ninja.exe
+- \c BOOST_DIR : the installation directory of the (built) boost libraries
+
+\code{.bat}
+cd %BUILD%
+
+cmake.exe %SOURCE% -GNinja \
+                   -DCMAKE_BUILD_TYPE=Debug \
+                   -DCMAKE_PROJECT_INCLUDE_BEFORE=%QT_DIR%/Tools/QtCreator/share/qtcreator/package-manager/auto-setup.cmake \
+                   -DCMAKE_CXX_COMPILER=%CC% \
+                   -DCMAKE_C_COMPILER=%CXX% \
+                   -DCMAKE_MAKE_PROGRAM=%NINJA_EXECUTABLE% \
+                   -DCMAKE_PREFIX_PATH=%QT_DIR%/5.15.2/;%BOOST_DIR%
+
+cmake.exe --build .
+\endcode
+Running the tests is rather straight forward on the command line
+\code{.bat}
+ctest.exe
+\endcode
+\subsubsection main_build_cl_linux Linux version
+
+On Linux you can also choose the compilers to use by setting the \c CC and \c CXX environment
+variables, or passing the path to the compiler binaries with the \c CMAKE_CXX_COMPILER and
+\c CMAKE_C_COMPILER parameters, we'll omit that here.
+
+If you used the package manager to install ninja, boost and Qt, the command reduces to:
+\code{.sh}
+cd $BUILD
+
+cmake $SOURCE -GNinja -DCMAKE_BUILD_TYPE=Debug
+
+cmake --build .
+\endcode
+
+Running the tests is rather straight forward on the command line
+\code{.sh}
+ctest
+\endcode
+
+\section main_installer Building Installer
+
+\subsection main_installer_win Installer for Windows
+On Windows, CMake doesn't support packaging, so we need to use a separate tool to create the actual
+installer. The choice had been Inno Setup (https://jrsoftware.org/isdl.php).
+
+\todo There exists already a installer creation configuration file (installer/yoyo.iss.in), but
+    since there is no Yoyo application yet, the actual build has not been enabled. Also, the license
+    file is still missing.
+
+\subsection main_installer_linux Installer for Linux
+
+CMake on Linux provides CPack, which is capable of creating packages for various Linux package
+managers.
+
+\todo Currently there is no packaging for Linux packages defined!
+
+\code{.bat}
+cd $BUILD
+cmake $SOURCE -GNinja -DCMAKE_BUILD_TYPE=Release
+cmake --build .
+cpack .
+\endcode
+
+*/

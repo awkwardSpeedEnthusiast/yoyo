@@ -1,0 +1,19 @@
+#ifdef __linux
+#  ifndef YOYO_LIBRARY_TESTING
+#    ifndef YOYO_TESTING_EXPORT
+#      define YOYO_TESTING_EXPORT
+#    endif
+#  endif
+#elif _WIN32
+#  ifndef YOYO_LIBRARY_TESTING
+#    ifndef YOYO_TESTING_EXPORT
+#      ifdef ${_NAME}_EXPORTS
+/* We are building this library */
+#        define YOYO_TESTING_EXPORT __declspec(dllexport)
+#      else
+/* We are using this library */
+#        define YOYO_TESTING_EXPORT __declspec(dllimport)
+#      endif
+#    endif
+#  endif
+#endif

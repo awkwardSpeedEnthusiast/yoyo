@@ -1,0 +1,90 @@
+/**
+\page guidelines Programming Guidelines
+
+As with all projects, the Yoyo project follows some programming guidelines.
+
+\section guidelines_architecture Architectural Guidelines
+
+At Yoyo, we follow the basic principles of object oriented analysis and object oriented design. We
+aim for high cohesion and low coupling. This is best achieved by defining extremely narrow
+interfaces not only to the user (SDK), but also within Yoyo itself.
+
+For designing the classes and the interfaces, the SOLID principles were applied.
+Whereever possible aggregation was used instead of inheritance (in particular to avoid diamond
+inheritance graphs).
+
+Yoyo is organized into modules, each
+\section guidelines_coverage Test Driven Development
+
+Yoyo strives for Test-Driven-Development. This means, that tests are written before the production
+code is written. These tests fail, obviously. Then the minimum amount of code is written to make
+these tests pass.
+
+This helps keeping the code small (less lines of code means less code to maintain) and the tests can
+act as a documentation for the intended behavior of the object under test.
+
+When a bug occurrs, it is first reproduced with a test (preferably unit-test). This ensures, that
+the bug has been understood and it verifies, that it had been resolved, when the test finally
+passes.
+
+When it comes to coverage, 85% line-coverage are aimed for.
+
+\section guidelines_cpp Cpp Core Guidelines
+
+Yoyo development tries to follow the Cpp Core Guidelines
+(https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines). Some of the guidelines cannot be
+applied though, being meant for the newest C++ version, while Yoyo is still C++-17.
+
+\subsection guidelines_cpp_other General
+
+- Use std::for_each preferably
+- When in doubt choose stl types over Qt types (the API is much more stable)
+- For Qt macros use the capitalized version: Q_SLOTS, Q_SIGNALS, Q_PROPERTY, Q_EMIT instead of
+    slots, signals or emit.
+- Own macros are allowed in tests and the test framework, nowhere else
+
+Whenever you can have the compiler check your code instead of doing a runtime check, choose the
+compiler to verify your code (strong typing). Example: Use std::chrono over int.
+
+\section guidelines_style Coding Style
+
+Yoyo uses clang-format to apply coding style. For the definition, see file ".clang-format" in the
+top-level directory of the repository.
+
+Clang-format is a state of the art tool for formatting code. It is provided as a by-product by LLVM,
+the developers of the clang compiler (so it doesn't have issues processing "newer" C++ features,
+since the compiler has to support them anyway).
+
+\section guidelines_documentation Documenting the Code
+
+The biggest rationale is: Don't document the obvious! But anything that isn't.
+
+\subsection guidelines_documentation_interfaces Interfaces
+
+Since the user of the code does not necessarily have access to the source code of the interface (in
+particular true for the SDK and plugin developers), these headers must be documented with extreme
+care, providing the user with all necessary information to use the classes and their methods
+appropriately.
+
+This includes in particular: input, output and side effects (like signal emission or throwing
+exceptions).
+
+\subsection guidelines_documentation_headers Package Private Headers
+
+Headers of package private entities do not need to be documented as thoroughly as the interface
+headers. At some points, the documentation may have already been applied to the base class.
+
+Choose speaking names for the classes and functions you define. Further documentation is only
+necessary, if there are non-obvious design decisions or similar.
+
+Since the source code of the package private objects is next to the header files, anyone having
+access to the header can easily look up the implementation for further information.
+
+\subsection guidelines_documentation_sources Source Code
+
+When documenting source code, document why implementation decisions have been made. Do not document
+what is already written in code. The code may change, but rather often the comment describing, what
+is done, doesn't, which leads to inconsistencies between code and comment.
+
+Use Doxygen markers to make thoughts available in this documentation.
+*/
